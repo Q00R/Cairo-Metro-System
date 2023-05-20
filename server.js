@@ -1,3 +1,6 @@
+const db = require('./connectors/db');
+
+
 const path = require('path');
 const express = require('express');
 const app = express();
@@ -6,6 +9,7 @@ const privateApiRoutes = require('./routes/private/api');
 const publicApiRoutes = require('./routes/public/api');
 // const publicViewRoutes = require('./routes/public/views');
 // const privateViewRoutes = require('./routes/private/views');
+const router = express.Router();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -20,6 +24,10 @@ app.use(express.urlencoded({extended:true}));
 // publicViewRoutes(app);
 publicApiRoutes(app);// uncomment
 
+app.get('/', async function(req, res) {
+  return res.render('register');
+});
+
 // If the request is not for a public view/api, then it must pass
 // through our authentication middleware first
  app.use(authMiddleware); // uncomment
@@ -27,6 +35,7 @@ publicApiRoutes(app);// uncomment
 // The routes/views below can only be accessed if the user is authenticated
 // privateViewRoutes(app);
 privateApiRoutes(app);
+
 
 // If request doesn't match any of the above routes then render the 404 page
 app.use(function(req, res, next) {

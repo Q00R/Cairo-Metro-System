@@ -50,5 +50,52 @@ module.exports = function (app) {
  
 
 
+  app.put("/api/v1/user/password/reset", async function (req, res) {
+    if(session.userId === null)
+    {
+      return res.status(400).send("user not logged in");
+    }
+    else
+    {
+      const newPass = req.body.newPassword;
+      db.update({password: newPass}).from("se_project.users").where("id", session.userId);
+    }
+  });
+
+  app.get("/api/v1/zones", async function (req, res) {
+    const zones = await db.select("*").from("se_project.zones");
+    return res.status(200).json(zones);
+  });
+
+  app.post("/api/v1/payment/subscription", async function (req, res) {
+    if(session.userId === null)
+    {
+      return res.status(400).send("user not logged in");
+    }
+    else
+    {
+      const newSub = {
+        purchaseId: req.body.purchaseId,
+        subType: req.body.subType,
+        zoneId: req.body.zoneId,
+        userId: session.userId,
+        noOfTickets: req.body.amount,
+        // why do we need the credit card number and holder name?
+        creditCardNumber: req.body.creditCardNumber,
+        holderName: req.body.holderName,
+      };
+      try {
+        const sub = await db("se_project.subscriptions").insert(newSub).returning("*");
+        return res.status(200).json(sub);
+      } catch (e) {
+        console.log(e.message);
+        return res.status(400).send("Could not create subscription");
+      }
+    }
+  });
+
+  app.post("/api/v1/user/payment/ticket", async function (req, res) {
+});
+
   
 };
