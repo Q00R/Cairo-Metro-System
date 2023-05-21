@@ -49,53 +49,66 @@ module.exports = function (app) {
   });
  
 
+  
 
-  app.put("/api/v1/user/password/reset", async function (req, res) {
-    if(session.userId === null)
-    {
-      return res.status(400).send("user not logged in");
+app.post("/api/v1/refund/:ticketId", async function (req, res) {
+  const ticketId = req.params.ticketId;
+  const ticketQuery = await db
+      .select("*")
+      .from("se_project.tickets")
+      .where("id", ticketId)
+      .first();
+    if (isEmpty(ticketQuery)) {
+      return res.status(400).send("This ticket doesn't exist in the first place to be refunded");
     }
     else
     {
-      const newPass = req.body.newPassword;
-      db.update({password: newPass}).from("se_project.users").where("id", session.userId);
+      db.del().where('id', '==', ticketId)
     }
-  });
-
-  app.get("/api/v1/zones", async function (req, res) {
-    const zones = await db.select("*").from("se_project.zones");
-    return res.status(200).json(zones);
-  });
-
-  app.post("/api/v1/payment/subscription", async function (req, res) {
-    if(session.userId === null)
-    {
-      return res.status(400).send("user not logged in");
-    }
-    else
-    {
-      const newSub = {
-        purchaseId: req.body.purchaseId,
-        subType: req.body.subType,
-        zoneId: req.body.zoneId,
-        userId: session.userId,
-        noOfTickets: req.body.amount,
-        // why do we need the credit card number and holder name?
-        creditCardNumber: req.body.creditCardNumber,
-        holderName: req.body.holderName,
-      };
-      try {
-        const sub = await db("se_project.subscriptions").insert(newSub).returning("*");
-        return res.status(200).json(sub);
-      } catch (e) {
-        console.log(e.message);
-        return res.status(400).send("Could not create subscription");
-      }
-    }
-  });
-
-  app.post("/api/v1/user/payment/ticket", async function (req, res) {
 });
+
+
+// doesn't want to work for some reason
+app.post("/api/v1/senior/request", async function(req, res) {
+  const status = "pending";
+  const userId = getUser(req).userId;
+  const {nationalId} = req.body;
+  const newRequest = {
+    status,
+    userId,
+    nationalId
+  }
+  try {
+    const request = await db("se_project.requests").insert(newRequest).returning("*");
+    return res.status(200).json(request);
+  }
+  catch (e) {
+    console.log(e.message);
+    return res.status(400).send("Could not register request");
+  }
+});
+
+app.put("/api/v1/ride/simulate", async function(req, res) {
+  const {origin, destination, tripDate } = req.body;
+  const userId = getUser(req).userId;
+  try
+  {
+    const newRide = await db("se_project.rides")
+    .where("origin", origin)
+    .andWhere("destination", destination)
+    .andWhere("tripDate", tripDate)
+    .andWhere(userId, userId)
+    .update("status", "completed").returning("*");
+    return res.status(200).json(newRide);
+  }
+  catch (e) {
+    console.log(e.message);
+    return res.status(400).send("Could not simulate ride");
+  }
+
+
+
+
 
   
 };

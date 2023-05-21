@@ -15,11 +15,11 @@ app.post("/api/v1/user", async function (req, res) {
     }
 
     const newUser = {
-      firstname: req.body.firstName,
-      lastname: req.body.lastName,
+      firstName: req.body.firstName,
+      lastName: req.body.lastName,
       email: req.body.email,
       password: req.body.password,
-      roleid: roles.user,
+      roleId: roles.user,
     };
     try {
       const user = await db("se_project.users").insert(newUser).returning("*");

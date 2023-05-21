@@ -56,7 +56,7 @@ CREATE TABLE IF NOT EXISTS se_project.tickets
     id SERIAL NOT NULL,
     origin text NOT NULL,
     destination text NOT NULL,
-    userId INTEGER NOT Null,
+    "userId" INTEGER NOT Null,
     subID INTEGER,
     tripDate timestamp not Null,
     FOREIGN KEY( userId ) REFERENCES se_project.users,

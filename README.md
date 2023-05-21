@@ -1,2 +1,1 @@
-# Run npm install to install all dependences 
- # npm start to run project
+# Run npm install to install all dependences npm start to run project
