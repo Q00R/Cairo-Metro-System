@@ -88,6 +88,7 @@ app.post("/api/v1/senior/request", async function(req, res) {
   }
 });
 
+// not yet tested as it requires some rides that are not yet created
 app.put("/api/v1/ride/simulate", async function(req, res) {
   const {origin, destination, tripDate } = req.body;
   const userId = getUser(req).userId;
@@ -101,13 +102,12 @@ app.put("/api/v1/ride/simulate", async function(req, res) {
     .update("status", "completed").returning("*");
     return res.status(200).json(newRide);
   }
-  catch (e) {
+  catch (e) 
+  {
     console.log(e.message);
     return res.status(400).send("Could not simulate ride");
   }
-
-
-
+});
 
 
   
