@@ -53,71 +53,73 @@ module.exports = function (app) {
   // doesn't want to work for some reason
   
 
-app.post("/api/v1/refund/:ticketId", async function (req, res) {
-  const ticketId = req.params.ticketId;
-  const ticketQuery = await db
-      .select("*")
-      .from("se_project.tickets")
-      .where("id", ticketId)
-      .first();
-    if (isEmpty(ticketQuery)) {
-      return res.status(400).send("This ticket doesn't exist in the first place to be refunded");
-    }
-    else
+  app.post("/api/v1/refund/:ticketId", async function (req, res) {
+    const ticketId = req.params.ticketId;
+    const ticketQuery = await db
+        .select("*")
+        .from("se_project.tickets")
+        .where("id", ticketId)
+        .first();
+      if (isEmpty(ticketQuery)) {
+        return res.status(400).send("This ticket doesn't exist in the first place to be refunded");
+      }
+      else
+      {
+        db.del().where('id', '==', ticketId)
+      }
+  });
+
+
+
+  // not yet tested as it requires some rides that are not yet created
+  app.put("/api/v1/ride/simulate", async function(req, res) {
+    const {origin, destination, tripDate } = req.body;
+    const userId = getUser(req).userId;
+    try
     {
-      db.del().where('id', '==', ticketId)
+      const newRide = await db("se_project.rides")
+      .where("origin", origin)
+      .andWhere("destination", destination)
+      .andWhere("tripDate", tripDate)
+      .andWhere(userId, userId)
+      .update("status", "completed").returning("*");
+      return res.status(200).json(newRide);
     }
-});
+    catch (e) 
+    {
+      console.log(e.message);
+      return res.status(400).send("Could not simulate ride");
+    }
+  });
 
 
-
-// not yet tested as it requires some rides that are not yet created
-app.put("/api/v1/ride/simulate", async function(req, res) {
-  const {origin, destination, tripDate } = req.body;
-  const userId = getUser(req).userId;
-  try
-  {
-    const newRide = await db("se_project.rides")
-    .where("origin", origin)
-    .andWhere("destination", destination)
-    .andWhere("tripDate", tripDate)
-    .andWhere(userId, userId)
-    .update("status", "completed").returning("*");
-    return res.status(200).json(newRide);
-  }
-  catch (e) 
-  {
-    console.log(e.message);
-    return res.status(400).send("Could not simulate ride");
-  }
-});
-
-app.post("/api/v1/senior/request", async function (req, res) {
-  userId = await getUser(req).userId;
-  const requestExists = await db
-    .select("*")
-    .from("se_project.senior_requests")
-    .where("userId", userId);
-  if (!isEmpty(requestExists)) {
-    return res.status(400).send("This user already submitted a request to be a senior");
-  }
-  const newRequest = 
-  {
-    status: "pending",
-    userId,
-    nationalId: req.body.nationalId
-  }
-  try
-  {
-    const result = await db.insert(newRequest).into("se_project.senior_requests").returning("*");
-    return res.status(200).json(result); 
-  }
-  catch (e)
-  {
-    console.log(e.message);
-    return res.status(400).send("Could not create senior request");
-  }
-});
+  // Bgad bteshta8al bmazagha
+  app.post("/api/v1/senior/request", async function (req, res) {
+    userId = await getUser(req).userId;
+    const requestExists = await db
+      .select("*")
+      .from("se_project.senior_requests")
+      .where("userId", userId);
+    if (!isEmpty(requestExists)) {
+      return res.status(400).send("This user already submitted a request to be a senior");
+    }
+    const newRequest = 
+    {
+      status: "pending",
+      userId,
+      nationalId: req.body.nationalId
+    }
+    try
+    {
+      const result = await db.insert(newRequest).into("se_project.senior_requests").returning("*");
+      return res.status(200).json(result); 
+    }
+    catch (e)
+    {
+      console.log(e.message);
+      return res.status(400).send("Could not create senior request");
+    }
+  });
 
 
   
