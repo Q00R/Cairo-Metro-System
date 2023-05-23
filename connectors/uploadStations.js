@@ -101,5 +101,5 @@ async function uploadR() {
   }
 }
 uploadS();
-//uploadR();
-//uploadSR();
+uploadR();
+uploadSR();
