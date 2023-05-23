@@ -47,7 +47,72 @@ module.exports = function (app) {
     }
    
   });
- 
+ app.put("/api/v1/station/:stationId", async function (req, res) {
+   try {
+     const user = await getUser(req);
+     if (user.isAdmin) {
+       const { stationId } = req.params;
+       const { stationName } = req.body;
+       if (!stationId) {
+         return res.status(400).send("stationId is required");
+       }
+       const station = await db("se_project.stations")
+         .where("id", stationId)
+         .update({ stationName })
+         .returning("*");
+       return res.status(200).json(station);
+     } else {
+       return res.status(400).send("You are Unauthrized to do this action");
+     }
+   } catch (e) {
+     console.log(e.message);
+     return res.status(400).send("Could not update station");
+   }
+ });
+
+ app.post("/api/v1/station", async function (req, res) {
+   try {
+     const user = await getUser(req);
+     if (user.isAdmin) {
+       console.log(req.body);
+       const { stationName } = req.body;
+       if (!stationName) {
+         return res.status(400).send("name is required");
+       }
+       const station = await db("se_project.stations")
+         .insert({
+           stationName,
+           stationType: "normal",
+           stationStatus: "new created",
+         })
+         .returning("*");
+       return res.status(200).json(station);
+     } else {
+       return res.status(400).send("You are Unauthrized to do this action");
+     }
+   } catch (e) {
+     console.log(e.message);
+     return res.status(400).send("Could not create station");
+   }
+ });
+
+ app.delete("/api/v1/station/:stationId", async function (req, res) {
+   try {
+     const user = await getUser(req);
+     const { stationId } = req.params;
+     if (!stationId) {
+       return res.status(400).send("stationId is required");
+     }
+     const station = await db("se_project.stations")
+       .where("id", stationId)
+       .del()
+       .returning("*");
+     return res.status(200).json(station);
+   } catch (e) {
+     console.log(e.message);
+     return res.status(400).send("Could not delete station");
+   }
+ });
 
 
   
