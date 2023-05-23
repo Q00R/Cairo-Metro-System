@@ -50,6 +50,8 @@ module.exports = function (app) {
  
 
   
+  // doesn't want to work for some reason
+  
 
 app.post("/api/v1/refund/:ticketId", async function (req, res) {
   const ticketId = req.params.ticketId;
@@ -68,25 +70,6 @@ app.post("/api/v1/refund/:ticketId", async function (req, res) {
 });
 
 
-// doesn't want to work for some reason
-app.post("/api/v1/senior/request", async function(req, res) {
-  const status = "pending";
-  const userId = getUser(req).userId;
-  const {nationalId} = req.body;
-  const newRequest = {
-    status,
-    userId,
-    nationalId
-  }
-  try {
-    const request = await db("se_project.requests").insert(newRequest).returning("*");
-    return res.status(200).json(request);
-  }
-  catch (e) {
-    console.log(e.message);
-    return res.status(400).send("Could not register request");
-  }
-});
 
 // not yet tested as it requires some rides that are not yet created
 app.put("/api/v1/ride/simulate", async function(req, res) {
@@ -106,6 +89,60 @@ app.put("/api/v1/ride/simulate", async function(req, res) {
   {
     console.log(e.message);
     return res.status(400).send("Could not simulate ride");
+  }
+});
+
+app.post("/api/v1/senior/request", async function (req, res) {
+  userId = await getUser(req).userId;
+  const requestExists = await db
+    .select("*")
+    .from("se_project.senior_requests")
+    .where("userId", userId);
+  if (!isEmpty(requestExists)) {
+    return res.status(400).send("This user already submitted a request to be a senior");
+  }
+  const newRequest = 
+  {
+    status: "pending",
+    userId,
+    nationalId: req.body.nationalId
+  }
+  try
+  {
+    const result = await db.insert(newRequest).into("se_project.senior_requests").returning("*");
+    return res.status(200).json(result); 
+  }
+  catch (e)
+  {
+    console.log(e.message);
+    return res.status(400).send("Could not create senior request");
+  }
+});
+
+app.post("/api/v1/senior/request", async function (req, res) {
+  userId = await getUser(req).userId;
+  const requestExists = await db
+    .select("*")
+    .from("se_project.senior_requests")
+    .where("userId", userId);
+  if (!isEmpty(requestExists)) {
+    return res.status(400).send("This user already submitted a request to be a senior");
+  }
+  const newRequest = 
+  {
+    status: "pending",
+    userId,
+    nationalId: req.body.nationalId
+  }
+  try
+  {
+    const result = await db.insert(newRequest).into("se_project.senior_requests").returning("*");
+    return res.status(200).json(result); 
+  }
+  catch (e)
+  {
+    console.log(e.message);
+    return res.status(400).send("Could not create senior request");
   }
 });
 
@@ -136,6 +173,35 @@ app.put("/api/v1/route/:routeId",async function(req, res){
     res.send(e.message);
   }
 })
+
+app.post("/api/v1/senior/request", async function (req, res) {
+  userId = await getUser(req).userId;
+  const requestExists = await db
+    .select("*")
+    .from("se_project.senior_requests")
+    .where("userId", userId);
+  if (!isEmpty(requestExists)) {
+    return res.status(400).send("This user already submitted a request to be a senior");
+  }
+  const newRequest = 
+  {
+    status: "pending",
+    userId,
+    nationalId: req.body.nationalId
+  }
+  try
+  {
+    const result = await db.insert(newRequest).into("se_project.senior_requests").returning("*");
+    return res.status(200).json(result); 
+  }
+  catch (e)
+  {
+    console.log(e.message);
+    return res.status(400).send("Could not create senior request");
+  }
+});
+
+
 
 //api to delete a route
 app.delete("/api/v1/route/:routeId",async function(req, res){
