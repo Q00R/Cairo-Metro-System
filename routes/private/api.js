@@ -174,35 +174,6 @@ app.put("/api/v1/route/:routeId",async function(req, res){
   }
 })
 
-app.post("/api/v1/senior/request", async function (req, res) {
-  userId = await getUser(req).userId;
-  const requestExists = await db
-    .select("*")
-    .from("se_project.senior_requests")
-    .where("userId", userId);
-  if (!isEmpty(requestExists)) {
-    return res.status(400).send("This user already submitted a request to be a senior");
-  }
-  const newRequest = 
-  {
-    status: "pending",
-    userId,
-    nationalId: req.body.nationalId
-  }
-  try
-  {
-    const result = await db.insert(newRequest).into("se_project.senior_requests").returning("*");
-    return res.status(200).json(result); 
-  }
-  catch (e)
-  {
-    console.log(e.message);
-    return res.status(400).send("Could not create senior request");
-  }
-});
-
-
-
 //api to delete a route
 app.delete("/api/v1/route/:routeId",async function(req, res){
   const routeId = req.params.routeId  
