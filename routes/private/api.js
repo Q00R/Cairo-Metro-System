@@ -47,8 +47,100 @@ module.exports = function (app) {
       return res.status(400).send("Could not get users");
     }
   });
- 
 
 
+  app.put('/api/v1/password/reset', async function (req, res) {
+    try {
+      const newPassword = req.body.newPassword;
+      const email = (await getUser(req)).email;
+
+
+      // Update the user's password in the database
+      await db('se_project.users').where('email', email).update({
+        password: newPassword
+      });
+  
+      return res.status(200).send('Password reset successfully');
+    } catch (e) {
+      console.log(e.message);
+      return res.status(400).send('Could not reset password');
+    }
+  });
+  
+  
+
+  app.get('/api/v1/zones', async function (req, res) {
+    try {
+      const zones = await db.select('*').from("se_project.zones")
+      return res.status(200).json(zones);
+    } catch (e) {
+      console.log(e.message);
+      return res.status(400).send("Could not get zones");
+    }
+  });
+
+  app.post('/api/v1/payment/subscription', async function (req, res) {
+    try {
+      const { purchasedId, creditCardNumber, holderName, payedAmount, subType, zoneId } = req.body;
+  
+  
+      let noOfTickets = 0;
+      let deductionAmount = 0;
+  
+      if (subType === 'monthly') {
+        noOfTickets = 10;
+        deductionAmount = 70;
+      }
+      else if (subType === 'quarterly') {
+        noOfTickets = 50;
+        deductionAmount = 330;
+      }
+      else if (subType === 'annual') {
+        noOfTickets = 100;
+        deductionAmount = 600;
+      }
+      else {
+        return res.status(400).send("Invalid subscription type");
+      }
+  
+      // Check if the user is a senio
+      const userId = (await getUser(req)).userId;
+  
+      if ((await getUser(req)).isSenior) {
+        deductionAmount = deductionAmount / 2; // Apply 50% discount
+      }
+  
+      // Make sure that the paid amount is sufficient
+      if (payedAmount < deductionAmount) {
+        return res.status(400).send('Insufficient payment amount');
+      }
+  
+      const remainingAmount = payedAmount - deductionAmount;
+  
+      // Create the subscription record
+      const subscription = await db('se_project.subsription').insert({
+        subType,
+        zoneId,
+        userId,
+        noOfTickets
+      });
+  
+      // Create the transaction record
+      const transaction = await db('se_project.transactions').insert({
+        amount: deductionAmount,
+        userId,
+        purchasedId
+      });
+  
+      return res.status(200).send({
+        subscriptionId: subscription.id,
+        remainingAmount,
+        message: 'Subscription Successful'
+      });
+    } catch (e) {
+      console.log(e.message);
+      return res.status(400).send('Could not create subscription');
+    }
+  });
   
 };
