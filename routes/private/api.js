@@ -1,4 +1,4 @@
-const { isEmpty } = require("lodash");
+const { isEmpty, countBy } = require("lodash");
 const { v4 } = require("uuid");
 const db = require("../../connectors/db");
 const roles = require("../../constants/roles");
@@ -121,6 +121,75 @@ module.exports = function (app) {
     }
   });
 
+app.post("/api/v1/senior/request", async function (req, res) {
+  userId = await getUser(req).userId;
+  const requestExists = await db
+    .select("*")
+    .from("se_project.senior_requests")
+    .where("userId", userId);
+  if (!isEmpty(requestExists)) {
+    return res.status(400).send("This user already submitted a request to be a senior");
+  }
+  const newRequest = 
+  {
+    status: "pending",
+    userId,
+    nationalId: req.body.nationalId
+  }
+  try
+  {
+    const result = await db.insert(newRequest).into("se_project.senior_requests").returning("*");
+    return res.status(200).json(result); 
+  }
+  catch (e)
+  {
+    console.log(e.message);
+    return res.status(400).send("Could not create senior request");
+  }
+});
 
-  
+//api to create a new route
+app.post("/api/v1/route",async function(req, res){
+  const {newStationId, connectedStationId, routeName } = req.body;
+  const newRoute = {
+    "fromStationId": newStationId,
+    "toStationId": connectedStationId,
+    routeName
+  }
+  try {
+    const addedRoute = await db("se_project.routes").insert(newRoute).returning("*");
+    return res.status(200).json(addedRoute);
+  } catch (e) {
+    return res.send(e.message);
+  }
+})
+
+//api to update a route's name
+app.put("/api/v1/route/:routeId",async function(req, res){
+  const routeName = req.body.routeName;
+  const routeId = req.params.routeId;
+  try {
+    const updatedRoute = await db("se_project.routes").update("routeName", routeName).where("id", routeId).returning("*");
+    return res.status(200).json(updatedRoute);
+  } catch (e) {
+    res.send(e.message);
+  }
+})
+
+//api to delete a route
+app.delete("/api/v1/route/:routeId",async function(req, res){
+  const routeId = req.params.routeId  
+  try {
+    const stationsId = await db("se_project.routes").select("fromStationId","toStationId").where("id",routeId).first();
+    n = await db("se_project.routes").count("fromStationId").where("fromStationId",stationsId.fromStationId).first().count;
+    m = await db("se_project.routes").count("fromStationId").where("fromStationId",stationsId.toStationId).first().count;
+    if(n>1 && m>1)
+      return res.status(302).send("This route is not in the start or end")
+    const deletedRoute = await db("se_project.routes").del().where("id", routeId).returning("*");
+    return res.status(200).json(deletedRoute);
+  } catch (e) {
+    return res.send(e.message);
+  }
+})
+
 };
