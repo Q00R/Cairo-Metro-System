@@ -87,17 +87,41 @@ module.exports = function (app) {
       let noOfTickets = 0;
       let deductionAmount = 0;
   
-      if (subType === 'monthly') {
+      if (subType === 'monthly' && zoneId === 1) {
+        noOfTickets = 10;
+        deductionAmount = 30;
+      }
+      else if (subType === 'quarterly' && zoneId === 1) {
+        noOfTickets = 50;
+        deductionAmount = 175;
+      }
+      else if (subType === 'annual' && zoneId === 1) {
+        noOfTickets = 100;
+        deductionAmount = 370;
+      }
+      else if (subType === 'monthly' && zoneId === 2) {
+        noOfTickets = 10;
+        deductionAmount = 50;
+      }
+      else if (subType === 'quarterly' && zoneId === 2) {
+        noOfTickets = 50;
+        deductionAmount = 270;
+      }
+      else if (subType === 'annual' && zoneId === 2) {
+        noOfTickets = 100;
+        deductionAmount = 550;
+      }
+      else if (subType === 'monthly' && zoneId === 3) {
         noOfTickets = 10;
         deductionAmount = 70;
       }
-      else if (subType === 'quarterly') {
+      else if (subType === 'quarterly' && zoneId === 3) {
         noOfTickets = 50;
-        deductionAmount = 330;
+        deductionAmount = 340;
       }
-      else if (subType === 'annual') {
+      else if (subType === 'annual' && zoneId === 3) {
         noOfTickets = 100;
-        deductionAmount = 600;
+        deductionAmount = 650;
       }
       else {
         return res.status(400).send("Invalid subscription type");
