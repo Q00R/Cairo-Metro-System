@@ -115,7 +115,7 @@ module.exports = function (app) {
       return res.status(200).json(result); 
     }
     catch (e)
-    {
+    { 
       console.log(e.message);
       return res.status(400).send("Could not create senior request");
     }
