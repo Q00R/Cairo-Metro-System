@@ -123,8 +123,8 @@ module.exports = function (app) {
   
       // Check if the user is a senior
       const user = await getUser(req);
-      const userId = user.id;
-      console.log("Testing Id here =>", userId)
+      const userId = user.userId;
+      console.log("IDDDDDDDDDDDDDDDDDDDDDDDDD =>", userId)
   
       if (await getUser(req).isSenior) {
         deductionAmount = deductionAmount / 2; // Apply 50% discount
@@ -184,7 +184,7 @@ if (existingSubscription) {
       });
 
 
-      const message = 'Subscription ID: ' + subscription.id + ' Remaining Amount: ' + remainingAmount + ' Subscription Successful';
+      const message ='Remaining Amount: ' + remainingAmount + 'Subscription Successful';
 
       return res.status(200).send({message: message});
     } catch (e) {
