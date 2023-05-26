@@ -74,7 +74,7 @@ module.exports = function (app) {
 
   app.post('/api/v1/payment/subscription', async function (req, res) {
     try {
-      const { purchasedId, creditCardNumber, holderName, payedAmount, subType, zoneId } = req.body;
+      const {creditCardNumber, holderName, payedAmount, subType, zoneId } = req.body;
   
   
       let noOfTickets = 0;
@@ -171,14 +171,17 @@ if (existingSubscription) {
         subType: subType,
         zoneId: zoneId,
         userId: userId,
-        noOfTickets: noOfTickets
+        noOfTickets: noOfTickets,
       });
   
       // Create the transaction record
       const transaction = await db('se_project.transactions').insert({
         amount: deductionAmount,
         userId,
-        purchasedId
+        purchasedId:  await db('se_project.subsription')
+        .where('userId', userId)
+        .select('id'),
+        type: 'subscription'
       });
 
 

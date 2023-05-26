@@ -31,6 +31,8 @@ CREATE TABLE IF NOT EXISTS se_project.roles
     CONSTRAINT roles_pkey PRIMARY KEY (id)
 );
 
+
+
 CREATE TABLE IF NOT EXISTS se_project.zones
 (
     id SERIAL NOT NULL,
@@ -39,6 +41,7 @@ CREATE TABLE IF NOT EXISTS se_project.zones
     CONSTRAINT zones_pkey PRIMARY KEY (id)
 
 );
+
 CREATE TABLE IF NOT EXISTS se_project.subsription
 (
     id SERIAL NOT NULL,
@@ -75,17 +78,18 @@ CREATE TABLE IF NOT EXISTS se_project.rides
     userId INTEGER NOT NULL,
     ticketId integer not null,
     tripDate timestamp not null,
-    FOREIGN KEY( userId ) REFERENCES se_project.users,
-    FOREIGN KEY( ticketId ) REFERENCES se_project.rides,
+    FOREIGN KEY( userid ) REFERENCES se_project.users,
+    FOREIGN KEY( ticketid ) REFERENCES se_project.tickets,
     CONSTRAINT rides_pkey PRIMARY KEY (id)
 );
 CREATE TABLE IF NOT EXISTS se_project.transactions
 (
     id SERIAL NOT NULL,
-    amount INTEGER NOT NULL,
-    userId INTEGER NOT NULL,
-    purchasedId text NOT NULL, 
-    FOREIGN KEY( userId ) REFERENCES se_project.users,
+    amount numeric(6,2) NOT NULL,
+    userid INTEGER NOT NULL,
+    purchasedIid text NOT NULL,
+    type text not Null,
+    FOREIGN KEY( userid ) REFERENCES se_project.users,
     CONSTRAINT transactions_pkey PRIMARY KEY (id)
 );
 CREATE TABLE IF NOT EXISTS se_project.refund_requests
@@ -138,4 +142,6 @@ CREATE TABLE IF NOT EXISTS se_project.stationRoutes
     FOREIGN KEY( stationId ) REFERENCES se_project.stations on DELETE CASCADE on UPDATE CASCADE,
     FOREIGN KEY( routeId ) REFERENCES se_project.routes on DELETE CASCADE on UPDATE CASCADE
 );
+
+
 
