@@ -149,8 +149,35 @@ module.exports = function (app) {
       routeName
     }
     try {
-      const addedRoute = await db("se_project.routes").insert(newRoute).returning("*");
+      if (await db("se_project.routes").select("*").where("fromStationId", newStationId).andWhere("toStationId", connectedStationId).first())
+        return res.send("This route already exists! You can rename the already existing route if you want");
+
+      fromStation = await db("se_project.stations").select("*").where("id", newRoute.fromStationId).first();
+      if (!fromStation)
+        return res.send("This source does not exist!");
+      toStation = await db("se_project.stations").select("*").where("id", newRoute.toStationId).first();
+      if (!toStation)
+        return res.send("This destination does not exist!");
+      if (fromStation.stationPosition != null && toStation.stationPosition != null)
+        return res.send("Both of these stations already have connections!");
+
+      if (fromStation.stationPosition == null) {
+        await db("se_project.stations").update("stationPosition", "start").where("id", fromStation.id);
+        await db("se_project.stations").update("stationPosition", "middle").where("id", toStation.id);
+      }
+      else if (toStation.stationPosition == null) {
+        await db("se_project.stations").update("stationPosition", "end").where("id", toStation.id);
+        await db("se_project.stations").update("stationPosition", "middle").where("id", fromStation.id);
+      }
+
+      let addedRoute = await db("se_project.routes").insert(newRoute).returning("*");
+      addedRoute = addedRoute[0];
+      const s1 = { "stationId": newStationId, "routeId": addedRoute.id };
+      await db("se_project.stationRoutes").insert(s1);
+      const s2 = { "stationId": connectedStationId, "routeId": addedRoute.id };
+      await db("se_project.stationRoutes").insert(s2);
       return res.status(200).json(addedRoute);
+
     } catch (e) {
       return res.send(e.message);
     }
@@ -170,15 +197,42 @@ module.exports = function (app) {
 
   //api to delete a route
   app.delete("/api/v1/route/:routeId", async function (req, res) {
-    const routeId = req.params.routeId
+    const routeId = req.params.routeId;
     try {
       const stationsId = await db("se_project.routes").select("fromStationId", "toStationId").where("id", routeId).first();
-      n = await db("se_project.routes").count("fromStationId").where("fromStationId", stationsId.fromStationId).first().count;
-      m = await db("se_project.routes").count("fromStationId").where("fromStationId", stationsId.toStationId).first().count;
-      if (n > 1 && m > 1)
-        return res.status(302).send("This route is not in the start or end")
-      const deletedRoute = await db("se_project.routes").del().where("id", routeId).returning("*");
-      return res.status(200).json(deletedRoute);
+      if (!stationsId)
+        return res.status(302).send("This route id does not exist");
+
+      fromStation = await db("se_project.stations").select("*").where("id", stationsId.fromStationId).first();
+      toStation = await db("se_project.stations").select("*").where("id", stationsId.toStationId).first();
+
+      if (fromStation.stationPosition == "middle" && toStation.stationPosition == "middle")
+        return res.send("Can't delete a route in the middle!");
+
+      let deletedRoute = await db("se_project.routes").delete().where("id", routeId).returning("*");
+      deletedRoute = deletedRoute[0];
+
+      if (!(await db("se_project.stationRoutes").select("*").where("stationId", fromStation.id).first())) {
+        console.log(fromStation.stationPosition);
+        await db("se_project.stations").update("stationPosition", fromStation.stationPosition).where("id", toStation.id);
+        await db("se_project.stations").update("stationPosition", null).where("id", fromStation.id);
+        return res.json(deletedRoute);
+      }
+      else if (!(await db("se_project.stationRoutes").select("*").where("stationId", toStation.id).first())) {
+        await db("se_project.stations").update("stationPosition", toStation.stationPosition).where("id", fromStation.id);
+        await db("se_project.stations").update("stationPosition", null).where("id", toStation.id);
+        return res.json(deletedRoute);
+      }
+
+      if (fromStation.stationPosition == "start" && toStation.stationPosition == "middle") {
+        await db("se_project.stations").update("stationPosition", "end").where("id", fromStation.id);
+      }
+      else if (fromStation.stationPosition == "middle" && toStation.stationPosition == "end") {
+        await db("se_project.stations").update("stationPosition", "start").where("id", toStation.id);
+      }
+      return res.json(deletedRoute);
+
+
     } catch (e) {
       return res.send(e.message);
     }
