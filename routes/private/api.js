@@ -57,7 +57,7 @@ module.exports = function (app) {
           return res.status(400).send("name is required");
         }
         const station = await db("se_project.stations")
-          .insert({ stationName , stationType: "normal", stationStatus: "new created" })
+          .insert({ stationName , stationType: "normal", stationStatus: "new" })
           .returning("*");
         return res.status(200).json(station);
       }
