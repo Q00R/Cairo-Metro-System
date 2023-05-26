@@ -8,22 +8,14 @@ const getUser = async function (req) {
   if (!sessionToken) {
     return res.status(301).redirect("/");
   }
-  console.log("hi",sessionToken);
+  console.log("hi", sessionToken);
   const user = await db
     .select("*")
     .from("se_project.sessions")
     .where("token", sessionToken)
-    .innerJoin(
-      "se_project.users",
-      "se_project.sessions.userId",
-      "se_project.users.id"
-    )
-    .innerJoin(
-      "se_project.roles",
-      "se_project.users.roleId",
-      "se_project.roles.id"
-    )
-   .first();
+    .innerJoin("se_project.users", "se_project.sessions.userId", "se_project.users.id")
+    .innerJoin("se_project.roles", "se_project.users.roleId", "se_project.roles.id")
+    .first();
 
   console.log("user =>", user);
   user.isNormal = user.roleId === roles.user;
@@ -31,6 +23,7 @@ const getUser = async function (req) {
   user.isSenior = user.roleId === roles.senior;
   return user;
 };
+
 
 module.exports = function (app) {
   // example
@@ -128,9 +121,10 @@ module.exports = function (app) {
         return res.status(400).send('Invalid subscription type or zone');
       }
   
-      // Check if the user is a senio
+      // Check if the user is a senior
       const user = await getUser(req);
       const userId = user.id;
+      console.log("Testing Id here =>", userId)
   
       if (await getUser(req).isSenior) {
         deductionAmount = deductionAmount / 2; // Apply 50% discount
@@ -144,32 +138,36 @@ module.exports = function (app) {
       const subscriptions = await db('se_project.subsription');
         if (subscriptions.length > 0) {
         // Check if the user already has a subscription
-      const existingSubscription = await db('se_project.subsription')
-        .where('userId', userId)
-        .first();
-  
-      if (existingSubscription) {
-        // Check if the new subscription is an upgrade or downgrade
-        const isUpgrade = (
-          (subType === 'quarterly' && existingSubscription.subType === 'monthly') ||
-          (subType === 'annual' && (existingSubscription.subType === 'monthly' || existingSubscription.subType === 'quarterly')) ||
-          (zoneId > existingSubscription.zoneId)
-        );
-  
-        if (isUpgrade) {
-          // Delete the existing subscription
-          await db('se_project.subsription')
-            .where('userId', existingSubscription.userId)
-            .del();
-        } else {
-          return res.status(400).send('Cannot downgrade subscription');
-        }
-      }
+const existingSubscription = await db('se_project.subsription')
+  .where('userId', userId)
+  .first();
+
+  console.log("IDDDDDDDDDDDDDDDD =>", userId);
+
+if (existingSubscription) {
+  // Check if the new subscription is an upgrade or downgrade
+  const isUpgrade = (
+    (subType === 'monthly' && existingSubscription.subType === 'quarterly') ||
+    (subType === 'annual' && (existingSubscription.subType === 'monthly' || existingSubscription.subType === 'quarterly')) ||
+    (zoneId > existingSubscription.zoneId)
+  );
+
+  if (!isUpgrade) {
+    return res.status(400).send('Cannot downgrade subsription');
+  }
+
+  // Delete the existing subscription
+  await db('se_project.subsription')
+    .where('userId', userId)
+    .del();
+}
+
+
+
     }
   
       const remainingAmount = payedAmount - deductionAmount;
   
-      console.log('userId', userId.roleId);
       // Create the subscription record
       const subscription = await db('se_project.subsription').insert({
         subType: subType,
@@ -187,7 +185,7 @@ module.exports = function (app) {
 
 
       const message = 'Subscription ID: ' + subscription.id + ' Remaining Amount: ' + remainingAmount + ' Subscription Successful';
-      
+
       return res.status(200).send({message: message});
     } catch (e) {
       console.log(e.message);
