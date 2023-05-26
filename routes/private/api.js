@@ -124,9 +124,8 @@ module.exports = function (app) {
       // Check if the user is a senior
       const user = await getUser(req);
       const userId = user.userId;
-      console.log("IDDDDDDDDDDDDDDDDDDDDDDDDD =>", userId)
   
-      if (await getUser(req).isSenior) {
+      if (user.roleId === 3) {
         deductionAmount = deductionAmount / 2; // Apply 50% discount
       }
   
@@ -142,12 +141,11 @@ const existingSubscription = await db('se_project.subsription')
   .where('userId', userId)
   .first();
 
-  console.log("IDDDDDDDDDDDDDDDD =>", userId);
 
 if (existingSubscription) {
   // Check if the new subscription is an upgrade or downgrade
   const isUpgrade = (
-    (subType === 'monthly' && existingSubscription.subType === 'quarterly') ||
+    (subType === 'quarterly' && existingSubscription.subType === 'monthly') ||
     (subType === 'annual' && (existingSubscription.subType === 'monthly' || existingSubscription.subType === 'quarterly')) ||
     (zoneId > existingSubscription.zoneId)
   );
