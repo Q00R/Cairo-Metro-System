@@ -1,4 +1,4 @@
-const { isEmpty } = require("lodash");
+const { isEmpty, get } = require("lodash");
 const { v4 } = require("uuid");
 const db = require("../../connectors/db");
 const roles = require("../../constants/roles");
@@ -87,6 +87,7 @@ module.exports = function (app) {
       let noOfTickets = 0;
       let deductionAmount = 0;
   
+      // Calculate the number of tickets and deduction amount based on the subscription type and zone
       if (subType === 'monthly' && zoneId === 1) {
         noOfTickets = 10;
         deductionAmount = 30;
@@ -124,13 +125,14 @@ module.exports = function (app) {
         deductionAmount = 650;
       }
       else {
-        return res.status(400).send("Invalid subscription type");
+        return res.status(400).send('Invalid subscription type or zone');
       }
   
       // Check if the user is a senio
-      const userId = (await getUser(req)).userId;
+      const user = await getUser(req);
+      const userId = user.id;
   
-      if ((await getUser(req)).isSenior) {
+      if (await getUser(req).isSenior) {
         deductionAmount = deductionAmount / 2; // Apply 50% discount
       }
   
@@ -138,15 +140,42 @@ module.exports = function (app) {
       if (payedAmount < deductionAmount) {
         return res.status(400).send('Insufficient payment amount');
       }
+
+      const subscriptions = await db('se_project.subsription');
+        if (subscriptions.length > 0) {
+        // Check if the user already has a subscription
+      const existingSubscription = await db('se_project.subsription')
+        .where('userId', userId)
+        .first();
+  
+      if (existingSubscription) {
+        // Check if the new subscription is an upgrade or downgrade
+        const isUpgrade = (
+          (subType === 'quarterly' && existingSubscription.subType === 'monthly') ||
+          (subType === 'annual' && (existingSubscription.subType === 'monthly' || existingSubscription.subType === 'quarterly')) ||
+          (zoneId > existingSubscription.zoneId)
+        );
+  
+        if (isUpgrade) {
+          // Delete the existing subscription
+          await db('se_project.subsription')
+            .where('userId', existingSubscription.userId)
+            .del();
+        } else {
+          return res.status(400).send('Cannot downgrade subscription');
+        }
+      }
+    }
   
       const remainingAmount = payedAmount - deductionAmount;
   
+      console.log('userId', userId.roleId);
       // Create the subscription record
       const subscription = await db('se_project.subsription').insert({
-        subType,
-        zoneId,
-        userId,
-        noOfTickets
+        subType: subType,
+        zoneId: zoneId,
+        userId: userId,
+        noOfTickets: noOfTickets
       });
   
       // Create the transaction record
@@ -155,16 +184,16 @@ module.exports = function (app) {
         userId,
         purchasedId
       });
-  
-      return res.status(200).send({
-        subscriptionId: subscription.id,
-        remainingAmount,
-        message: 'Subscription Successful'
-      });
+
+
+      const message = 'Subscription ID: ' + subscription.id + ' Remaining Amount: ' + remainingAmount + ' Subscription Successful';
+      
+      return res.status(200).send({message: message});
     } catch (e) {
       console.log(e.message);
       return res.status(400).send('Could not create subscription');
     }
   });
+  
   
 };
