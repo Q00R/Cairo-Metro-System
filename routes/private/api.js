@@ -268,7 +268,7 @@ module.exports = function (app) {
           .andWhere("status", "upcoming")
           .update({ destination: stationName })
           .returning("*");
-        const station = await db("se_project.stations")
+         station = await db("se_project.stations")
           .where("id", stationId)
           .update({ stationName })
           .returning("*");
