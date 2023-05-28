@@ -49,37 +49,37 @@ module.exports = function (app) {
   });
 
   // really bteshta8al bmazagha if we remove v1, it works perfectly fine
-  app.post("/api/v1/senior/request", async function(req, res){
+  app.post("/api/v2/senior/request", async function(req, res){
     let user = await getUser(req);
     let userId = user.userId;
     const {nationalId} = req.body;
     const requestExists = await db("se_project.senior_requests").select("*").where("userId", userId).first();
-    if (isEmpty(requestExists)) 
+    if (!isEmpty(requestExists)) 
     {
-      const newRequest = 
-      {
-        status: "pending",
-        userId,
-        nationalId
-      }
-      try
-      {
-        const result = await db.insert(newRequest).into("se_project.senior_requests").returning("*");
-        return res.status(200).json(result); 
-      }
-      catch (e)
-      { 
-        console.log(e.message);
-        return res.status(400).send("Could not create senior request");
-      }
+      return res.status(400).send("This user already submitted a request to be a senior");
     }
-    return res.status(400).send("This user already submitted a request to be a senior");
+    const newRequest = 
+    {
+      status: "pending",
+      userId,
+      nationalId
+    }
+    try
+    {
+      const result = await db.insert(newRequest).into("se_project.senior_requests").returning("*");
+      return res.status(200).json(result); 
+    }
+    catch (e)
+    { 
+      console.log(e.message);
+      return res.status(400).send("Could not create senior request");
+    }
   });
 
   
 // The calculate price is not working......
   app.post("/api/v1/refund/:ticketId", async function (req, res) {
-    const {ticketId} = req.params;
+    const { ticketId } = req.params;
     console.log("hena", ticketId);
     const user = await getUser(req);
     const userId = user.userId;
@@ -99,8 +99,22 @@ module.exports = function (app) {
     {
       return res.status(400).send("This ticket doesn't belong to you");
     }
-    const ticketPrice = await calculatePrice(ticketQuery.origin, ticketQuery.destination)
-    console.log("price", ticketPrice);
+    const refundsSearch = await db("se_project.refund_requests")
+    .select("*")
+    .where("ticketId", ticketId)
+    .andWhere("userId", userId);
+    if (!isEmpty(refundsSearch))
+    {
+      return res.status(400).send("There is already a refund request for this ticket");
+    }
+
+    const tick = await db("se_project.transactions")
+    .select("*")
+    .where("purchasedId", ticketId)
+    .andWhere("type", "ticket")
+    .first();  
+    const ticketPrice = tick.amount;
+
     try
     {
       const newRefund =
@@ -196,18 +210,6 @@ app.delete("/api/v1/route/:routeId",async function(req, res){
 // JavaScript code for printing shortest path between
 // two vertices of unweighted graph
 const max_value = 9007199254740992;
-
-// utility function to form edge between two vertices
-// source and dest
-function add_edge(adj, src, dest){
- Number(src);
-  Number(dest);
-  console.log(typeof adj[src], typeof adj[src]);
-  
-	adj[src].push(dest);
-	adj[dest].push(src);
-  console.log(src, dest);
-}
 
 // a modified version of BFS that stores predecessor
 // of each vertex in array p
@@ -310,6 +312,39 @@ function shortestDistance(adj, s, dest, v)
 	
 }
 
+async function computingTicketPrice(originID, destinationID) {    
+  const user = (await getUser(req));
+    let numberOfSations = 0;
+    console.log("hena")
+    let priceThatShouldBePayed = 0;
+    if (originID === destinationID) {
+      return priceThatShouldBePayed;
+    } else {
+      try {
+        retrievingRoute = await calculatePrice(originID, destinationID);
+        numberOfSations = Number(retrievingRoute.charAt(0));
+      }
+      catch (e) {
+
+        return (res.send(e.message));
+      }
+      
+      if (numberOfSations <= 9)
+        priceThatShouldBePayed = 5;
+      else if (numberOfSations <= 16 && numberOfSations > 9)
+        priceThatShouldBePayed = 7;
+      else
+        priceThatShouldBePayed = 10;
+
+      if (user.isSenior)
+        priceThatShouldBePayed = priceThatShouldBePayed * 0.5;
+
+
+
+      return priceThatShouldBePayed;
+    }
+  }
+
 async function calculatePrice(source, dest){
   // no. of vertices
   console.log("IN CALCULATE PRICE");
@@ -337,7 +372,7 @@ async function calculatePrice(source, dest){
     a=fromTo[i].fromStationId;
     b=fromTo[i].toStationId;
     
-    add_edge(adj,a,b);
+    adj[src].push(dest);
 
   }
   console.log("HENAAAAAAAAAAAAAAA");
