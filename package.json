@@ -1,17 +1,34 @@
 {
-  "name": "SE_PROJECT",
+<<<<<<< HEAD
+  "name": "se_starter_code",
+=======
+  "name": "se_project",
+>>>>>>> fc4fef44795d51cad7923dffbbafcc741a9068d7
   "scripts": {
     "start": "nodemon server.js"
   },
   "dependencies": {
+<<<<<<< HEAD
     "express": "^4.18.2",
     "hjs": "^0.0.6",
     "knex": "^2.4.2",
     "lodash": "4.17.21",
     "pg": "^8.7.1",
+=======
+    "express": "4.18.2",
+    "hjs": "0.0.6",
+    "knex": "^2.4.2",
+    "lodash": "4.17.21",
+    "pg": "8.7.1",
+>>>>>>> fc4fef44795d51cad7923dffbbafcc741a9068d7
     "uuid": "8.3.2"
   },
   "devDependencies": {
+<<<<<<< HEAD
     "nodemon": "^2.0.20"
+=======
+    "nodemon": "2.0.20",
+    "open": "^9.1.0"
+>>>>>>> f8c47e3913b81c2ee5c7117856152667b658a6d4
   }
 }

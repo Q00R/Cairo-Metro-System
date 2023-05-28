@@ -6,6 +6,7 @@ const { getSessionToken } = require('../utils/session');
 module.exports = async function(req, res, next) {
   const sessionToken = getSessionToken(req);
   if (!sessionToken) {
+    console.log("Kicked1");
     return res.status(301).redirect('/');
   }
 
@@ -13,12 +14,18 @@ module.exports = async function(req, res, next) {
   // that we set in the signinHandler
   const userSession = await db.select('*').from('se_project.sessions').where('token', sessionToken).first();
   if (!userSession) {
+    console.log("Kicked2");
     // If the session token is not present in session map, return an unauthorized error
     return res.status(301).redirect('/');
   }
   // if the session has expired, return an unauthorized error, and delete the 
   // session from our map
+<<<<<<< HEAD
   if (new Date() > userSession.expiresat) {
+=======
+  if (new Date() > userSession.expiresAt) {
+    console.log("Kicked3");
+>>>>>>> fc4fef44795d51cad7923dffbbafcc741a9068d7
     return res.status(301).redirect('/');
   }
 

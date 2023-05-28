@@ -31,6 +31,8 @@ CREATE TABLE IF NOT EXISTS se_project.roles
     CONSTRAINT roles_pkey PRIMARY KEY (id)
 );
 
+
+
 CREATE TABLE IF NOT EXISTS se_project.zones
 (
     id SERIAL NOT NULL,
@@ -39,6 +41,7 @@ CREATE TABLE IF NOT EXISTS se_project.zones
     CONSTRAINT zones_pkey PRIMARY KEY (id)
 
 );
+
 CREATE TABLE IF NOT EXISTS se_project.subsription
 (
     id SERIAL NOT NULL,
@@ -56,11 +59,19 @@ CREATE TABLE IF NOT EXISTS se_project.tickets
     id SERIAL NOT NULL,
     origin text NOT NULL,
     destination text NOT NULL,
+<<<<<<< HEAD
     userid INTEGER NOT Null,
     subiD INTEGER,
     tripdate timestamp not Null,
     FOREIGN KEY( userid ) REFERENCES se_project.users,
     FOREIGN KEY( subid ) REFERENCES se_project.subsription,
+=======
+    "userId" INTEGER NOT Null,
+    subID INTEGER,
+    tripDate timestamp not Null,
+    FOREIGN KEY( userId ) REFERENCES se_project.users,
+    FOREIGN KEY( subID ) REFERENCES se_project.subsription,
+>>>>>>> f8c47e3913b81c2ee5c7117856152667b658a6d4
     CONSTRAINT tickets_pkey PRIMARY KEY (id)
 );
 
@@ -72,19 +83,34 @@ CREATE TABLE IF NOT EXISTS se_project.rides
     status text NOT NULL,
     origin text NOT NULL, 
     destination text NOT NULL, 
+<<<<<<< HEAD
     userid INTEGER NOT NULL,
     ticketid integer not null,
     tripdate timestamp not null,
     FOREIGN KEY( userid ) REFERENCES se_project.users,
     FOREIGN KEY( ticketid ) REFERENCES se_project.rides,
+=======
+    userId INTEGER NOT NULL,
+    ticketId integer not null,
+    tripDate timestamp not null,
+    FOREIGN KEY( userid ) REFERENCES se_project.users,
+    FOREIGN KEY( ticketid ) REFERENCES se_project.tickets,
+>>>>>>> fc4fef44795d51cad7923dffbbafcc741a9068d7
     CONSTRAINT rides_pkey PRIMARY KEY (id)
 );
 CREATE TABLE IF NOT EXISTS se_project.transactions
 (
     id SERIAL NOT NULL,
+<<<<<<< HEAD
     amount INTEGER NOT NULL,
     userid INTEGER NOT NULL,
     purchasedid text NOT NULL, 
+=======
+    amount numeric(6,2) NOT NULL,
+    userid INTEGER NOT NULL,
+    purchasedIid text NOT NULL,
+    type text not Null,
+>>>>>>> fc4fef44795d51cad7923dffbbafcc741a9068d7
     FOREIGN KEY( userid ) REFERENCES se_project.users,
     CONSTRAINT transactions_pkey PRIMARY KEY (id)
 );
@@ -138,3 +164,9 @@ CREATE TABLE IF NOT EXISTS se_project.stationRoutes
     FOREIGN KEY( stationid ) REFERENCES se_project.stations on DELETE CASCADE on UPDATE CASCADE,
     FOREIGN KEY( routeid ) REFERENCES se_project.routes on DELETE CASCADE on UPDATE CASCADE
 );
+<<<<<<< HEAD
+=======
+
+
+
+>>>>>>> fc4fef44795d51cad7923dffbbafcc741a9068d7
