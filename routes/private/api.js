@@ -77,10 +77,8 @@ module.exports = function (app) {
   });
 
 
-  // The calculate price is not working......
   app.post("/api/v1/refund/:ticketId", async function (req, res) {
     const { ticketId } = req.params;
-    console.log("hena", ticketId);
     const user = await getUser(req);
     const userId = user.userId;
     const ticketQuery = await db
@@ -97,6 +95,13 @@ module.exports = function (app) {
     if (ticketQuery.userId !== userId) {
       return res.status(400).send("This ticket doesn't belong to you");
     }
+
+    const rideCompletedCheck = await db("se_project.rides").select("*").where("ticketId", ticketId).andWhere("status", "completed").first();
+    if (!isEmpty(rideCompletedCheck)) 
+    {
+      return res.status(400).send('This ticket is already used as the status for this ride is "completed"');
+    }
+
     const refundsSearch = await db("se_project.refund_requests")
     .select("*")
     .where("ticketId", ticketId)
@@ -140,7 +145,13 @@ module.exports = function (app) {
     const { origin, destination, tripDate } = req.body;
     const user = await getUser(req);
     const userId = user.userId;
-    console.log("user id", userId);
+    const rideQuery = await db("se_project.rides").select("*").where("origin", origin).andWhere("destination", destination).andWhere("tripDate", tripDate).andWhere("userId", userId).first();
+    const ticketId = rideQuery.ticketId; 
+    const checkAppliedRefReq = await db("se_project.refund_requests").select("*").where(ticketId, ticketId).first();
+    if (!isEmpty(checkAppliedRefReq))
+    {
+      return res.status(400).send("There is a refund request for this ticket. You can't simulate the ride");
+    }
     try {
       const newRide = await db("se_project.rides")
         .where("origin", origin)
