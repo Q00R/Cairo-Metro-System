@@ -53,9 +53,12 @@ async function uploadSR() {
 
   for (let i = 0; i < SR.length; i++) {
 <<<<<<< HEAD
+<<<<<<< HEAD
     const element =SR[i];
     await db("se_project.stationroutes").insert(element).returning("*");
 =======
+=======
+>>>>>>> fc4fef44795d51cad7923dffbbafcc741a9068d7
     const element = SR[i];
     await db("se_project.stationRoutes").insert(element).returning("*");
 >>>>>>> f8c47e3913b81c2ee5c7117856152667b658a6d4
@@ -117,6 +120,7 @@ async function uploadS() {
 
 async function uploadR() {
 <<<<<<< HEAD
+<<<<<<< HEAD
     let routes = [
       { routename: "hi12", fromstationid: 1, tostationid: 2 },
       { routename: "hi21", fromstationid: 2, tostationid: 1 },
@@ -133,6 +137,8 @@ async function uploadR() {
     ];
   
 =======
+=======
+>>>>>>> fc4fef44795d51cad7923dffbbafcc741a9068d7
   let routes = [
     { routeName: "hi12", fromStationId: 1, toStationId: 2 },
     { routeName: "hi21", fromStationId: 2, toStationId: 1 },
@@ -148,17 +154,23 @@ async function uploadR() {
     { routeName: "hi67", fromStationId: 6, toStationId: 7 },
   ];
 
+<<<<<<< HEAD
 >>>>>>> f8c47e3913b81c2ee5c7117856152667b658a6d4
+=======
+>>>>>>> fc4fef44795d51cad7923dffbbafcc741a9068d7
   for (let i = 0; i < routes.length; i++) {
     const element = routes[i];
     await db("se_project.routes").insert(element).returning("*");
   }
 }
 <<<<<<< HEAD
+<<<<<<< HEAD
 //uploadS(); first to run
 //uploadR(); second
 //uploadSR(); third
 =======
+=======
+>>>>>>> fc4fef44795d51cad7923dffbbafcc741a9068d7
 
 async function uploadData() {
   await uploadS();
@@ -168,4 +180,7 @@ async function uploadData() {
 }
 
 uploadData();
+<<<<<<< HEAD
 >>>>>>> f8c47e3913b81c2ee5c7117856152667b658a6d4
+=======
+>>>>>>> fc4fef44795d51cad7923dffbbafcc741a9068d7
