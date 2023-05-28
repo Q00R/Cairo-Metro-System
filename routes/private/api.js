@@ -247,11 +247,9 @@ const max_value = 9007199254740992;
 function add_edge(adj, src, dest) {
   Number(src);
   Number(dest);
-  console.log(typeof adj[src], typeof adj[src]);
 
   adj[src].push(dest);
   adj[dest].push(src);
-  console.log(src, dest);
 }
 
 // a modified version of BFS that stores predecessor
