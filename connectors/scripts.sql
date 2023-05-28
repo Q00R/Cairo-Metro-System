@@ -56,11 +56,19 @@ CREATE TABLE IF NOT EXISTS se_project.tickets
     id SERIAL NOT NULL,
     origin text NOT NULL,
     destination text NOT NULL,
+<<<<<<< HEAD
     userid INTEGER NOT Null,
     subiD INTEGER,
     tripdate timestamp not Null,
     FOREIGN KEY( userid ) REFERENCES se_project.users,
     FOREIGN KEY( subid ) REFERENCES se_project.subsription,
+=======
+    "userId" INTEGER NOT Null,
+    subID INTEGER,
+    tripDate timestamp not Null,
+    FOREIGN KEY( userId ) REFERENCES se_project.users,
+    FOREIGN KEY( subID ) REFERENCES se_project.subsription,
+>>>>>>> f8c47e3913b81c2ee5c7117856152667b658a6d4
     CONSTRAINT tickets_pkey PRIMARY KEY (id)
 );
 
