@@ -34,6 +34,175 @@ const getUser = async function (req) {
 
 module.exports = function (app) {
   // example
+  // async function stationExists(stationId) {
+  //   const station = await db("se_project.stations")
+  //     .where("id", stationId)
+  //     .first();
+  //   return !isEmpty(station);
+  // }
+  // JavaScript code for printing shortest path between
+  // two vertices of unweighted graph
+  const max_value = 9007199254740992;
+
+  // utility function to form edge between two vertices
+  // source and dest
+  function add_edge(adj, src, dest) {
+    Number(src);
+    Number(dest);
+    adj[src].push(dest);
+  }
+
+  // a modified version of BFS that stores predecessor
+  // of each vertex in array p
+  // and its distance from source in array d
+  function BFS(adj, src, dest, v, pred, dist) {
+    console.log("IN BFS");
+    // a queue to maintain queue of vertices whose
+    // adjacency list is to be scanned as per normal
+    // DFS algorithm
+    let queue = [];
+
+    // boolean array visited[] which stores the
+    // information whether ith vertex is reached
+    // at least once in the Breadth first search
+    let visited = new Array(v);
+
+    // initially all vertices are unvisited
+    // so v[i] for all i is false
+    // and as no path is yet constructed
+    // dist[i] for all i set to infinity
+    for (let i = 0; i < v; i++) {
+      visited[i] = false;
+      dist[i] = max_value;
+      pred[i] = -1;
+    }
+
+    // now source is first to be visited and
+    // distance from source to itself should be 0
+    visited[src] = true;
+    dist[src] = 0;
+    queue.push(src);
+
+    // standard BFS algorithm
+    while (queue.length > 0) {
+      let u = queue[0];
+      queue.shift();
+      for (let i = 0; i < adj[u].length; i++) {
+        if (visited[adj[u][i]] == false) {
+          visited[adj[u][i]] = true;
+          dist[adj[u][i]] = dist[u] + 1;
+          pred[adj[u][i]] = u;
+          queue.push(adj[u][i]);
+
+          // We stop BFS when we find
+          // destination.
+          if (adj[u][i] == dest)
+            return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  // utility function to print the shortest distance
+  // between source vertex and destination vertex
+  function shortestDistance(adj, s, dest, v) {
+    console.log("IN SHORTEST DISTANCE");
+    // predecessor[i] array stores predecessor of
+    // i and distance array stores distance of i
+    // from s
+    let pred = new Array(v).fill(0);
+    let dist = new Array(v).fill(0);
+
+    if (BFS(adj, s, dest, v, pred, dist) == false) {
+      throw new Error("unreachable destination");
+    }
+
+    // vector path stores the shortest path
+    let path = new Array();
+
+    let crawl = dest;
+    path.push(crawl);
+    while (pred[crawl] != -1) {
+      path.push(pred[crawl]);
+
+      crawl = pred[crawl];
+    }
+    // distance from source is in distance array
+    console.log("Path is::");
+    let route = "";
+    for (let i = path.length - 1; i >= 0; i--) {
+      console.log(path[i]);
+      route += path[i]
+    }
+    console.log("route", route, "route concatenated with # of stations", dist[dest] + route);
+    return dist[dest] + route;
+
+
+    // printing path from source to destination
+
+  }
+  async function calculatePrice(source, dest) {
+    // no. of vertices
+    console.log("IN CALCULATE PRICE");
+    let test = await db.count("*").from("se_project.stations");
+    let v = Number(test[0].count) + 1;
+
+    // array of vectors is used to store the graph
+    // in the form of an adjacency list
+    const adj = new Array(v).fill(0);
+
+    for (let i = 0; i < v; i++) {
+      adj[i] = new Array();
+    }
+
+    // Creating graph given in the above diagram.
+    // add_edge function takes adjacency list, source
+    // and destination vertex as argument and forms
+    // an edge between them.
+    fromTo = await db.select("fromStationId", "toStationId").from("se_project.routes");
+
+
+    for (let i = 0; i < fromTo.length; i++) {
+      a = fromTo[i].fromStationId;
+      b = fromTo[i].toStationId;
+
+      add_edge(adj, a, b);
+
+    }
+
+
+    return shortestDistance(adj, source, dest, v);
+
+    // The code is contributed by Gautam goel
+  }
+  async function computingTicketPrice(originID, destinationID) {    
+    const user = (await getUser(req));
+      let numberOfSations = 0;
+      console.log("hena")
+      let priceThatShouldBePayed = 0;
+      if (originID === destinationID) {
+        return priceThatShouldBePayed;
+      } else {
+        try {
+          retrievingRoute = await calculatePrice(originID, destinationID);
+          numberOfSations = Number(retrievingRoute.charAt(0));
+        }
+        catch (e) {
+          return (res.send(e.message));
+        }
+        if (numberOfSations <= 9)
+          priceThatShouldBePayed = 5;
+        else if (numberOfSations <= 16 && numberOfSations > 9)
+          priceThatShouldBePayed = 7;
+        else
+          priceThatShouldBePayed = 10;
+        if (user.isSenior)
+          priceThatShouldBePayed = priceThatShouldBePayed * 0.5;
+        return priceThatShouldBePayed;
+      }
+  }
+
   app.put("/users", async function (req, res) {
     try {
        const user = await getUser(req);
@@ -78,6 +247,27 @@ module.exports = function (app) {
         if (!stationId) {
           return res.status(400).send("stationId is required");
         }
+        const station = await db("se_project.stations")
+          .where("id", stationId)
+          .returning("*");
+        const tickets1 = await db("se_project.tickets")
+          .where("origin", station.stationName)
+          .update({ origin: stationName })
+          .returning("*");
+        const tickets2 = await db("se_project.tickets")
+          .where("destination", station.stationName)
+          .update({ destination: stationName })
+          .returning("*");
+        const rides1 = await db("se_project.rides")
+          .where("origin", station.stationName)
+          .andWhere("status", "upcoming")
+          .update({ origin: stationName })
+          .returning("*");
+        const rides2 = await db("se_project.rides")
+          .where("destination", station.stationName)
+          .andWhere("status", "upcoming")
+          .update({ destination: stationName })
+          .returning("*");
         const station = await db("se_project.stations")
           .where("id", stationId)
           .update({ stationName })
@@ -202,6 +392,15 @@ module.exports = function (app) {
           .where("id", requestId)
           .update({ status: refundStaus })
           .returning("*");
+        if (refundStaus == "accepted"){
+          const transaction = await db("se_project.transactions")
+            .insert({ userId: request.userId, amount: request.refundAmount, purchasedId: request.ticketId })
+            .returning("*");
+          const ticket = await db("se_project.tickets")
+            .where("id", request.ticketId)
+            .del()
+            .returning("*");
+        }
         return res.status(200).json(request);
       }
       else
@@ -228,6 +427,10 @@ module.exports = function (app) {
         const request = await db("se_project.senior_requests")
           .where("id", requestId)
           .update({ status: seniorStaus })
+          .returning("*");
+        const dbUser = await db("se_project.users")
+          .where("id", request.userId)
+          .update({ roleId: 3 })
           .returning("*");
         return res.status(200).json(request);
       }
