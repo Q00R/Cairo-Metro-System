@@ -25,9 +25,6 @@ const getUser = async function (req) {
       "se_project.users.roleId",
       "se_project.roles.id"
     )
-
-    .innerJoin("se_project.users", "se_project.sessions.userId", "se_project.users.id")
-    .innerJoin("se_project.roles", "se_project.users.roleId", "se_project.roles.id")
     .first();
 
   console.log("user =>", user);

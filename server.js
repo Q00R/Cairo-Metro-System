@@ -7,14 +7,9 @@ const app = express();
 const authMiddleware = require('./middleware/auth');
 const privateApiRoutes = require('./routes/private/api');
 const publicApiRoutes = require('./routes/public/api');
-<<<<<<< HEAD
-const publicViewRoutes = require('./routes/public/view');
-const privateViewRoutes = require('./routes/private/view');
-=======
 // const publicViewRoutes = require('./routes/public/views');
 // const privateViewRoutes = require('./routes/private/views');
 const router = express.Router();
->>>>>>> f8c47e3913b81c2ee5c7117856152667b658a6d4
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));

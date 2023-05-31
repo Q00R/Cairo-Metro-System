@@ -15,11 +15,11 @@ app.post("/api/v1/users", async function (req, res) {
     }
 
     const newUser = {
-      firstname: req.body.firstName,
-      lastname: req.body.lastName,
+      firstName: req.body.firstName,
+      lastName: req.body.lastName,
       email: req.body.email,
       password: req.body.password,
-      roleid: roles.user,
+      roleId: roles.user,
     };
     try {
       const user = await db("se_project.users").insert(newUser).returning("*");
@@ -66,9 +66,9 @@ app.post("/api/v1/users", async function (req, res) {
 
     // create a session containing information about the user and expiry time
     const session = {
-      userid: user.id,
+      userId: user.id,
       token,
-      expiresat,
+      expiresAt:expiresat,
     };
     try {
       await db("se_project.sessions").insert(session);
