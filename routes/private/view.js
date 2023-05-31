@@ -11,8 +11,8 @@ const getUser = async function(req) {
   const user = await db.select('*')
     .from('se_project.sessions')
     .where('token', sessionToken)
-    .innerJoin('se_project.users', 'se_project.sessions.userid', 'se_project.users.id')
-    .innerJoin('se_project.roles', 'se_project.users.roleid', 'se_project.roles.id')
+    .innerJoin('se_project.users', 'se_project.sessions.userId', 'se_project.users.id')
+    .innerJoin('se_project.roles', 'se_project.users.roleId', 'se_project.roles.id')
     .first();
   
   console.log('user =>', user)
@@ -41,6 +41,10 @@ module.exports = function(app) {
     const user = await getUser(req);
     const stations = await db.select('*').from('se_project.stations');
     return res.render('stations_example', { ...user, stations });
+  });
+
+  app.get('/resetPassword', async function(req, res) {
+    return res.render('resetPassword');
   });
 
 };

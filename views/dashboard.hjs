@@ -24,11 +24,15 @@
             <li><a href="/stations_example">Station</a></li>
             <li><a href="/users">Users</a></li>
             <li><a href="/users/add">Add Users</a></li>
-            <li><a href="/">Logout</a></li>
+            <li><a href="/resetPassword">Reset Password</a></li>
           </ul>
+          <ul class="nav navbar-nav navbar-right" style="padding-right:20px">
+            <li><a  style="color:crimson" href="/">Logout</a></li>
+          </ul>
+
        </nav>
       </div>
-      <p>Welcome {{firstName}}, you are logged in!</p>
+      <p style="text-align: center;">Welcome {{firstName}}, you are logged in!</p>
     </div>
   </body>
   </html>
