@@ -39,7 +39,7 @@
       });
       </script>    
     <div>
-      <nav class="navbar navbar-inverse" style="padding-left:130px;">
+      <nav class="navbar navbar-inverse" style="padding-left:2%;">
           <ul class="nav navbar-nav">
             <li class="active"><a href="/">Home</a></li>
           </ul>
@@ -47,9 +47,9 @@
     </div>
 
     <div class="center">
-      <h1>Login</h1>
+      <h1>Login</h1><br><br>
     </div>
-    <div style="padding-left: 400px">
+    <div style="padding-left: 30%">
     <form class="form-horizontal" style="width: 50%;">
       <div class="form-group">
           <label for="email" class="col-sm-2 control-label">Email</label>
