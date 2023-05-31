@@ -372,12 +372,16 @@ module.exports = function (app) {
       return res.status(400).send("There is already a refund request for this ticket");
     }
 
-    const tick = await db("se_project.transactions")
-    .select("*")
-    .where("purchasedId", ticketId)
-    .andWhere("type", "ticket")
-    .first();  
+    
+    const tick = await db("se_project.tickets")
+    .innerJoin("se_project.transactions", "se_project.tickets.id", "se_project.transactions.purchasedId")
+    .where("se_project.tickets.id", ticketId)
+    .andWhere("se_project.transactions.type", "ticket")
+    .first();
+    console.log("ticket   ", tick);
     const ticketPrice = tick.amount;
+
+    console.log("ticketPrice   ", ticketPrice);
 
     try
     {
