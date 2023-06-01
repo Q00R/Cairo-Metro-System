@@ -563,11 +563,15 @@ module.exports = function (app) {
 
   app.post('/api/v1/payment/subscription', async function (req, res) {
     try {
-      const { creditCardNumber, holderName, payedAmount, subType, zoneId } = req.body;
+      let { creditCardNumber, holderName, payedAmount, subType, zoneId } = req.body;
 
+      
 
       let noOfTickets = 0;
       let deductionAmount = 0;
+
+      zoneId = Number(zoneId);
+      payedAmount = Number(payedAmount);
 
       // Calculate the number of tickets and deduction amount based on the subscription type and zone
       if (subType === 'monthly' && zoneId === 1) {

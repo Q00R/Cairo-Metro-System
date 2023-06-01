@@ -47,4 +47,8 @@ module.exports = function(app) {
     return res.render('resetPassword');
   });
 
+  app.get('/subscriptions', async function(req, res) {
+    return res.render('subscriptions');
+  });
+
 };
