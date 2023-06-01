@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Courses</title>
+    <link rel='stylesheet' href='/styles/bootstrap.min.css' />
+    <link rel='stylesheet' href='/styles/style.css' />
+    <script src="/js/jquery-2.2.0.min.js" type="text/javascript"></script>
+    <script src="/js/bootstrap.min.js" type="text/javascript"></script>
+  </head>
+  <body>
+    <script>
+      function updateStatus(zoneId, textBoxID) {
+        const price = $('#'+textBoxID).val();
+        const data = {
+            price
+        };
+        $.ajax({
+          type: "Put",
+          data,
+          url: '/api/v1/zones/' + zoneId,
+          success: function(serverResponse) {
+            if(serverResponse) {
+              alert('Updated price for zone with id ' + zoneId);
+              location.href = '/manage/zones';
+            }
+          },
+          error: function(errorResponse) {
+            if(errorResponse) {
+              alert(`Error Updating Status: ${errorResponse.responseText}`);
+            }            
+          }
+        });
+      };
+    </script>
+    <div>
+    <div>
+        <nav class="navbar navbar-inverse" style="padding-left:2%;">
+          <ul class="nav navbar-nav">
+            <li><a href="/dashboard">Home</a></li>
+            {{#isAdmin}}
+            <li><a href="/manage/stations">Station</a></li>
+            <li class="active"><a href="/manage/zones">Zones</a></li>
+            <div class="dropdown navbar navbar-inverse nav navbar-nav">
+              <li><a>Requests</a></li>
+              <div class="dropdown-content navbar navbar-inverse nav navbar-nav">
+              <li><a href="/manage/requests/seniors">Senior</a></li>
+              <li><a href="/manage/requests/refunds">Refund</a></li>
+              </div>
+            </div>
+            {{/isAdmin}}
+          </ul>
+          <ul class="nav navbar-nav navbar-right" style="padding-right:2%">
+            <li><a style="color:goldenrod" href="/resetPassword">Reset Password</a></li>
+            <li><a  style="color:crimson" href="/">Logout</a></li>
+          </ul>
+
+       </nav>
+    </div>
+    <br/>
+
+    <div>
+      <h1 style="text-align: center;">Zones</h1><br><br>
+    </div>
+      <table class="table" style="max-width: 75%; margin-left: auto; margin-right: auto;">
+        <thead>
+          <tr>
+            <th scope="col">Id</th>
+            <th scope="col">Zone Type</th>
+            <th scope="col">Price</th>
+            <th scope="col">New Price</th>
+          </tr>
+          {{#zones}}
+            <tr>
+              <td>{{id}}</td>
+              <td>{{zoneType}}</td>
+              <td>{{price}}</td>
+              <td>
+                {{#isAdmin}}
+                  <input id="btnUpdateStation{{id}}" type="number" value="{{price}}" class="btn btn-primary" style="background-color: rgb(255, 255, 255); color:rgb(0, 0, 0)">
+                  <input id="btnDeleteStation{{id}}" onclick="updateStatus({{id}}, 'btnUpdateStation'+{{id}})" type="button" value="Update" class="btn btn-primary" style="background-color: rgb(36, 155, 252);">
+                {{/isAdmin}}
+              </td>
+            </tr> 
+          {{/zones}}
+        </thead>
+      </table>
+    </div>
+  </body>
+  </html>

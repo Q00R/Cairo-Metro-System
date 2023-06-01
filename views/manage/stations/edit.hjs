@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Courses</title>
+    <link rel='stylesheet' href='/styles/bootstrap.min.css' />
+    <link rel='stylesheet' href='/styles/style.css' />
+    <script src="/js/jquery-2.2.0.min.js" type="text/javascript"></script>
+    <script src="/js/bootstrap.min.js" type="text/javascript"></script>
+  </head>
+  <body>
+    <script>
+    $(document).ready(function(){    
+      // Handle Registration Button Click
+      $("#update").click(function() {
+        const stationName = $('#stationName').val();
+        const stationId = $('#stationId').val();
+        const data = {
+          stationName
+        };
+        $.ajax({
+          type: "put",
+          url: '/api/v1/station/' + stationId,
+          data,
+          success: function(serverResponse) {
+            if(serverResponse) {
+              alert('Successfully Edited Station');
+            }
+          },
+          error: function(errorResponse) {
+            if(errorResponse) {
+              alert(`Error Editing Station: ${errorResponse.responseText}`);
+            }            
+          }
+        });
+      });      
+    });
+    </script>
+    <div>
+    <div>
+        <nav class="navbar navbar-inverse" style="padding-left:2%;">
+          <ul class="nav navbar-nav">
+            <li><a href="/dashboard">Home</a></li>
+            {{#isAdmin}}
+            <li><a href="/manage/stations">Station</a></li>
+            <li><a href="/manage/zones">Zones</a></li>
+            <div class="dropdown navbar navbar-inverse nav navbar-nav">
+              <li><a>Requests</a></li>
+              <div class="dropdown-content navbar navbar-inverse nav navbar-nav">
+              <li><a href="/manage/requests/seniors">Senior</a></li>
+              <li><a href="/manage/requests/refunds">Refund</a></li>
+              </div>
+            </div>
+            {{/isAdmin}}
+          </ul>
+          <ul class="nav navbar-nav navbar-right" style="padding-right:2%">
+            <li><a style="color:goldenrod" href="/resetPassword">Reset Password</a></li>
+            <li><a  style="color:crimson" href="/">Logout</a></li>
+          </ul>
+
+       </nav>
+    </div>
+    <br/>
+    
+      <div class="center">
+      <h1>Edit Station</h1>
+    </div>
+    <div style="padding-left: 500px">
+    <form class="form-horizontal" style="width: 50%;">
+      <div class="form-group">
+          <label for="stationId" class="col-sm-2 control-label">Station Id</label>
+          <div class="col-sm-10">
+              <input type="text" class="form-control" id="stationId" name="stationId" placeholder="Station Id" value="{{stationId}}">
+          </div>
+      </div>
+      <div class="form-group">
+          <label for="stationName" class="col-sm-2 control-label">Station Name</label>
+          <div class="col-sm-10">
+              <input type="text" class="form-control" id="stationName" name="stationName" placeholder="Station Name" value="">
+          </div>
+      </div>
+      <div class="form-group">
+          <div class="col-sm-10 col-sm-offset-2">
+              <input id="update" name="update" type="button" value="Update" class="btn btn-primary">
+          </div>
+      </div>
+  </form>
+    </div>
+    </div>
+  </body>
+  </html>

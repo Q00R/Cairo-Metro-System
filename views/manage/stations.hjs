@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Courses</title>
+    <link rel='stylesheet' href='/styles/bootstrap.min.css' />
+    <link rel='stylesheet' href='/styles/style.css' />
+    <script src="/js/jquery-2.2.0.min.js" type="text/javascript"></script>
+    <script src="/js/bootstrap.min.js" type="text/javascript"></script>
+  </head>
+  <body>
+    <script>
+      function deleteStation(stationId) {
+        $.ajax({
+          type: "Delete",
+          url: '/api/v1/station/' + stationId,
+          success: function(serverResponse) {
+            if(serverResponse) {
+              alert('Deleted Station with is ' + stationId);
+              location.href = '/stations';
+            }
+          },
+          error: function(errorResponse) {
+            if(errorResponse) {
+              alert(`Error Deleting Station: ${errorResponse.responseText}`);
+            }            
+          }
+        });
+      };    
+      function updateStation(stationId) {
+        const url = "/manage/stations/edit/" + stationId;
+        location.href = url;
+      };
+      function changeHref() {
+        location.href = '/manage/stations/create';
+      };
+    </script>
+    <div>
+    <div>
+        <nav class="navbar navbar-inverse" style="padding-left:2%;">
+          <ul class="nav navbar-nav">
+            <li><a href="/dashboard">Home</a></li>
+            {{#isAdmin}}
+            <li class="active"><a href="/manage/stations">Station</a></li>
+            <li><a href="/manage/zones">Zones</a></li>
+            <div class="dropdown navbar navbar-inverse nav navbar-nav">
+              <li><a>Requests</a></li>
+              <div class="dropdown-content navbar navbar-inverse nav navbar-nav">
+              <li><a href="/manage/requests/seniors">Senior</a></li>
+              <li><a href="/manage/requests/refunds">Refund</a></li>
+              </div>
+            </div>
+            {{/isAdmin}}
+          </ul>
+          <ul class="nav navbar-nav navbar-right" style="padding-right:2%">
+            <li><a style="color:goldenrod" href="/resetPassword">Reset Password</a></li>
+            <li><a  style="color:crimson" href="/">Logout</a></li>
+          </ul>
+
+       </nav>
+    </div>
+    <br/>
+
+    <div>
+      <h1 style="text-align: center;">All Stations</h1><br><br>
+    </div>
+    
+      {{#isAdmin}}
+      <div style="position:absolute; right:0;">
+        <input id="btnAddStation" onclick="changeHref()" type="button" onc value="Add station" class="btn btn-primary">
+        <br />
+      </div>
+      {{/isAdmin}}
+      <table class="table" style="max-width: 75%; margin-left: auto; margin-right: auto;">
+        <thead>
+          <tr>
+            <th scope="col">id</th>
+            <th scope="col">Name</th>
+            <th scope="col">Type</th>
+            <th scope="col">Position</th>
+            <th scope="col">Status</th>
+          </tr>
+          {{#stations}}
+            <tr>
+              <td>{{id}}</td>
+              <td>{{stationName}}</td>
+              <td>{{stationType}}</td>
+              <td>{{stationPosition}}</td>
+              <td>{{stationStatus}}</td>
+              <td>
+                {{#isAdmin}}
+                  <input id="btnUpdateStation{{id}}" onclick="updateStation({{id}})" type="button" value="✏️" class="btn btn-primary" style="background-color: rgb(46, 191, 253); border: none;">
+                  <input id="btnDeleteStation{{id}}" onclick="deleteStation({{id}})" type="button" value="🗑️" class="btn btn-primary" style="background-color: rgb(255, 115, 115); border: none;">
+                {{/isAdmin}}
+              </td>
+            </tr> 
+          {{/stations}}
+        </thead>
+      </table>
+    </div>
+  </body>
+  </html>
