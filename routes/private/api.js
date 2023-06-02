@@ -36,11 +36,11 @@ const getUser = async function (req) {
 
 
 module.exports = function (app) {
-
+  
   app.put("/users", async function (req, res) {
     try {
 
-
+    
       const user = await getUser(req);
       // const {userId}=req.body
 
@@ -55,17 +55,17 @@ module.exports = function (app) {
   });
 
 
-
+  
   app.post("/api/v1/station", async function (req, res) {
     try {
       const user = await getUser(req);
-      if (user.isAdmin) {
+      if (user.isAdmin){
         const { stationName } = req.body;
         if (!stationName) {
           return res.status(400).send("name is required");
         }
         const station = await db("se_project.stations")
-          .insert({ stationName, stationType: "normal", stationStatus: "new" })
+          .insert({ stationName , stationType: "normal", stationStatus: "new" })
           .returning("*");
         return res.status(200).json(station);
       }
@@ -80,7 +80,7 @@ module.exports = function (app) {
   app.put("/api/v1/station/:stationId", async function (req, res) {
     try {
       const user = await getUser(req);
-      if (user.isAdmin) {
+      if(user.isAdmin){
         const { stationId } = req.params;
         const { stationName } = req.body;
         if (!stationId) {
@@ -107,13 +107,13 @@ module.exports = function (app) {
           .andWhere("status", "upcoming")
           .update({ destination: stationName })
           .returning("*");
-        station = await db("se_project.stations")
+         station = await db("se_project.stations")
           .where("id", stationId)
           .update({ stationName })
           .returning("*");
         return res.status(200).json(station);
       }
-      else {
+      else{
         return res.status(400).send("You are Unauthorized to do this action");
       }
     } catch (e) {
@@ -121,93 +121,93 @@ module.exports = function (app) {
       return res.status(400).send("Could not update station");
     }
   });
-
+  
   app.delete("/api/v1/station/:stationId", async function (req, res) {
     try {
       const user = await getUser(req);
-      if (user.isAdmin) {
-        const { stationId } = req.params;
-        if (!stationId) {
-          return res.status(400).send("stationId is required");
-        }
-        const station = await db("se_project.stations")
-          .where("id", stationId)
-          .returning("*");
-        const stationRoutes = await db("se_project.stationRoutes")
-          .innerJoin(
-            "se_project.routes",
-            "se_project.routes.id",
-            "se_project.stationRoutes.routeId"
-          )
-          .where("stationId", stationId)
-          .returning("se_project.routes.id", "se_project.routes.routeName", "se_project.routes.fromStationId", "se_project.routes.toStationId");
-        const routesIds = stationRoutes.map(route => route.routeId);
-        console.log("routesIds =>", routesIds);
-        let connectedStationsIds = (stationRoutes.map(route => (route.toStationId == stationId ? route.fromStationId : route.toStationId))).filter(id => id != stationId);
-        connectedStationsIds = connectedStationsIds.filter((id, index) => connectedStationsIds.indexOf(id) === index);
-        console.log("connectedStationsIds =>", connectedStationsIds);
-        let addedRoute;
-        for (let i = 0; i < connectedStationsIds.length - 1; i++) {
-          for (let j = i + 1; j < connectedStationsIds.length; j++) {
-            const newRoute1 = {
-              "fromStationId": connectedStationsIds[i],
-              "toStationId": connectedStationsIds[j],
-              "routeName": "New Route"
-            }
-            addedRoute = (await db("se_project.routes").insert(newRoute1).returning("*"));
-            console.log("addedRoute =>", addedRoute);
-            let id = addedRoute[0].id;
-            const newStationRoute1 = {
-              "stationId": newRoute1.fromStationId,
-              "routeId": id
-            }
-            console.log("newStationRoute1 =>", newStationRoute1);
-            const newStationRoute2 = {
-              "stationId": newRoute1.toStationId,
-              "routeId": id
-            }
-            console.log("newStationRoute2 =>", newStationRoute2);
-            await db("se_project.stationRoutes").insert(newStationRoute1).returning("*");
-            await db("se_project.stationRoutes").insert(newStationRoute2).returning("*");
-            const newRoute2 = {
-              "fromStationId": connectedStationsIds[j],
-              "toStationId": connectedStationsIds[i],
-              "routeName": "New Route"
-            }
-            addedRoute = (await db("se_project.routes").insert(newRoute2).returning("*"));
-            id = addedRoute[0].id;
-            console.log("addedRoute =>", addedRoute);
-            const newStationRoute3 = {
-              "stationId": newRoute2.fromStationId,
-              "routeId": id
-            }
-            const newStationRoute4 = {
-              "stationId": newRoute2.toStationId,
-              "routeId": id
-            }
-            await db("se_project.stationRoutes").insert(newStationRoute3).returning("*");
-            await db("se_project.stationRoutes").insert(newStationRoute4).returning("*");
+        if (user.isAdmin){
+          const { stationId } = req.params;
+          if (!stationId) {
+            return res.status(400).send("stationId is required");
           }
+          const station = await db("se_project.stations")
+            .where("id", stationId)
+            .returning("*");
+          const stationRoutes = await db("se_project.stationRoutes")
+            .innerJoin(
+              "se_project.routes",
+              "se_project.routes.id",
+              "se_project.stationRoutes.routeId"
+            )
+            .where("stationId", stationId)
+            .returning("se_project.routes.id", "se_project.routes.routeName", "se_project.routes.fromStationId", "se_project.routes.toStationId");
+          const routesIds = stationRoutes.map(route => route.routeId);
+          console.log("routesIds =>", routesIds);
+          let connectedStationsIds = (stationRoutes.map(route => (route.toStationId == stationId ? route.fromStationId : route.toStationId))).filter(id => id != stationId);
+          connectedStationsIds = connectedStationsIds.filter((id, index) => connectedStationsIds.indexOf(id) === index);
+          console.log("connectedStationsIds =>", connectedStationsIds);
+          let addedRoute;
+          for (let i = 0; i < connectedStationsIds.length-1; i++) {
+            for (let j = i+1; j < connectedStationsIds.length; j++) {
+              const newRoute1 = {
+                "fromStationId": connectedStationsIds[i],
+                "toStationId": connectedStationsIds[j],
+                "routeName": "New Route"
+              }
+              addedRoute = (await db("se_project.routes").insert(newRoute1).returning("*"));
+              console.log("addedRoute =>", addedRoute);
+              let id = addedRoute[0].id;
+              const newStationRoute1 = {
+                "stationId": newRoute1.fromStationId,
+                "routeId": id
+              }
+              console.log("newStationRoute1 =>", newStationRoute1);
+              const newStationRoute2 = {
+                "stationId": newRoute1.toStationId,
+                "routeId": id
+              }
+              console.log("newStationRoute2 =>", newStationRoute2);
+              await db("se_project.stationRoutes").insert(newStationRoute1).returning("*");
+              await db("se_project.stationRoutes").insert(newStationRoute2).returning("*");
+              const newRoute2 = {
+                "fromStationId": connectedStationsIds[j],
+                "toStationId": connectedStationsIds[i],
+                "routeName": "New Route"
+              }
+              addedRoute = (await db("se_project.routes").insert(newRoute2).returning("*"));
+              id = addedRoute[0].id;
+              console.log("addedRoute =>", addedRoute);
+              const newStationRoute3 = {
+                "stationId": newRoute2.fromStationId,
+                "routeId":  id
+              }
+              const newStationRoute4 = {
+                "stationId": newRoute2.toStationId,
+                "routeId":  id
+              }
+              await db("se_project.stationRoutes").insert(newStationRoute3).returning("*");
+              await db("se_project.stationRoutes").insert(newStationRoute4).returning("*");
+            }
+          }
+          const deletedStationRoutes1 = await db("se_project.stationRoutes")
+            .whereIn("routeId", routesIds)
+            .del()
+            .returning("*");
+          console.log("deletedStationRoutes1 =>", deletedStationRoutes1);
+          const deletedRoutes = await db("se_project.routes")
+            .whereIn("id", routesIds)
+            .del()
+            .returning("*");
+            console.log("deletedRoutes =>", deletedRoutes);
+          const deletedStation = await db("se_project.stations")
+            .where("id", stationId)
+            .del()
+            .returning("*");
+            console.log("deletedStation =>", deletedStation);
+          return res.status(200).json(deletedStation);
         }
-        const deletedStationRoutes1 = await db("se_project.stationRoutes")
-          .whereIn("routeId", routesIds)
-          .del()
-          .returning("*");
-        console.log("deletedStationRoutes1 =>", deletedStationRoutes1);
-        const deletedRoutes = await db("se_project.routes")
-          .whereIn("id", routesIds)
-          .del()
-          .returning("*");
-        console.log("deletedRoutes =>", deletedRoutes);
-        const deletedStation = await db("se_project.stations")
-          .where("id", stationId)
-          .del()
-          .returning("*");
-        console.log("deletedStation =>", deletedStation);
-        return res.status(200).json(deletedStation);
-      }
-      else
-        return res.status(400).send("You are Unauthorized to do this action")
+        else
+          return res.status(400).send("You are Unauthorized to do this action")
     }
     catch (e) {
       console.log(e.message);
@@ -215,10 +215,10 @@ module.exports = function (app) {
     }
   });
 
-  app.put('/api/v1/requests/refunds/:requestId', async function (req, res) {
+  app.put('/api/v1/requests/refunds/:requestId', async function (req, res){
     try {
       const user = await getUser(req);
-      if (user.isAdmin) {
+      if (user.isAdmin){
         const { requestId } = req.params;
         const { refundStaus } = req.body;
         if (!requestId) {
@@ -231,7 +231,7 @@ module.exports = function (app) {
           .where("id", requestId)
           .update({ status: refundStaus })
           .returning("*");
-        if (refundStaus == "accepted") {
+        if (refundStaus == "accepted"){
           const transaction = await db("se_project.transactions")
             .insert({ userId: request.userId, amount: request.refundAmount, purchasedId: request.ticketId })
             .returning("*");
@@ -251,10 +251,10 @@ module.exports = function (app) {
     }
   });
 
-  app.put('/api/v1/requests/senior/:requestId', async function (req, res) {
+  app.put('/api/v1/requests/senior/:requestId', async function (req, res){
     try {
       const user = await getUser(req);
-      if (user.isAdmin) {
+      if (user.isAdmin){
         const { requestId } = req.params;
         const { seniorStaus } = req.body;
         if (!requestId) {
@@ -281,10 +281,10 @@ module.exports = function (app) {
     }
   });
 
-  app.put('/api/v1/zones/:zoneId', async function (req, res) {
+  app.put('/api/v1/zones/:zoneId', async function (req, res){
     try {
       const user = await getUser(req);
-      if (user.isAdmin) {
+      if (user.isAdmin){
         const { zoneId } = req.params;
         const { price } = req.body;
         if (!zoneId) {
@@ -315,20 +315,23 @@ module.exports = function (app) {
     let userId = user.userId;
     const { nationalId } = req.body;
     const requestExists = await db("se_project.senior_requests").select("*").where("userId", userId).first();
-    if (!isEmpty(requestExists)) {
+    if (!isEmpty(requestExists)) 
+    {
       return res.status(400).send("This user already submitted a request to be a senior");
     }
-    const newRequest =
+    const newRequest = 
     {
       status: "pending",
       userId,
       nationalId
     }
-    try {
+    try
+    {
       const result = await db.insert(newRequest).into("se_project.senior_requests").returning("*");
-      return res.status(200).json(result);
+      return res.status(200).json(result); 
     }
-    catch (e) {
+    catch (e)
+    { 
       console.log(e.message);
       return res.status(400).send("Could not create senior request");
     }
@@ -355,26 +358,33 @@ module.exports = function (app) {
     }
 
     const rideCompletedCheck = await db("se_project.rides").select("*").where("ticketId", ticketId).andWhere("status", "completed").first();
-    if (!isEmpty(rideCompletedCheck)) {
+    if (!isEmpty(rideCompletedCheck)) 
+    {
       return res.status(400).send('This ticket is already used as the status for this ride is "completed"');
     }
 
     const refundsSearch = await db("se_project.refund_requests")
-      .select("*")
-      .where("ticketId", ticketId)
-      .andWhere("userId", userId);
-    if (!isEmpty(refundsSearch)) {
+    .select("*")
+    .where("ticketId", ticketId)
+    .andWhere("userId", userId);
+    if (!isEmpty(refundsSearch))
+    {
       return res.status(400).send("There is already a refund request for this ticket");
     }
 
-    const tick = await db("se_project.transactions")
-      .select("*")
-      .where("purchasedId", ticketId)
-      .andWhere("type", "ticket")
-      .first();
+    
+    const tick = await db("se_project.tickets")
+    .innerJoin("se_project.transactions", "se_project.tickets.id", "se_project.transactions.purchasedId")
+    .where("se_project.tickets.id", ticketId)
+    .andWhere("se_project.transactions.type", "ticket")
+    .first();
+    console.log("ticket   ", tick);
     const ticketPrice = tick.amount;
 
-    try {
+    console.log("ticketPrice   ", ticketPrice);
+
+    try
+    {
       const newRefund =
       {
         status: "pending",
@@ -401,9 +411,10 @@ module.exports = function (app) {
     const user = await getUser(req);
     const userId = user.userId;
     const rideQuery = await db("se_project.rides").select("*").where("origin", origin).andWhere("destination", destination).andWhere("tripDate", tripDate).andWhere("userId", userId).first();
-    const ticketId = rideQuery.ticketId;
+    const ticketId = rideQuery.ticketId; 
     const checkAppliedRefReq = await db("se_project.refund_requests").select("*").where(ticketId, ticketId).first();
-    if (!isEmpty(checkAppliedRefReq)) {
+    if (!isEmpty(checkAppliedRefReq))
+    {
       return res.status(400).send("There is a refund request for this ticket. You can't simulate the ride");
     }
     try {
@@ -556,46 +567,50 @@ module.exports = function (app) {
 
   app.post('/api/v1/payment/subscription', async function (req, res) {
     try {
-      const { creditCardNumber, holderName, payedAmount, subType, zoneId } = req.body;
+      let { creditCardNumber, holderName, payedAmount, subType, zoneId } = req.body;
 
+      
 
       let noOfTickets = 0;
       let deductionAmount = 0;
 
+      zoneId = Number(zoneId);
+      payedAmount = Number(payedAmount);
+
       // Calculate the number of tickets and deduction amount based on the subscription type and zone
-      if (subType == 'monthly' && zoneId == 1) {
+      if (subType === 'monthly' && zoneId === 1) {
         noOfTickets = 10;
         deductionAmount = 30;
       }
-      else if (subType == 'quarterly' && zoneId == 1) {
+      else if (subType === 'quarterly' && zoneId === 1) {
         noOfTickets = 50;
         deductionAmount = 175;
       }
-      else if (subType == 'annual' && zoneId == 1) {
+      else if (subType === 'annual' && zoneId === 1) {
         noOfTickets = 100;
         deductionAmount = 370;
       }
-      else if (subType == 'monthly' && zoneId == 2) {
+      else if (subType === 'monthly' && zoneId === 2) {
         noOfTickets = 10;
         deductionAmount = 50;
       }
-      else if (subType == 'quarterly' && zoneId == 2) {
+      else if (subType === 'quarterly' && zoneId === 2) {
         noOfTickets = 50;
         deductionAmount = 270;
       }
-      else if (subType == 'annual' && zoneId == 2) {
+      else if (subType === 'annual' && zoneId === 2) {
         noOfTickets = 100;
         deductionAmount = 550;
       }
-      else if (subType == 'monthly' && zoneId == 3) {
+      else if (subType === 'monthly' && zoneId === 3) {
         noOfTickets = 10;
         deductionAmount = 70;
       }
-      else if (subType == 'quarterly' && zoneId == 3) {
+      else if (subType === 'quarterly' && zoneId === 3) {
         noOfTickets = 50;
         deductionAmount = 340;
       }
-      else if (subType == 'annual' && zoneId == 3) {
+      else if (subType === 'annual' && zoneId === 3) {
         noOfTickets = 100;
         deductionAmount = 650;
       }
@@ -607,7 +622,7 @@ module.exports = function (app) {
       const user = await getUser(req);
       const userId = user.userId;
 
-      if (user.roleId == 3) {
+      if (user.roleId === 3) {
         deductionAmount = deductionAmount / 2; // Apply 50% discount
       }
 
@@ -681,6 +696,7 @@ module.exports = function (app) {
     }
   });
 
+ 
   app.post('/api/v1/payment/ticket', async function (req, res) {
 
     console.log("straaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaat");
@@ -922,7 +938,7 @@ module.exports = function (app) {
     }
 
   });
-
+  
 
 
 
@@ -1016,7 +1032,7 @@ module.exports = function (app) {
   async function getStationName(stationId) {
     console.log("getStationName")
     let entry = await db('se_project.stations').where('id', stationId).first();
-    if (!entry)
+    if(!entry) 
       throw new Error("station not found");
     let stationName = entry.stationName;
     return stationName;
