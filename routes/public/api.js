@@ -3,15 +3,15 @@ const { v4 } = require("uuid");
 const db = require("../../connectors/db");
 const roles = require("../../constants/roles");
 module.exports = function (app) {
-
 app.post("/api/v1/user", async function (req, res) {
+
     // Check if user already exists in the system
     const userExists = await db
       .select("*")
       .from("se_project.users")
       .where("email", req.body.email);
     if (!isEmpty(userExists)) {
-      return res.status(400).send("user exists");
+      return res.status(400).json("user exists");
     }
 
     const newUser = {
@@ -83,6 +83,4 @@ app.post("/api/v1/user", async function (req, res) {
       return res.status(400).send("Could not register user");
     }
   });
-
-
 }
