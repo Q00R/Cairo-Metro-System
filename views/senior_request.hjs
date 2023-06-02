@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Train System</title>
+    <link rel='stylesheet' href='/styles/bootstrap.min.css' />
+    <link rel='stylesheet' href='/styles/style.css' />
+    <script src="/js/jquery-2.2.0.min.js" type="text/javascript"></script>
+    <script src="/js/bootstrap.min.js" type="text/javascript"></script>
+  </head>
+  <body>
+      <script>
+      $(document).ready(function(){
+        $("#submit").click(function() {
+            const nationalId = $('#nationalId').val();
+            const data = {
+                nationalId,
+            };
+
+          $.ajax({
+            type: "POST",
+            url: '/api/v1/senior/request',
+            data,
+
+            success: function(serverResponse) {
+              if(serverResponse) {
+                alert('Senior Request Recorded Successfully');
+              }
+            },
+            error: function(errorResponse) {
+              if(errorResponse) {
+                alert(`Something went wrong: ${errorResponse.responseText}`);
+              }            
+            }
+          });
+        });
+      });
+      </script>
+    <div>
+      <div>
+        <nav class="navbar navbar-inverse" style="padding-left:1%;">
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="/dashboard">Home</a></li>
+            <li><a href="/stations">Station</a></li>
+            <li><a href="/users">Users</a></li>
+            {{#isNormal}}
+              <li><a href="/requests/refund">Refund Ticket</a></li>
+              <li><a href="/requests/senior">Senior Citizens</a></li>
+            {{/isNormal}}
+          </ul>
+          <ul class="nav navbar-nav navbar-right" style="padding-right:2%">
+            <li><a style="color:goldenrod" href="/resetPassword">Reset Password</a></li>
+            <li><a  style="color:crimson" href="/">Logout</a></li>
+          </ul>
+
+       </nav>
+      </div>
+      <div class="center">
+      <h1> <u>Senior Request Application</u></h1>
+    </div><br><br>
+    <div style="padding-left: 25%">
+    <form class="form-horizontal" style="width: 50%;">
+      <div class="form-group">
+              <label for="nationalIdLabel" class="form-check-label">National ID</label>
+              <input type="text" class="form-control" id="nationalId" name="nationalId" placeholder="102030104433" value="">
+                <small id="passHelp" class="form-text text-muted">If your National ID starts with a 3, do not bother appling.</small>
+
+      </div>
+      <div class="form-group">
+        <div style="margin-right: auto; float: right;">
+            <img src="/nationalID.jpg" alt="Senior" style="width: 300px;;height: 200px;margin-right: auto;"><br>
+        </div>
+        <input id="submit" class="btn btn-primary" name="submit" type="button" value="Place Request">
+      </div>
+    </div>
+  </body>
+  </html>

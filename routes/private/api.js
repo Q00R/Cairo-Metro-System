@@ -372,12 +372,16 @@ module.exports = function (app) {
       return res.status(400).send("There is already a refund request for this ticket");
     }
 
-    const tick = await db("se_project.transactions")
-    .select("*")
-    .where("purchasedId", ticketId)
-    .andWhere("type", "ticket")
-    .first();  
+    
+    const tick = await db("se_project.tickets")
+    .innerJoin("se_project.transactions", "se_project.tickets.id", "se_project.transactions.purchasedId")
+    .where("se_project.tickets.id", ticketId)
+    .andWhere("se_project.transactions.type", "ticket")
+    .first();
+    console.log("ticket   ", tick);
     const ticketPrice = tick.amount;
+
+    console.log("ticketPrice   ", ticketPrice);
 
     try
     {
@@ -935,7 +939,7 @@ module.exports = function (app) {
 
 
 
-  app.get('/api/v1/tickets/price/:originId/:destinationId', async function (req, res) {
+  app.post('/api/v1/tickets/price/:originId/:destinationId', async function (req, res) {
     const user = (await getUser(req));
     let numberOfSations = 0;
     console.log("hena")
@@ -948,7 +952,7 @@ module.exports = function (app) {
     } else {
       let station = await getStationName(originID);
       if (originID === destinationID) {
-        return res.json({ "Price that should be paid": 0, "you are already at your destination": station });
+        return res.json({ "price": 0, "message": `You are already at your destination ${station}` });
       } else {
         try {
           retrievingRoute = await calculatePrice(originID, destinationID);
@@ -980,7 +984,7 @@ module.exports = function (app) {
 
 
 
-        return res.json({ "Price that should be paid": priceThatShouldBePayed });
+        return res.json({ "price": priceThatShouldBePayed });
 
       }
     }
