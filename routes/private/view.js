@@ -16,9 +16,9 @@ const getUser = async function(req) {
     .first();
   
   console.log('user =>', user)
-  user.isStudent = user.roleid === roles.student;
-  user.isAdmin = user.roleid === roles.admin;
-  user.isSenior = user.roleid === roles.senior;
+  user.isNormal = user.roleId === 1;
+  user.isAdmin = user.roleId === 2;
+  user.isSenior = user.roleId === 3;
 
   return user;  
 }
@@ -68,7 +68,7 @@ module.exports = function(app) {
   const stations = await db.select('*').from('se_project.stations');
   return res.render('price', { ...user, stations });
  });
- 
+
 
   app.get('/subscriptions', async function(req, res) {
     return res.render('subscriptions');
