@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <title>Zones</title>
   <link rel="stylesheet" href="/styles/bootstrap.min.css">
-  <link rel="stylesheet" href="/styles/style.css">
+  <link rel="stylesheet" href="/styles/subscriptions.css">
   <script src="/js/jquery-2.2.0.min.js"></script>
   <script src="/js/bootstrap.min.js"></script>
   <style>
@@ -19,11 +19,33 @@
     }
     .form-horizontal {
       width: 50%;
-      padding-left: 25%;
+      margin-left: 25%;
     }
     .subscription-table {
       margin-top: 20px;
     }
+
+    .container {
+      display: flex;
+      flex-wrap: wrap;
+    }
+
+    .left-column {
+      flex: 1;
+    }
+
+    .right-column {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .subscription-table,
+    .subscription-types {
+      flex: 1;
+    }
+
   </style>
 </head>
 <body>
@@ -46,8 +68,8 @@
     <h1><u>Subscriptions</u></h1>
   </div>
 
-  <div class="row">
-    <div class="col-md-6">
+  <div class="container">
+    <div class="left-column">
       <form class="form-horizontal">
         <div class="form-group">
           <label for="creditCardNumber">Credit Card Number</label>
@@ -77,51 +99,38 @@
             <option value="3">Zone 3</option>
           </select>
         </div>
-
         <div class="form-group">
           <input type="button" id="submit" class="btn btn-primary" value="Submit">
         </div>
       </form>
     </div>
-    <div class="col-md-6">
+    <div class="right-column">
       <div class="subscription-table">
         <table class="table table-bordered">
           <thead>
             <tr>
               <th>Zone ID</th>
               <th>Amount of stations</th>
-              <th>Price</th>
             </tr>
           </thead>
           <tbody id="zoneTable"></tbody>
         </table>
       </div>
-    </div>
-     </div>
-   <div class="row">
-  <div class="col-md-6">
-    <form class="form-horizontal">
-      <!-- Existing form code here -->
-    </form>
-  </div>
-  <div class="col-md-6">
-    <div class="subscription-types">
-      <table class="table table-bordered">
-        <thead>
-          <tr>
-            <th>Subscription Type</th>
-            <th>Zone 1 price</th>
-            <th>Zone 2 price</th>
-            <th>Zone 3 price</th>
-          </tr>
-        </thead>
-        <tbody id="subTable"></tbody>
-      </table>
+      <div class="subscription-types">
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th>Subscription Type</th>
+              <th>Zone 1 price</th>
+              <th>Zone 2 price</th>
+              <th>Zone 3 price</th>
+            </tr>
+          </thead>
+          <tbody id="subTable"></tbody>
+        </table>
+      </div>
     </div>
   </div>
-</div>
-  </div>
-
 
   <script>
     $(document).ready(function() {
@@ -137,9 +146,8 @@ $.ajax({
       var row = $("<tr></tr>");
       var zoneId = $("<td></td>").text(zone.id);
       var zoneName = $("<td></td>").text(zone.zoneType);
-      var description = $("<td></td>").text(zone.price);
 
-      row.append(zoneId, zoneName, description);
+      row.append(zoneId, zoneName);
       zoneTable.append(row);
     });
 
@@ -194,6 +202,11 @@ subscriptionTypes.forEach((subscription) => {
         const payedAmount = $("#payedAmount").val();
         const subType = $("#subType").val();
         const zoneId = parseInt($("#zoneId").val()); // Convert the zone ID to an integer
+
+        if (creditCardNumber === '' || holderName === '' || payedAmount === '' || subType === '' || zoneId === '') {
+        alert('Please fill in all fields');
+        return;
+      }
         const data = {
           creditCardNumber,
           holderName,
