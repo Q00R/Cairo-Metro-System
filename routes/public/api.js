@@ -3,8 +3,8 @@ const { v4 } = require("uuid");
 const db = require("../../connectors/db");
 const roles = require("../../constants/roles");
 module.exports = function (app) {
-app.post("/api/v1/user", async function (req, res) {
 
+app.post("/api/v1/user", async function (req, res) {
     // Check if user already exists in the system
     const userExists = await db
       .select("*")
@@ -83,4 +83,6 @@ app.post("/api/v1/user", async function (req, res) {
       return res.status(400).send("Could not register user");
     }
   });
+
+
 }
