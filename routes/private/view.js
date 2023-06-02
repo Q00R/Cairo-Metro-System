@@ -90,8 +90,5 @@ app.get('/price', async function(req, res) {
   const hasNoSubscription = !hasSubscription; // Check if userSubscription is undefined
   return res.render('tickets', { ...user, stations, hasSubscription ,hasNoSubscription});
  });
- app.get('/subscriptions', async function(req, res) {
-  return res.render('subscriptions');
-});
 
 };
