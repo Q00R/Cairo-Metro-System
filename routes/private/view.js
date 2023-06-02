@@ -47,4 +47,24 @@ module.exports = function(app) {
     return res.render('resetPassword');
   });
 
+app.get('/price', async function(req, res) {
+
+  const user = await getUser(req);
+  const stations = await db.select('*').from('se_project.stations');
+  return res.render('price', { ...user, stations });
+ });
+
+ app.get('/tickets', async function(req, res) {
+
+  const user = await getUser(req);
+  const stations = await db.select('*').from('se_project.stations');
+  const userSubscription = await db('se_project.subsription').where('userId', user.userId).orderBy('id', 'desc').first();
+  const hasSubscription = userSubscription !== undefined; // Check if userSubscription is defined
+  const hasNoSubscription = !hasSubscription; // Check if userSubscription is undefined
+  return res.render('tickets', { ...user, stations, hasSubscription ,hasNoSubscription});
+ });
+ app.get('/subscriptions', async function(req, res) {
+  return res.render('subscriptions');
+});
+
 };

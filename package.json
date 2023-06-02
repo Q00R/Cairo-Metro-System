@@ -6,10 +6,11 @@
   "dependencies": {
     "bootstrap": "^5.3.0",
     "express": "^4.18.2",
+    "handlebars": "^4.7.7",
     "hjs": "^0.0.6",
     "knex": "^2.4.2",
     "lodash": "4.17.21",
-    "pg": "^8.7.1",
+    "pg": "^8.11.0",
     "uuid": "8.3.2"
   },
   "devDependencies": {

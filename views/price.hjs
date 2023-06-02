@@ -1,0 +1,96 @@
+
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>Ticket Price</title>
+  <link rel="stylesheet" href="/styles/bootstrap.min.css">
+  <link rel="stylesheet" href="/styles/style.css">
+  <script src="/js/jquery-2.2.0.min.js"></script>
+  <script src="/js/bootstrap.min.js"></script>
+</head>
+
+<body>
+
+    <script>
+      $(document).ready(function(){
+        $("#submit").click(function() {
+            const destinationId = $('#destinationDropdown').val();
+            const originId = $('#originDropdown').val();
+            if(!destinationId || !originId)
+            {
+                alert('Please select both origin and destination stations');
+               
+            }
+            const url = `/api/v1/tickets/price/${originId}/${destinationId}`
+            $.ajax({
+                type:"POST",
+                url,
+                success: function(serverResponse) 
+                {
+                    if(serverResponse) 
+                    {
+                        if(serverResponse.message)
+                        {
+                            alert(serverResponse.message + `  Price: ${serverResponse.price}`);
+                        }
+                        else
+                        {
+                            alert('Ticket Price retreived successfully: ' + serverResponse.price );
+                        }
+                    }
+                },
+                error: function(errorResponse) 
+                {
+                    if(errorResponse) 
+                    {
+                        alert(`Something went wrong: ${errorResponse.responseText}`);
+                    }            
+                }
+            });
+        });
+      });
+      </script>
+
+
+  <nav class="navbar navbar-inverse" style="padding-left:2%;">
+    <ul class="nav navbar-nav">
+      <li ><a href="/dashboard">Home</a></li>
+      <li><a href="/stations">Station</a></li>
+      <li><a href="/users">Users</a></li>
+      <li class="active"><a href="/price">Ticket Price</a></li>
+      <li><a href="/tickets">Book a ticket</a></li>
+
+      
+    </ul>
+    <ul class="nav navbar-nav navbar-right" style="padding-right:2%">
+      <li><a style="color:goldenrod" href="/resetPassword">Reset Password</a></li>
+      <li><a style="color:crimson" href="/">Logout</a></li>
+    </ul>
+  </nav>
+  <div class="center">
+    <h1><u>Ticket Price</u></h1>
+  </div>
+
+  <div style="margin-left: auto; margin-right: auto; padding-left: 30%; text-align: left;">
+    <form id="myForm" method="post">
+      <select id="originDropdown" class="btn btn-secondary btn-lg dropdown-toggle">
+        <option disabled selected>Origin station</option>
+        {{#stations}}
+            <option value={{id}}>{{stationName}}</option>
+        {{/stations}}
+      </select>
+      <select id="destinationDropdown" class="btn btn-secondary btn-lg dropdown-toggle">
+        <option disabled selected>Destination station</option>
+        {{#stations}}
+            <option value={{id}}>{{stationName}}</option>
+        {{/stations}}
+      </select>
+        <input id="submit" class="btn btn-primary" name="submit" type="button" value="Submit">
+    </form>
+  </div>
+
+</body>
+
+</html>
