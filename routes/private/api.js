@@ -942,7 +942,6 @@ module.exports = function (app) {
   app.post('/api/v1/tickets/price/:originId/:destinationId', async function (req, res) {
     const user = (await getUser(req));
     let numberOfSations = 0;
-    console.log("hena")
     let originID = Number(req.params.originId);
     let destinationID = Number(req.params.destinationId);
     const originResult = await db.select("id").from('se_project.stations').where('id', originID).first();

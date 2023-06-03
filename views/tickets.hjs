@@ -17,11 +17,6 @@
     .navbar-right {
       padding-right: 2%;
     }
-
-    .center {
-      text-align: center;
-    }
-
     .form-horizontal {
       width: 50%;
       margin-left: 25%;
@@ -59,7 +54,8 @@
         <nav class="navbar navbar-inverse" style="padding-left:1%;">
           <ul class="nav navbar-nav">
             <li class="active"><a href="/dashboard">Home</a></li>
-            <li><a href="/stations">Station</a></li>
+            <li><a href="/stations">Stations</a></li>
+            <li><a href="/users">Users</a></li>
             {{#isNormal}}
               <li><a href="/subscriptions">Subscriptions</a></li>
               <li><a href="/requests/refund">Refund Ticket</a></li>
@@ -67,6 +63,9 @@
               <li><a href="/price">Ticket Price</a></li>
               <li><a href="/tickets">Book a ticket</a></li>
             {{/isNormal}}
+            {{#isAdmin}}
+              <li><a href="/manage/routes">Routes</a></li>
+            {{/isAdmin}}
           </ul>
           <ul class="nav navbar-nav navbar-right" style="padding-right:2%">
             <li><a style="color:goldenrod" href="/resetPassword">Reset Password</a></li>
@@ -105,21 +104,21 @@
             placeholder="Enter your SubscriptionID">
 
         </div>
+        
         {{/hasSubscription}}
 
         <div class="form-group">
           <label for="tripDate">Trip Date</label>
           <input type="date" class="form-control" id="tripDate" name="tripDate" placeholder="Enter date">
-        </div>
-        <div class="form-group">
-          <select id="originDropdown" class="btn btn-secondary btn-lg dropdown-toggle">
-            <option disabled selected>Origin station</option>
+          <br>
+          <select id="originDropdown" style="width:100%" class="btn btn-secondary btn-lg dropdown-toggle">
+            <option style="text-align: left;" disabled selected>Origin station</option>
             {{#stations}}
             <option value={{stationName}}>{{stationName}}</option>
             {{/stations}}
-          </select>
-          <select id="destinationDropdown" class="btn btn-secondary btn-lg dropdown-toggle">
-            <option disabled selected>Destination station</option>
+          </select><br><br>
+          <select id="destinationDropdown" style="width:100%" class="btn btn-secondary btn-lg dropdown-toggle">
+            <option style="text-align: left;" disabled selected>Destination station</option>
             {{#stations}}
             <option value={{stationName}}>{{stationName}}</option>
             {{/stations}}
@@ -127,7 +126,7 @@
 
         </div>
         <div class="form-group">
-          <input type="button" id="submit" class="btn btn-primary" value="Submit">
+          <input style="width: 100%;" type="button" id="submit" class="btn btn-primary" value="Submit">
         </div>
       </form>
     </div>
@@ -161,6 +160,17 @@
           </thead>
           <tbody id="PriceTable"></tbody>
         </table>
+        {{#hasSubscription}}
+         <div class="Remaining-table">
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th>Number Of Remaining tickets</th>
+            </tr>
+          </thead>
+          <tbody id="RemainingTable"></tbody>
+        </table>
+  {{/hasSubscription}}
       </div>
     </div>
   </div>
@@ -215,11 +225,13 @@
         $("#creditCardNumberParts").hide();
         $("#payedAmountParts").hide();
         $("#subscriptionPart").show(); // show the subscription textbox
+        $("#RemainingTable").show();
       } else {
         $("#holderNameParts").show();
         $("#creditCardNumberParts").show();
         $("#payedAmountParts").show();
         $("#subscriptionPart").hide(); // hide the subscription textbox
+         $("#RemainingTable").hide();
       }
       console.log("ready!");
       $("#submit").click(function () {
@@ -306,7 +318,16 @@
             alert(serverResponse.stationToBeTaken);
             alert(serverResponse.transferStations);
 
+              var rTable = $("#RemainingTable");
+              rTable.empty();
+              var row = $("<tr></tr>");
+              var rTable1 = $("<td></td>").text( serverResponse.numnberOfRemainingTickets);
+              row.append(rTable1);
+              rTable.append(row);
+              alert(serverResponse.numnberOfRemainingTickets)
+
             updateTables(serverResponse.price, serverResponse.stationToBeTaken, serverResponse.transferStations);
+
           },
           error: function (errorResponse) {
             if (errorResponse) {

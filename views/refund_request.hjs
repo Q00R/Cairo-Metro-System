@@ -42,7 +42,8 @@
         <nav class="navbar navbar-inverse" style="padding-left:1%;">
           <ul class="nav navbar-nav">
             <li class="active"><a href="/dashboard">Home</a></li>
-            <li><a href="/stations">Station</a></li>
+            <li><a href="/stations">Stations</a></li>
+            <li><a href="/users">Users</a></li>
             {{#isNormal}}
               <li><a href="/subscriptions">Subscriptions</a></li>
               <li><a href="/requests/refund">Refund Ticket</a></li>
@@ -50,6 +51,9 @@
               <li><a href="/price">Ticket Price</a></li>
               <li><a href="/tickets">Book a ticket</a></li>
             {{/isNormal}}
+            {{#isAdmin}}
+              <li><a href="/manage/routes">Routes</a></li>
+            {{/isAdmin}}
           </ul>
           <ul class="nav navbar-nav navbar-right" style="padding-right:2%">
             <li><a style="color:goldenrod" href="/resetPassword">Reset Password</a></li>
@@ -63,16 +67,19 @@
         <h1 style="text-align: center;">Apply For Refund Requests</h1>
       </div>
 
-        <div style="margin-left: auto; margin-right: auto; padding-left: 30%;">
         <form id="myForm" method="post">
-            <select id="myDropdown" class="btn btn-secondary btn-lg dropdown-toggle">
+        <div class="dropdown" style="margin-left: auto; margin-right: auto; padding-left: 35%;">
+            <select id="myDropdown" style="width: 30%;" class="btn btn-secondary btn-lg dropdown-toggle">
                 <option disabled selected value="-1">Select a ticket</option>
                 {{#userTickets}}
                     <option value={{id}}>{{id}}</option>                    
                 {{/userTickets}}
             </select>
-        <input id="submit" class="btn btn-primary" name="submit" type="button" value="Place Request">
+        <input id="submit" style="width: 15%; height: 40%" class="btn btn-warning" name="submit" type="button" value="Place Request"><br><br>
         </form>
+        </div>
+        <div style="margin-left: auto; margin-right: auto; padding-left: 35%;">
+        <img src="/ref2.jpg" style="width:45%" alt="refund"><br>
         </div>
 
         

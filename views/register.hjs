@@ -45,7 +45,7 @@
     });
     </script>
     <div>
-      <nav class="navbar navbar-inverse" style="padding-left:130px;">
+      <nav class="navbar navbar-inverse" style="padding-left:2%;">
           <ul class="nav navbar-nav">
             <li><a href="/">Home</a></li>
           </ul>
@@ -53,40 +53,41 @@
     </div>
 
     <div class="center">
-      <h1>Register</h1>
+      <h1>Register</h1><br><br>
     </div>
-    <div style="padding-left: 500px">
+    <div style="padding-left: 25%">
     <form class="form-horizontal" style="width: 50%;">
       <div class="form-group">
-          <label for="firstName" class="col-sm-2 control-label">First Name</label>
-          <div class="col-sm-10">
+          <label for="firstName" class="col-sm-3 control-label">First Name</label>
+          <div class="col-sm-9">
               <input type="text" class="form-control" id="firstName" name="firstName" placeholder="First Name" value="">
           </div>
       </div>
       <div class="form-group">
-          <label for="lastName" class="col-sm-2 control-label">Last Name</label>
-          <div class="col-sm-10">
+          <label for="lastName" class="col-sm-3 control-label">Last Name</label>
+          <div class="col-sm-9">
               <input type="text" class="form-control" id="lastName" name="lastName" placeholder="Last Name" value="">
           </div>
       </div>
       <div class="form-group">
-          <label for="email" class="col-sm-2 control-label">Email</label>
-          <div class="col-sm-10">
+          <label for="email" class="col-sm-3 control-label">Email</label>
+          <div class="col-sm-9">
               <input type="text" class="form-control" id="email" name="email" placeholder="Email" value="">
           </div>
       </div>
       <div class="form-group">
-          <label for="password" class="col-sm-2 control-label">Password</label>
-          <div class="col-sm-10">
-              <input type="password" class="form-control" id="password" name="password" placeholder="password" value="">
+          <label for="password" class="col-sm-3 control-label">Password</label>
+          <div class="col-sm-9">
+              <input type="password" class="form-control" id="password" name="password" placeholder="Password" value="">
           </div>
       </div>
       <div class="form-group">
-          <div class="col-sm-10 col-sm-offset-2">
-              <input id="register" name="register" type="button" value="Register" class="btn btn-primary">
+          <div class="col-sm-9 col-sm-offset-3">
+            <input id="register" name="register" type="button" value="Register" class="btn btn-primary">
           </div>
       </div>
   </form>
-    </div>
+</div>
+
   </body>
 </html>
