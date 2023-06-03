@@ -64,7 +64,7 @@
                     <th scope="col">Name</th>
                     <th scope="col">From Station Id</th>
                     <th scope="col">To Station Id</th>
-                    <th scope="col">Delete</th>
+                    <th scope="col">Update</th>
 
                 </tr>
                 {{#routes}}
