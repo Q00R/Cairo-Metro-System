@@ -1,4 +1,3 @@
-
 const { isEmpty, countBy } = require("lodash");
 const { v4 } = require("uuid");
 const db = require("../../connectors/db");
@@ -312,6 +311,8 @@ module.exports = function (app) {
     }
   });
 
+
+
   // really bteshta8al bmazagha if we remove v1, it works perfectly fine
   app.post("/api/v1/senior/request", async function (req, res) {
     let user = await getUser(req);
@@ -374,12 +375,16 @@ module.exports = function (app) {
       return res.status(400).send("There is already a refund request for this ticket");
     }
 
-    const tick = await db("se_project.transactions")
-    .select("*")
-    .where("purchasedId", ticketId)
-    .andWhere("type", "ticket")
-    .first();  
+    
+    const tick = await db("se_project.tickets")
+    .innerJoin("se_project.transactions", "se_project.tickets.id", "se_project.transactions.purchasedId")
+    .where("se_project.tickets.id", ticketId)
+    .andWhere("se_project.transactions.type", "ticket")
+    .first();
+    console.log("ticket   ", tick);
     const ticketPrice = tick.amount;
+
+    console.log("ticketPrice   ", ticketPrice);
 
     try
     {
@@ -400,6 +405,8 @@ module.exports = function (app) {
     }
 
   });
+
+
 
   // Works
   app.put("/api/v1/ride/simulate", async function (req, res) {
@@ -447,8 +454,8 @@ module.exports = function (app) {
       toStation = await db("se_project.stations").select("*").where("id", newRoute.toStationId).first();
       if (!toStation)
         return res.send("This destination does not exist!");
-      if (fromStation.stationPosition != null && toStation.stationPosition != null)
-        return res.send("Both of these stations already have connections!");
+      if (fromStation.stationPosition == "middle" && toStation.stationPosition == "middle")
+        return res.send("These stations are in the middle!");
 
       if (fromStation.stationPosition == null) {
         await db("se_project.stations").update("stationPosition", "start").where("id", fromStation.id);
@@ -468,7 +475,7 @@ module.exports = function (app) {
       return res.status(200).json(addedRoute);
 
     } catch (e) {
-      return res.send(e.message);
+      return res.json(e.message);
     }
   })
 
@@ -519,13 +526,17 @@ module.exports = function (app) {
       else if (fromStation.stationPosition == "middle" && toStation.stationPosition == "end") {
         await db("se_project.stations").update("stationPosition", "start").where("id", toStation.id);
       }
-      return res.json(deletedRoute);
+      
+      return res.status(200).send(deletedRoute);
 
 
     } catch (e) {
       return res.send(e.message);
     }
   })
+
+
+
 
   app.put('/api/v1/password/reset', async function (req, res) {
     try {
@@ -545,6 +556,8 @@ module.exports = function (app) {
     }
   });
 
+
+
   app.get('/api/v1/zones', async function (req, res) {
     try {
       const zones = await db.select('*').from("se_project.zones")
@@ -557,11 +570,15 @@ module.exports = function (app) {
 
   app.post('/api/v1/payment/subscription', async function (req, res) {
     try {
-      const { creditCardNumber, holderName, payedAmount, subType, zoneId } = req.body;
+      let { creditCardNumber, holderName, payedAmount, subType, zoneId } = req.body;
 
+      
 
       let noOfTickets = 0;
       let deductionAmount = 0;
+
+      zoneId = Number(zoneId);
+      payedAmount = Number(payedAmount);
 
       // Calculate the number of tickets and deduction amount based on the subscription type and zone
       if (subType === 'monthly' && zoneId === 1) {
@@ -682,6 +699,7 @@ module.exports = function (app) {
     }
   });
 
+ 
   app.post('/api/v1/payment/ticket', async function (req, res) {
 
     console.log("straaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaat");
@@ -693,7 +711,8 @@ module.exports = function (app) {
       // console.log("userSubscription", userSubscription);
       if (!(userSubscription)) {
         if (origin === destination) {
-          return res.json({ "Price that should be paid": 0, "you are already at your destination": destination });
+
+          return res.status(400).send("price: 0, " +`You are already at your destination ${destination}`);
         } else {
           //checking if desitanationand origin are valid
           console.log("checking if desitanation and origin are valid");
@@ -728,13 +747,19 @@ module.exports = function (app) {
                 transferStations.push(await getStationName(id));
               }
             }
-            if (numberOfSations <= 9)
-              priceThatShouldBePayed = 5;
-            else if (numberOfSations <= 16 && numberOfSations > 9)
-              priceThatShouldBePayed = 7;
-            else
-              priceThatShouldBePayed = 10;
+            if (numberOfSations <= 9) {
+              const zone= await db('se_project.zones').where('id', 1).first();
+              priceThatShouldBePayed = zone.price;
 
+            } else if (numberOfSations <= 16) {
+              const zone= await db('se_project.zones').where('id', 2).first();
+              priceThatShouldBePayed = zone.price;
+              priceThatShouldBePayed = 7;
+            } else {
+              const zone= await db('se_project.zones').where('id', 3).first();
+              priceThatShouldBePayed = zone.price;
+              priceThatShouldBePayed = 10;
+            }
             if (user.isSenior)
               priceThatShouldBePayed = priceThatShouldBePayed * 0.5;
 
@@ -773,7 +798,7 @@ module.exports = function (app) {
               });
 
               console.log("DONEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE");
-              return res.json({ priceThatShouldBePayed, stationToBeTaken, transferStations });
+              return res.json({ price: priceThatShouldBePayed, stationToBeTaken, transferStations });
             } else {
               console.log("DONEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE");
               return res.status(400).send('Not enough money');
@@ -807,7 +832,7 @@ module.exports = function (app) {
       if (hasSubscription && Object.keys(hasSubscription).length !== 0) {
         console.log(originResult, destinationResult);
         if (origin === destination) {
-          return res.json({ "Price that should be paid": 0, "you are already at your destination": destination });
+          return res.status(400).send("price: 0, " +`You are already at your destination ${destination}`);
         } else {
 
           console.log(!(originResult && destinationResult));
@@ -843,11 +868,16 @@ module.exports = function (app) {
 
             console.log("back");
             if (numberOfSations <= 9) {
-              priceThatShouldBePayed = 5;
+              const zone= await db('se_project.zones').where('id', 1).first();
+              priceThatShouldBePayed = zone.price;
 
             } else if (numberOfSations <= 16) {
+              const zone= await db('se_project.zones').where('id', 2).first();
+              priceThatShouldBePayed = zone.price;
               priceThatShouldBePayed = 7;
             } else {
+              const zone= await db('se_project.zones').where('id', 3).first();
+              priceThatShouldBePayed = zone.price;
               priceThatShouldBePayed = 10;
             }
             if (user.isSenior) {
@@ -896,7 +926,8 @@ module.exports = function (app) {
               });
 
               console.log("DONEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE");
-              return res.json({ numnberOfRemainingTickets, "ticket price if not subscribed": priceThatShouldBePayed, "ticket cost": 0, stationToBeTaken, transferStations });
+             // return res.json({ numnberOfRemainingTickets, "ticket price if not subscribed": priceThatShouldBePayed, "ticket cost": 0, stationToBeTaken, transferStations });
+             return res.json({ price: priceThatShouldBePayed, stationToBeTaken, transferStations,numnberOfRemainingTickets });
 
             }
             else {
@@ -909,7 +940,7 @@ module.exports = function (app) {
       } else {
         console.log("User does not have a subscription or incorrect subscription id was provided -> not correct api for purchasing ticket", "DONEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE");
 
-        return res.status(400).send('User does not have a subscription  or incorrect subscription id was provided -> not correct api for purchasing ticket');
+        return res.status(400).send('User does not have a subscription  or incorrect subscription id was provided ');
       }
 
     } catch (e) {
@@ -920,8 +951,11 @@ module.exports = function (app) {
     }
 
   });
+  
 
-  app.get('/api/v1/tickets/price/:originId/:destinationId', async function (req, res) {
+
+
+  app.post('/api/v1/tickets/price/:originId/:destinationId', async function (req, res) {
     const user = (await getUser(req));
     let numberOfSations = 0;
     console.log("hena")
@@ -934,7 +968,7 @@ module.exports = function (app) {
     } else {
       let station = await getStationName(originID);
       if (originID === destinationID) {
-        return res.json({ "Price that should be paid": 0, "you are already at your destination": station });
+        return res.json({ "price": 0, "message": `You are already at your destination ${station}` });
       } else {
         try {
           retrievingRoute = await calculatePrice(originID, destinationID);
@@ -954,19 +988,25 @@ module.exports = function (app) {
             transferStations.push(await getStationName(id));
           }
         }
-        if (numberOfSations <= 9)
-          priceThatShouldBePayed = 5;
-        else if (numberOfSations <= 16 && numberOfSations > 9)
-          priceThatShouldBePayed = 7;
-        else
-          priceThatShouldBePayed = 10;
+        if (numberOfSations <= 9) {
+          const zone= await db('se_project.zones').where('id', 1).first();
+          priceThatShouldBePayed = zone.price;
 
+        } else if (numberOfSations <= 16) {
+          const zone= await db('se_project.zones').where('id', 2).first();
+          priceThatShouldBePayed = zone.price;
+          priceThatShouldBePayed = 7;
+        } else {
+          const zone= await db('se_project.zones').where('id', 3).first();
+          priceThatShouldBePayed = zone.price;
+          priceThatShouldBePayed = 10;
+        }
         if (user.isSenior)
           priceThatShouldBePayed = priceThatShouldBePayed * 0.5;
 
 
 
-        return res.json({ "Price that should be paid": priceThatShouldBePayed });
+        return res.json({ "price": priceThatShouldBePayed });
 
       }
     }
@@ -1005,6 +1045,9 @@ module.exports = function (app) {
     }
   }
 
+
+
+
   async function getStationName(stationId) {
     console.log("getStationName")
     let entry = await db('se_project.stations').where('id', stationId).first();
@@ -1022,6 +1065,14 @@ module.exports = function (app) {
     return stationtype === "transfer";
   }
 
+
+
+
+
+
+
+
+
   // JavaScript code for printing shortest path between
   // two vertices of unweighted graph
   const max_value = 9007199254740992;
@@ -1031,7 +1082,11 @@ module.exports = function (app) {
   function add_edge(adj, src, dest) {
     Number(src);
     Number(dest);
+
+
     adj[src].push(dest);
+
+
   }
 
   // a modified version of BFS that stores predecessor

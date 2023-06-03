@@ -1,0 +1,151 @@
+/* Add custom styles for the subscription page */
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f2f2f2; /* Add a background color */
+  }
+  
+  .container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Add a box shadow */
+  }
+  
+  .navbar {
+    background-color: #333;
+    color: #fff;
+    padding-left: 2%;
+    padding-right: 2%;
+  }
+  
+  .navbar a {
+    color: #fff;
+    text-decoration: none;
+  }
+  
+  .navbar-right a {
+    color: goldenrod;
+  }
+  
+  .navbar-right a:last-child {
+    color: crimson;
+  }
+  
+  .center {
+    text-align: center;
+    margin-top: 40px;
+  }
+  
+  form {
+    width: 50%;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 20px;
+  }
+  
+  .form-group {
+    margin-bottom: 15px;
+  }
+  
+  label {
+    font-weight: bold;
+  }
+  
+  .btn-primary {
+    background-color: #337ab7;
+    border-color: #337ab7;
+  }
+  
+  .subscription-table {
+    margin-top: 20px;
+  }
+  
+  .subscription-types {
+    margin-top: 20px;
+  }
+  
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  table th,
+  table td {
+    padding: 8px;
+    border: 1px solid #ddd;
+  }
+  
+  table th {
+    background-color: #f5f5f5;
+    font-weight: bold;
+  }
+  
+  table td {
+    text-align: center;
+  }
+  
+  .alert {
+    margin-top: 20px;
+  }
+  
+  /* Additional suggestions for your project */
+  .container {
+    padding: 40px 20px; /* Increase padding for more breathing space */
+  }
+  
+  h1 {
+    text-decoration: underline;
+    color: #337ab7;
+  }
+  
+  .navbar {
+    margin-bottom: 20px; /* Add margin at the bottom of the navbar */
+  }
+  
+  .form-horizontal {
+    margin-bottom: 40px; /* Add margin at the bottom of the form */
+  }
+  
+  .subscription-table,
+  .subscription-types {
+    background-color: #fff;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Add box shadow for the tables */
+  }
+  
+  .subscription-types {
+    margin-top: 40px; /* Increase top margin for the subscription types table */
+  }
+  
+  .alert {
+    background-color: #f8d7da; /* Add a background color for the alert */
+    color: #721c24; /* Set the text color for the alert */
+    padding: 15px;
+    border-radius: 4px;
+  }
+  
+  .container {
+    display: flex;
+    flex-wrap: wrap;
+  }
+  
+  .left-column {
+    flex: 1;
+  }
+  
+  .right-column {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .subscription-table,
+  .subscription-types {
+    flex: 1;
+  }
+  

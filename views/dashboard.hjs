@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Courses</title>
+    <title>Train System</title>
+    <link rel="icon" href="public/images/Train.ico" type="image/x-icon">
     <link rel='stylesheet' href='/styles/bootstrap.min.css' />
     <link rel='stylesheet' href='/styles/style.css' />
     <script src="/js/jquery-2.2.0.min.js" type="text/javascript"></script>
@@ -24,6 +25,7 @@
             {{#isAdmin}}
               <li><a href="/manage/stations">Station</a></li>
               <li><a href="/manage/zones">Zones</a></li>
+              <li><a href="/manage/routes">Routes</a></li>
               <div class="dropdown navbar navbar-inverse nav navbar-nav">
                 <li><a>Requests</a></li>
                 <div class="dropdown-content navbar navbar-inverse nav navbar-nav">
@@ -32,6 +34,13 @@
                 </div>
               </div>
             {{/isAdmin}}
+            {{#isNormal}}
+              <li><a href="/subscriptions">Subscriptions</a></li>
+              <li><a href="/requests/refund">Refund Ticket</a></li>
+              <li><a href="/requests/senior">Senior Citizens</a></li>
+              <li><a href="/price">Ticket Price</a></li>
+              <li><a href="/tickets">Book a ticket</a></li>
+            {{/isNormal}}
           </ul>
           <ul class="nav navbar-nav navbar-right" style="padding-right:2%">
             <li><a style="color:goldenrod" href="/resetPassword">Reset Password</a></li>

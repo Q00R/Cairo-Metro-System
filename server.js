@@ -14,6 +14,9 @@ const router = express.Router();
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hjs');
+
+app.use(express.static(path.join(__dirname, 'static')));
+
 // Config setup to allow our HTTP server to serve static files from our public directory
 app.use(express.static('public'));
 // Config setup to parse JSON payloads from HTTP POST request body
@@ -25,10 +28,9 @@ publicViewRoutes(app);
 publicApiRoutes(app);// uncomment
 
 
-
 // If the request is not for a public view/api, then it must pass
 // through our authentication middleware first
- app.use(authMiddleware); // uncomment
+app.use(authMiddleware); // uncomment
 
 // The routes/views below can only be accessed if the user is authenticated
 privateViewRoutes(app);

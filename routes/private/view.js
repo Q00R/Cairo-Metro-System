@@ -15,10 +15,10 @@ const getUser = async function(req) {
     .innerJoin('se_project.roles', 'se_project.users.roleId', 'se_project.roles.id')
     .first();
   
-  user.isStudent = user.roleId === roles.user;
-  user.isAdmin = user.roleId === roles.admin;
-  user.isSenior = user.roleId === roles.senior;
-  console.log('user =>', user);
+  console.log('user =>', user)
+  user.isNormal = user.roleId === 1;
+  user.isAdmin = user.roleId === 2;
+  user.isSenior = user.roleId === 3;
 
   return user;  
 }
@@ -32,65 +32,76 @@ module.exports = function(app) {
 
   // Register HTTP endpoint to render /users page
   app.get('/users', async function(req, res) {
+    const user = await getUser(req);
     const users = await db.select('*').from('se_project.users');
-    return res.render('users', { users });
+    return res.render('users', { ...user,users });
+  });
+
+  app.get
+
+  // Register HTTP endpoint to render /courses page
+  app.get('/stations', async function(req, res) {
+    const user = await getUser(req);
+    const stations = await db.select('*').from('se_project.stations').orderBy("id");
+    return res.render('stations_example', { ...user, stations });
+  });
+
+  app.get('/manage/routes', async function(req, res) {
+    const user = await getUser(req);
+    const routes = await db.select('*').from('se_project.routes').orderBy("id");
+    return res.render('routes', { ...user, routes });
+  });
+
+  app.get('/manage/routes/create', async function(req, res) {
+    const user = await getUser(req);
+    return res.render('routesCreate', { ...user});
   });
 
   app.get('/resetPassword', async function(req, res) {
-    return res.render('resetPassword');
-  });
-
-  app.get('/manage/stations', async function(req, res) {
     const user = await getUser(req);
-    const stations = await db.select('*').from('se_project.stations');
-    if (!user.isAdmin) {
-      return res.status(403).render('403');
-    }
-    return res.render('manage/stations', { ...user, stations });
-  });
-
-  app.get('/manage/stations/create', async function(req, res) {
-    const user = await getUser(req);
-    if (!user.isAdmin) {
-      return res.status(403).render('403');
-    }
-    return res.render('manage/stations/create', {...user});
+    return res.render('resetPassword', {...user});
   });
   
-  app.get('/manage/stations/edit/:stationId', async function(req, res) {
-    const user = await getUser(req);
-    const stationId = req.params.stationId;
-    if (!user.isAdmin) {
-      return res.status(403).render('403');
-    }
-    return res.render('manage/stations/edit', { ...user, stationId });
+ app.get('/requests/refund', async function(req, res) {
+  const user = await getUser(req);
+  const userId = user.userId;
+  const userTickets = await db("se_project.tickets")
+  .where("userId", userId)
+  .returning("*");
+  return res.render('refund_request', {...user, userTickets});
+ });
+
+ app.get('/requests/senior', async function(req, res) {
+  const user = await getUser(req);
+  return res.render('senior_request', {...user});
+ });
+
+ app.get('/price', async function(req, res) {
+  const user = await getUser(req);
+  const stations = await db.select('*').from('se_project.stations');
+  return res.render('price', { ...user, stations });
+ });
+
+
+  app.get('/subscriptions', async function(req, res) {
+    return res.render('subscriptions');
   });
 
-  app.get('/manage/requests/refunds', async function(req, res) {
-    const user = await getUser(req);
-    const refunds = await db.select('*').from('se_project.refund_requests');
-    if (!user.isAdmin) {
-      return res.status(403).render('403');
-    }
-    return res.render('manage/requests/refunds', { ...user, refunds });
-  });
+app.get('/price', async function(req, res) {
 
-  app.get('/manage/requests/seniors', async function(req, res) {
-    const user = await getUser(req);
-    const seniors = await db.select('*').from('se_project.senior_requests');
-    if (!user.isAdmin) {
-      return res.status(403).render('403');
-    }
-    return res.render('manage/requests/seniors', { ...user, seniors });
-  });
+  const user = await getUser(req);
+  const stations = await db.select('*').from('se_project.stations');
+  return res.render('price', { ...user, stations });
+ });
 
-  app.get('/manage/zones', async function(req, res) {
-    const user = await getUser(req);
-    const zones = await db.select('*').from('se_project.zones');
-    if (!user.isAdmin) {
-      return res.status(403).render('403');
-    }
-    return res.render('manage/zones', { ...user, zones });
-  });
+ app.get('/tickets', async function(req, res) {
+
+  const user = await getUser(req);
+  const stations = await db.select('*').from('se_project.stations');
+  const userSubscription = await db('se_project.subsription').where('userId', user.userId).orderBy('id', 'desc').first();
+  const hasSubscription = userSubscription !== undefined; // Check if userSubscription is defined
+  const hasNoSubscription = !hasSubscription; // Check if userSubscription is undefined
+  return res.render('tickets', { ...user, stations, hasSubscription ,hasNoSubscription});
+ });
 
 };
