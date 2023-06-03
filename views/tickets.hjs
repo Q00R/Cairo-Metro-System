@@ -5,9 +5,10 @@
   <meta charset="UTF-8">
   <title>Tickets</title>
   <link rel="stylesheet" href="/styles/bootstrap.min.css">
-
+  <link rel="stylesheet" href="/styles/style.css">
   <script src="/js/jquery-2.2.0.min.js"></script>
   <script src="/js/bootstrap.min.js"></script>
+  
   <style>
     .navbar {
       padding-left: 2%;
@@ -16,11 +17,6 @@
     .navbar-right {
       padding-right: 2%;
     }
-
-    .center {
-      text-align: center;
-    }
-
     .form-horizontal {
       width: 50%;
       margin-left: 25%;
@@ -55,23 +51,32 @@
 
 <body>
   <div>
-    <nav class="navbar navbar-inverse">
-      <ul class="nav navbar-nav">
-         <li ><a href="/dashboard">Home</a></li>
-      <li><a href="/stations">Station</a></li>
-      <li><a href="/users">Users</a></li>
-      <li ><a href="/price">Ticket Price</a></li>
-      <li class="active"></liclass><a href="/tickets">Book a ticket</a></li>
-      </ul>
-      <ul class="nav navbar-nav navbar-right">
-        <li><a style="color: rgb(32, 218, 57)" href="/resetPassword">Reset Password</a></li>
-        <li><a style="color: crimson" href="/">Logout</a></li>
-      </ul>
-    </nav>
-  </div>
+        <nav class="navbar navbar-inverse" style="padding-left:1%;">
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="/dashboard">Home</a></li>
+            <li><a href="/stations">Stations</a></li>
+            <li><a href="/users">Users</a></li>
+            {{#isNormal}}
+              <li><a href="/subscriptions">Subscriptions</a></li>
+              <li><a href="/requests/refund">Refund Ticket</a></li>
+              <li><a href="/requests/senior">Senior Citizens</a></li>
+              <li><a href="/price">Ticket Price</a></li>
+              <li><a href="/tickets">Book a ticket</a></li>
+            {{/isNormal}}
+            {{#isAdmin}}
+              <li><a href="/manage/routes">Routes</a></li>
+            {{/isAdmin}}
+          </ul>
+          <ul class="nav navbar-nav navbar-right" style="padding-right:2%">
+            <li><a style="color:goldenrod" href="/resetPassword">Reset Password</a></li>
+            <li><a  style="color:crimson" href="/">Logout</a></li>
+          </ul>
+
+       </nav>
+      </div>
 
   <div class="center">
-    <h1><u>Booking Tickets</u></h1>
+    <h1>Booking Tickets</h1><br><br>
   </div>
 
   <div class="container">
@@ -105,16 +110,15 @@
         <div class="form-group">
           <label for="tripDate">Trip Date</label>
           <input type="date" class="form-control" id="tripDate" name="tripDate" placeholder="Enter date">
-        </div>
-        <div class="form-group">
-          <select id="originDropdown" class="btn btn-secondary btn-lg dropdown-toggle">
-            <option disabled selected>Origin station</option>
+          <br>
+          <select id="originDropdown" style="width:100%" class="btn btn-secondary btn-lg dropdown-toggle">
+            <option style="text-align: left;" disabled selected>Origin station</option>
             {{#stations}}
             <option value={{stationName}}>{{stationName}}</option>
             {{/stations}}
-          </select>
-          <select id="destinationDropdown" class="btn btn-secondary btn-lg dropdown-toggle">
-            <option disabled selected>Destination station</option>
+          </select><br><br>
+          <select id="destinationDropdown" style="width:100%" class="btn btn-secondary btn-lg dropdown-toggle">
+            <option style="text-align: left;" disabled selected>Destination station</option>
             {{#stations}}
             <option value={{stationName}}>{{stationName}}</option>
             {{/stations}}
@@ -122,7 +126,7 @@
 
         </div>
         <div class="form-group">
-          <input type="button" id="submit" class="btn btn-primary" value="Submit">
+          <input style="width: 100%;" type="button" id="submit" class="btn btn-primary" value="Submit">
         </div>
       </form>
     </div>

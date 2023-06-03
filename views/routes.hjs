@@ -27,24 +27,29 @@
 <body>
   <div>
     <div>
-      <nav class="navbar navbar-inverse" style="padding-left:1%;">
-        <ul class="nav navbar-nav">
-          <li class="active"><a href="/dashboard">Home</a></li>
-          <li><a href="/stations">Station</a></li>
-          <li><a href="/users">Users</a></li>
-          <li><a href="/subscriptions">Subscriptions</a></li>
-          {{#isNormal}}
-          <li><a href="/requests/refund">Refund Ticket</a></li>
-          <li><a href="/requests/senior">Senior Citizens</a></li>
-          {{/isNormal}}
-        </ul>
-        <ul class="nav navbar-nav navbar-right" style="padding-right:2%">
-          <li><a style="color:goldenrod" href="/resetPassword">Reset Password</a></li>
-          <li><a style="color:crimson" href="/">Logout</a></li>
-        </ul>
+        <nav class="navbar navbar-inverse" style="padding-left:1%;">
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="/dashboard">Home</a></li>
+            <li><a href="/stations">Stations</a></li>
+            <li><a href="/users">Users</a></li>
+            {{#isNormal}}
+              <li><a href="/subscriptions">Subscriptions</a></li>
+              <li><a href="/requests/refund">Refund Ticket</a></li>
+              <li><a href="/requests/senior">Senior Citizens</a></li>
+              <li><a href="/price">Ticket Price</a></li>
+              <li><a href="/tickets">Book a ticket</a></li>
+            {{/isNormal}}
+            {{#isAdmin}}
+              <li><a href="/manage/routes">Routes</a></li>
+            {{/isAdmin}}
+          </ul>
+          <ul class="nav navbar-nav navbar-right" style="padding-right:2%">
+            <li><a style="color:goldenrod" href="/resetPassword">Reset Password</a></li>
+            <li><a  style="color:crimson" href="/">Logout</a></li>
+          </ul>
 
-      </nav>
-    </div>
+       </nav>
+      </div>
     <br />
 
     <div>
@@ -53,18 +58,21 @@
 
     {{#isAdmin}}
     <div style="position:absolute; right:0;">
-      <a href="/manage/routes/create"><input id="btnAddRoute" type="button" value="Create a route" class="btn btn-primary"></a>
+      <a href="/manage/routes/create"><input id="btnAddRoute" type="button" value="Create a route"
+          class="btn btn-primary"></a>
+      <a href="/manage/routes/edit/:routeId"><input id="btnAddRoute" type="button" value="Update a route's name"
+          class="btn btn-primary"></a>
       <br />
     </div>
     {{/isAdmin}}
     <table id="routesTable" class="table" style="max-width: 75%; margin-left: auto; margin-right: auto;">
       <thead>
         <tr>
-          <th scope="col">id</th>
+          <th scope="col">Id</th>
           <th scope="col">Name</th>
-          <th scope="col">fromStationId</th>
-          <th scope="col">toStationId</th>
-          <th scope="col"></th>
+          <th scope="col">From Station Id</th>
+          <th scope="col">To Station Id</th>
+          <th scope="col">Delete</th>
 
         </tr>
         {{#routes}}

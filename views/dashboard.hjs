@@ -41,6 +41,9 @@
               <li><a href="/price">Ticket Price</a></li>
               <li><a href="/tickets">Book a ticket</a></li>
             {{/isNormal}}
+            {{#isAdmin}}
+              <li><a href="/manage/routes">Routes</a></li>
+            {{/isAdmin}}
           </ul>
           <ul class="nav navbar-nav navbar-right" style="padding-right:2%">
             <li><a style="color:goldenrod" href="/resetPassword">Reset Password</a></li>

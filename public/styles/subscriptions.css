@@ -16,7 +16,6 @@ body {
   }
   
   .navbar {
-    background-color: #333;
     color: #fff;
     padding-left: 2%;
     padding-right: 2%;
@@ -97,10 +96,7 @@ body {
     padding: 40px 20px; /* Increase padding for more breathing space */
   }
   
-  h1 {
-    text-decoration: underline;
-    color: #337ab7;
-  }
+
   
   .navbar {
     margin-bottom: 20px; /* Add margin at the bottom of the navbar */

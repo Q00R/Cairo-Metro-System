@@ -15,7 +15,7 @@ const getUser = async function(req) {
     .innerJoin('se_project.roles', 'se_project.users.roleId', 'se_project.roles.id')
     .first();
   
-  console.log('user =>', user)
+  //console.log('user =>', user)
   user.isNormal = user.roleId === 1;
   user.isAdmin = user.roleId === 2;
   user.isSenior = user.roleId === 3;
@@ -52,6 +52,12 @@ module.exports = function(app) {
     return res.render('routes', { ...user, routes });
   });
 
+  app.get('/manage/routes/edit/:routeId', async function(req, res) {
+    const user = await getUser(req);
+    const routes = await db.select('*').from('se_project.routes').orderBy("id");
+    return res.render('routesUpdate', { ...user, routes });
+  });
+
   app.get('/manage/routes/create', async function(req, res) {
     const user = await getUser(req);
     return res.render('routesCreate', { ...user});
@@ -84,7 +90,9 @@ module.exports = function(app) {
 
 
   app.get('/subscriptions', async function(req, res) {
-    return res.render('subscriptions');
+    const user = await getUser(req);
+    const zones = await db.select('*').from('se_project.zones');
+    return res.render('subscriptions', { ...user, zones });
   });
 
 app.get('/price', async function(req, res) {

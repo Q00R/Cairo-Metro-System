@@ -5,6 +5,7 @@
   <title>Zones</title>
   <link rel="stylesheet" href="/styles/bootstrap.min.css">
   <link rel="stylesheet" href="/styles/subscriptions.css">
+  <link rel="stylesheet" href="/styles/style.css">
   <script src="/js/jquery-2.2.0.min.js"></script>
   <script src="/js/bootstrap.min.js"></script>
   <style>
@@ -50,22 +51,32 @@
 </head>
 <body>
   <div>
-    <nav class="navbar navbar-inverse">
-      <ul class="nav navbar-nav">
-        <li><a href="/dashboard">Home</a></li>
-        <li><a href="/stations">Station</a></li>
-        <li><a href="/users">Users</a></li>
-        <li><a href="/subscriptions">Subscriptions</a></li>
-      </ul>
-      <ul class="nav navbar-nav navbar-right">
-        <li><a style="color: goldenrod" href="/resetPassword">Reset Password</a></li>
-        <li><a style="color: crimson" href="/">Logout</a></li>
-      </ul>
-    </nav>
-  </div>
+        <nav class="navbar navbar-inverse" style="padding-left:1%;">
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="/dashboard">Home</a></li>
+            <li><a href="/stations">Stations</a></li>
+            <li><a href="/users">Users</a></li>
+            {{#isNormal}}
+              <li><a href="/subscriptions">Subscriptions</a></li>
+              <li><a href="/requests/refund">Refund Ticket</a></li>
+              <li><a href="/requests/senior">Senior Citizens</a></li>
+              <li><a href="/price">Ticket Price</a></li>
+              <li><a href="/tickets">Book a ticket</a></li>
+            {{/isNormal}}
+            {{#isAdmin}}
+              <li><a href="/manage/routes">Routes</a></li>
+            {{/isAdmin}}
+          </ul>
+          <ul class="nav navbar-nav navbar-right" style="padding-right:2%">
+            <li><a style="color:goldenrod" href="/resetPassword">Reset Password</a></li>
+            <li><a  style="color:crimson" href="/">Logout</a></li>
+          </ul>
 
-  <div class="center">
-    <h1><u>Subscriptions</u></h1>
+       </nav>
+      </div>
+
+  <div>
+    <h1>Subscriptions</h1>
   </div>
 
   <div class="container">
@@ -94,9 +105,10 @@
         <div class="form-group">
           <label for="zoneId">Zone</label>
           <select class="form-control" id="zoneId" name="zoneId">
-            <option value="1">Zone 1</option>
-            <option value="2">Zone 2</option>
-            <option value="3">Zone 3</option>
+              <option disabled selected value="-1">Select a zone</option>
+              {{#zones}}
+                  <option value={{id}}>{{id}}</option>                    
+              {{/zones}}
           </select>
         </div>
         <div class="form-group">
@@ -120,6 +132,7 @@
         <table class="table table-bordered">
           <thead>
             <tr>
+
               <th>Subscription Type</th>
               <th>Zone 1 price</th>
               <th>Zone 2 price</th>

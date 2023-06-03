@@ -13,13 +13,18 @@
         <nav class="navbar navbar-inverse" style="padding-left:1%;">
           <ul class="nav navbar-nav">
             <li class="active"><a href="/dashboard">Home</a></li>
-            <li><a href="/stations">Station</a></li>
+            <li><a href="/stations">Stations</a></li>
             <li><a href="/users">Users</a></li>
-            <li><a href="/subscriptions">Subscriptions</a></li>
             {{#isNormal}}
+              <li><a href="/subscriptions">Subscriptions</a></li>
               <li><a href="/requests/refund">Refund Ticket</a></li>
               <li><a href="/requests/senior">Senior Citizens</a></li>
+              <li><a href="/price">Ticket Price</a></li>
+              <li><a href="/tickets">Book a ticket</a></li>
             {{/isNormal}}
+            {{#isAdmin}}
+              <li><a href="/manage/routes">Routes</a></li>
+            {{/isAdmin}}
           </ul>
           <ul class="nav navbar-nav navbar-right" style="padding-right:2%">
             <li><a style="color:goldenrod" href="/resetPassword">Reset Password</a></li>
@@ -27,7 +32,7 @@
           </ul>
 
        </nav>
-    </div>
+      </div>
     <br/>
 
     <div>

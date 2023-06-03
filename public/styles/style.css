@@ -29,5 +29,25 @@
   left: 0;
 }
 h1 {
-  color: blue;
+  color: #337ab7;
+  text-decoration: underline;
+  text-align: center;
+}
+
+label
+{
+  text-align: left;
+}
+
+select {
+  width: 200px;
+  padding: 10px;
+  font-size: 16px;
+  border: none;
+  background-color: #f1f1f1;
+}
+
+option {
+  font-size: 16px;
+  background-color: white;
 }
