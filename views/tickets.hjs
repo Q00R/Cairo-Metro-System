@@ -99,6 +99,7 @@
             placeholder="Enter your SubscriptionID">
 
         </div>
+        
         {{/hasSubscription}}
 
         <div class="form-group">
@@ -155,6 +156,17 @@
           </thead>
           <tbody id="PriceTable"></tbody>
         </table>
+        {{#hasSubscription}}
+         <div class="Remaining-table">
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th>Number Of Remaining tickets</th>
+            </tr>
+          </thead>
+          <tbody id="RemainingTable"></tbody>
+        </table>
+  {{/hasSubscription}}
       </div>
     </div>
   </div>
@@ -209,11 +221,13 @@
         $("#creditCardNumberParts").hide();
         $("#payedAmountParts").hide();
         $("#subscriptionPart").show(); // show the subscription textbox
+        $("#RemainingTable").show();
       } else {
         $("#holderNameParts").show();
         $("#creditCardNumberParts").show();
         $("#payedAmountParts").show();
         $("#subscriptionPart").hide(); // hide the subscription textbox
+         $("#RemainingTable").hide();
       }
       console.log("ready!");
       $("#submit").click(function () {
@@ -300,7 +314,16 @@
             alert(serverResponse.stationToBeTaken);
             alert(serverResponse.transferStations);
 
+              var rTable = $("#RemainingTable");
+              rTable.empty();
+              var row = $("<tr></tr>");
+              var rTable1 = $("<td></td>").text( serverResponse.numnberOfRemainingTickets);
+              row.append(rTable1);
+              rTable.append(row);
+              alert(serverResponse.numnberOfRemainingTickets)
+
             updateTables(serverResponse.price, serverResponse.stationToBeTaken, serverResponse.transferStations);
+
           },
           error: function (errorResponse) {
             if (errorResponse) {
