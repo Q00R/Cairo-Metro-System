@@ -15,6 +15,7 @@
             <li class="active"><a href="/dashboard">Home</a></li>
             <li><a href="/stations">Station</a></li>
             <li><a href="/users">Users</a></li>
+            <li><a href="/subscriptions">Subscriptions</a></li>
             {{#isNormal}}
               <li><a href="/requests/refund">Refund Ticket</a></li>
               <li><a href="/requests/senior">Senior Citizens</a></li>

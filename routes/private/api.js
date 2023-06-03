@@ -567,11 +567,15 @@ module.exports = function (app) {
 
   app.post('/api/v1/payment/subscription', async function (req, res) {
     try {
-      const { creditCardNumber, holderName, payedAmount, subType, zoneId } = req.body;
+      let { creditCardNumber, holderName, payedAmount, subType, zoneId } = req.body;
 
+      
 
       let noOfTickets = 0;
       let deductionAmount = 0;
+
+      zoneId = Number(zoneId);
+      payedAmount = Number(payedAmount);
 
       // Calculate the number of tickets and deduction amount based on the subscription type and zone
       if (subType === 'monthly' && zoneId === 1) {
@@ -692,6 +696,7 @@ module.exports = function (app) {
     }
   });
 
+ 
   app.post('/api/v1/payment/ticket', async function (req, res) {
 
     console.log("straaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaat");
@@ -703,7 +708,8 @@ module.exports = function (app) {
       // console.log("userSubscription", userSubscription);
       if (!(userSubscription)) {
         if (origin === destination) {
-          return res.json({ "Price that should be paid": 0, "you are already at your destination": destination });
+
+          return res.status(400).send("price: 0, " +`You are already at your destination ${destination}`);
         } else {
           //checking if desitanationand origin are valid
           console.log("checking if desitanation and origin are valid");
@@ -783,7 +789,7 @@ module.exports = function (app) {
               });
 
               console.log("DONEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE");
-              return res.json({ priceThatShouldBePayed, stationToBeTaken, transferStations });
+              return res.json({ price: priceThatShouldBePayed, stationToBeTaken, transferStations });
             } else {
               console.log("DONEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE");
               return res.status(400).send('Not enough money');
@@ -818,7 +824,7 @@ module.exports = function (app) {
       if (hasSubscription && Object.keys(hasSubscription).length !== 0) {
         console.log(originResult, destinationResult);
         if (origin === destination) {
-          return res.json({ "Price that should be paid": 0, "you are already at your destination": destination });
+          return res.status(400).send("price: 0, " +`You are already at your destination ${destination}`);
         } else {
 
           console.log(!(originResult && destinationResult));
@@ -907,7 +913,8 @@ module.exports = function (app) {
               });
 
               console.log("DONEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE");
-              return res.json({ numnberOfRemainingTickets, "ticket price if not subscribed": priceThatShouldBePayed, "ticket cost": 0, stationToBeTaken, transferStations });
+             // return res.json({ numnberOfRemainingTickets, "ticket price if not subscribed": priceThatShouldBePayed, "ticket cost": 0, stationToBeTaken, transferStations });
+             return res.json({ price: priceThatShouldBePayed, stationToBeTaken, transferStations });
 
             }
             else {
@@ -920,7 +927,7 @@ module.exports = function (app) {
       } else {
         console.log("User does not have a subscription or incorrect subscription id was provided -> not correct api for purchasing ticket", "DONEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE");
 
-        return res.status(400).send('User does not have a subscription  or incorrect subscription id was provided -> not correct api for purchasing ticket');
+        return res.status(400).send('User does not have a subscription  or incorrect subscription id was provided ');
       }
 
     } catch (e) {
@@ -931,7 +938,7 @@ module.exports = function (app) {
     }
 
   });
-
+  
 
 
 
@@ -985,7 +992,6 @@ module.exports = function (app) {
       }
     }
   });
-
 
   async function computingTicketPrice(originID, destinationID) {
     const user = (await getUser(req));
