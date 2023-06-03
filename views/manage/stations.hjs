@@ -16,7 +16,7 @@
           success: function(serverResponse) {
             if(serverResponse) {
               alert('Deleted Station with is ' + stationId);
-              location.href = '/stations';
+              location.href = '/manage/stations';
             }
           },
           error: function(errorResponse) {

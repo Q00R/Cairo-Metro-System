@@ -58,6 +58,11 @@ module.exports = function (app) {
         if (!stationName) {
           return res.status(400).send("name is required");
         }
+        const stationsWithName = await db("se_project.stations")
+        .where("stationName", stationName)
+        .returning("*");
+        if(stationsWithName.length > 0)
+          return res.status(400).send("Station with same name already exists!")
         const station = await db("se_project.stations")
           .insert({ stationName , stationType: "normal", stationStatus: "new" })
           .returning("*");
@@ -83,8 +88,6 @@ module.exports = function (app) {
         const stationsWithSameName = await db("se_project.stations")
           .where("stationName", stationName)
           .returning("*");
-        console.log("stationWithSameName =>", stationsWithSameName);
-        console.log("stationWithSameName.length =>", stationsWithSameName.length);
         if(stationsWithSameName.length > 0){
           return res.status(400).send("There is a station with same name!");
         }
@@ -119,7 +122,6 @@ module.exports = function (app) {
         return res.status(400).send("You are Unauthorized to do this action");
       }
     } catch (e) {
-      console.log(e.message);
       return res.status(400).send("Could not update station");
     }
   });
@@ -229,18 +231,21 @@ module.exports = function (app) {
         if (!refundStaus) {
           return res.status(400).send("status is required");
         }
-        const request = await db("se_project.refund_requests")
+        let request = await db("se_project.refund_requests")
           .where("id", requestId)
-          .update({ status: refundStaus })
           .returning("*");
+        if(request[0].status == "accepted"){
+          return res.status(400).send("Refund Already Accepted!");
+        }
         if (refundStaus == "accepted"){
-          if(request[0].status == "accepted"){
-            return res.status(400).send("Refund Already Accepted!");
-          }
           const transaction = await db("se_project.transactions")
             .insert({ userId: request[0].userId, amount: request[0].refundAmount, purchasedId: request[0].ticketId })
             .returning("*");
         }
+        request = await db("se_project.refund_requests")
+          .where("id", requestId)
+          .update({ status: refundStaus })
+          .returning("*");
         return res.status(200).json(request[0]);
       }
       else

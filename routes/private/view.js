@@ -37,8 +37,6 @@ module.exports = function(app) {
     return res.render('users', { ...user,users });
   });
 
-  app.get
-
   // Register HTTP endpoint to render /courses page
   app.get('/stations', async function(req, res) {
     const user = await getUser(req);
@@ -88,7 +86,6 @@ module.exports = function(app) {
   return res.render('price', { ...user, stations });
  });
 
-
   app.get('/subscriptions', async function(req, res) {
     const user = await getUser(req);
     const zones = await db.select('*').from('se_project.zones');
@@ -111,5 +108,58 @@ app.get('/price', async function(req, res) {
   const hasNoSubscription = !hasSubscription; // Check if userSubscription is undefined
   return res.render('tickets', { ...user, stations, hasSubscription ,hasNoSubscription});
  });
+ 
+ app.get('/manage/stations', async function(req, res) {
+  const user = await getUser(req);
+  const stations = await db.select('*').from('se_project.stations');
+  if (!user.isAdmin) {
+    return res.status(403).render('403');
+  }
+  return res.render('manage/stations', { ...user, stations });
+});
+
+app.get('/manage/stations/create', async function(req, res) {
+  const user = await getUser(req);
+  if (!user.isAdmin) {
+    return res.status(403).render('403');
+  }
+  return res.render('manage/stations/create', {...user});
+});
+
+app.get('/manage/stations/edit/:stationId', async function(req, res) {
+  const user = await getUser(req);
+  const stationId = req.params.stationId;
+  if (!user.isAdmin) {
+    return res.status(403).render('403');
+  }
+  return res.render('manage/stations/edit', { ...user, stationId });
+});
+
+app.get('/manage/requests/refunds', async function(req, res) {
+  const user = await getUser(req);
+  const refunds = await db.select('*').from('se_project.refund_requests');
+  if (!user.isAdmin) {
+    return res.status(403).render('403');
+  }
+  return res.render('manage/requests/refunds', { ...user, refunds });
+});
+
+app.get('/manage/requests/seniors', async function(req, res) {
+  const user = await getUser(req);
+  const seniors = await db.select('*').from('se_project.senior_requests');
+  if (!user.isAdmin) {
+    return res.status(403).render('403');
+  }
+  return res.render('manage/requests/seniors', { ...user, seniors });
+});
+
+app.get('/manage/zones', async function(req, res) {
+  const user = await getUser(req);
+  const zones = await db.select('*').from('se_project.zones');
+  if (!user.isAdmin) {
+    return res.status(403).render('403');
+  }
+  return res.render('manage/zones', { ...user, zones });
+});
 
 };
