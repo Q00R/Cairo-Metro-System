@@ -22,15 +22,15 @@
           <ul class="nav navbar-nav">
             <li class="active"><a href="/dashboard">Home</a></li>
             {{#isAdmin}}
-            <li><a href="/manage/stations">Station</a></li>
-            <li><a href="/manage/zones">Zones</a></li>
-            <div class="dropdown navbar navbar-inverse nav navbar-nav">
-              <li><a>Requests</a></li>
-              <div class="dropdown-content navbar navbar-inverse nav navbar-nav">
-              <li><a href="/manage/requests/seniors">Senior</a></li>
-              <li><a href="/manage/requests/refunds">Refund</a></li>
+              <li><a href="/manage/stations">Station</a></li>
+              <li><a href="/manage/zones">Zones</a></li>
+              <div class="dropdown navbar navbar-inverse nav navbar-nav">
+                <li><a>Requests</a></li>
+                <div class="dropdown-content navbar navbar-inverse nav navbar-nav">
+                <li><a href="/manage/requests/seniors">Senior</a></li>
+                <li><a href="/manage/requests/refunds">Refund</a></li>
+                </div>
               </div>
-            </div>
             {{/isAdmin}}
           </ul>
           <ul class="nav navbar-nav navbar-right" style="padding-right:2%">
