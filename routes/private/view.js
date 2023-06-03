@@ -37,6 +37,8 @@ module.exports = function(app) {
     return res.render('users', { ...user,users });
   });
 
+  app.get
+
   // Register HTTP endpoint to render /courses page
   app.get('/stations', async function(req, res) {
     const user = await getUser(req);
