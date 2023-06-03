@@ -40,8 +40,19 @@ module.exports = function(app) {
   // Register HTTP endpoint to render /courses page
   app.get('/stations', async function(req, res) {
     const user = await getUser(req);
-    const stations = await db.select('*').from('se_project.stations');
+    const stations = await db.select('*').from('se_project.stations').orderBy("id");
     return res.render('stations_example', { ...user, stations });
+  });
+
+  app.get('/manage/routes', async function(req, res) {
+    const user = await getUser(req);
+    const routes = await db.select('*').from('se_project.routes').orderBy("id");
+    return res.render('routes', { ...user, routes });
+  });
+
+  app.get('/manage/routes/create', async function(req, res) {
+    const user = await getUser(req);
+    return res.render('routesCreate', { ...user});
   });
 
   app.get('/resetPassword', async function(req, res) {
