@@ -5,9 +5,10 @@
   <meta charset="UTF-8">
   <title>Tickets</title>
   <link rel="stylesheet" href="/styles/bootstrap.min.css">
-
+  <link rel="stylesheet" href="/styles/style.css">
   <script src="/js/jquery-2.2.0.min.js"></script>
   <script src="/js/bootstrap.min.js"></script>
+  
   <style>
     .navbar {
       padding-left: 2%;
@@ -55,23 +56,28 @@
 
 <body>
   <div>
-    <nav class="navbar navbar-inverse">
-      <ul class="nav navbar-nav">
-         <li ><a href="/dashboard">Home</a></li>
-      <li><a href="/stations">Station</a></li>
-      <li><a href="/users">Users</a></li>
-      <li ><a href="/price">Ticket Price</a></li>
-      <li class="active"></liclass><a href="/tickets">Book a ticket</a></li>
-      </ul>
-      <ul class="nav navbar-nav navbar-right">
-        <li><a style="color: rgb(32, 218, 57)" href="/resetPassword">Reset Password</a></li>
-        <li><a style="color: crimson" href="/">Logout</a></li>
-      </ul>
-    </nav>
-  </div>
+        <nav class="navbar navbar-inverse" style="padding-left:1%;">
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="/dashboard">Home</a></li>
+            <li><a href="/stations">Station</a></li>
+            {{#isNormal}}
+              <li><a href="/subscriptions">Subscriptions</a></li>
+              <li><a href="/requests/refund">Refund Ticket</a></li>
+              <li><a href="/requests/senior">Senior Citizens</a></li>
+              <li><a href="/price">Ticket Price</a></li>
+              <li><a href="/tickets">Book a ticket</a></li>
+            {{/isNormal}}
+          </ul>
+          <ul class="nav navbar-nav navbar-right" style="padding-right:2%">
+            <li><a style="color:goldenrod" href="/resetPassword">Reset Password</a></li>
+            <li><a  style="color:crimson" href="/">Logout</a></li>
+          </ul>
+
+       </nav>
+      </div>
 
   <div class="center">
-    <h1><u>Booking Tickets</u></h1>
+    <h1>Booking Tickets</h1><br><br>
   </div>
 
   <div class="container">

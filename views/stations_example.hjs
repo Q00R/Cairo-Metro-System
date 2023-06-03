@@ -14,11 +14,12 @@
           <ul class="nav navbar-nav">
             <li class="active"><a href="/dashboard">Home</a></li>
             <li><a href="/stations">Station</a></li>
-            <li><a href="/users">Users</a></li>
-            <li><a href="/subscriptions">Subscriptions</a></li>
             {{#isNormal}}
+              <li><a href="/subscriptions">Subscriptions</a></li>
               <li><a href="/requests/refund">Refund Ticket</a></li>
               <li><a href="/requests/senior">Senior Citizens</a></li>
+              <li><a href="/price">Ticket Price</a></li>
+              <li><a href="/tickets">Book a ticket</a></li>
             {{/isNormal}}
           </ul>
           <ul class="nav navbar-nav navbar-right" style="padding-right:2%">
@@ -27,7 +28,7 @@
           </ul>
 
        </nav>
-    </div>
+      </div>
     <br/>
 
     <div>

@@ -73,7 +73,9 @@ module.exports = function(app) {
 
 
   app.get('/subscriptions', async function(req, res) {
-    return res.render('subscriptions');
+    const user = await getUser(req);
+    const zones = await db.select('*').from('se_project.zones');
+    return res.render('subscriptions', { ...user, zones });
   });
 
 app.get('/price', async function(req, res) {

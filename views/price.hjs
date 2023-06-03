@@ -54,21 +54,26 @@
       </script>
 
 
-  <nav class="navbar navbar-inverse" style="padding-left:2%;">
-    <ul class="nav navbar-nav">
-      <li ><a href="/dashboard">Home</a></li>
-      <li><a href="/stations">Station</a></li>
-      <li><a href="/users">Users</a></li>
-      <li class="active"><a href="/price">Ticket Price</a></li>
-      <li><a href="/tickets">Book a ticket</a></li>
+  <div>
+        <nav class="navbar navbar-inverse" style="padding-left:1%;">
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="/dashboard">Home</a></li>
+            <li><a href="/stations">Station</a></li>
+            {{#isNormal}}
+              <li><a href="/subscriptions">Subscriptions</a></li>
+              <li><a href="/requests/refund">Refund Ticket</a></li>
+              <li><a href="/requests/senior">Senior Citizens</a></li>
+              <li><a href="/price">Ticket Price</a></li>
+              <li><a href="/tickets">Book a ticket</a></li>
+            {{/isNormal}}
+          </ul>
+          <ul class="nav navbar-nav navbar-right" style="padding-right:2%">
+            <li><a style="color:goldenrod" href="/resetPassword">Reset Password</a></li>
+            <li><a  style="color:crimson" href="/">Logout</a></li>
+          </ul>
 
-      
-    </ul>
-    <ul class="nav navbar-nav navbar-right" style="padding-right:2%">
-      <li><a style="color:goldenrod" href="/resetPassword">Reset Password</a></li>
-      <li><a style="color:crimson" href="/">Logout</a></li>
-    </ul>
-  </nav>
+       </nav>
+      </div>
   <div class="center">
     <h1><u>Ticket Price</u></h1>
   </div>
