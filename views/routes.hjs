@@ -58,18 +58,21 @@
 
     {{#isAdmin}}
     <div style="position:absolute; right:0;">
-      <a href="/manage/routes/create"><input id="btnAddRoute" type="button" value="Create a route" class="btn btn-primary"></a>
+      <a href="/manage/routes/create"><input id="btnAddRoute" type="button" value="Create a route"
+          class="btn btn-primary"></a>
+      <a href="/manage/routes/edit/:routeId"><input id="btnAddRoute" type="button" value="Update a route's name"
+          class="btn btn-primary"></a>
       <br />
     </div>
     {{/isAdmin}}
     <table id="routesTable" class="table" style="max-width: 75%; margin-left: auto; margin-right: auto;">
       <thead>
         <tr>
-          <th scope="col">id</th>
+          <th scope="col">Id</th>
           <th scope="col">Name</th>
-          <th scope="col">fromStationId</th>
-          <th scope="col">toStationId</th>
-          <th scope="col"></th>
+          <th scope="col">From Station Id</th>
+          <th scope="col">To Station Id</th>
+          <th scope="col">Delete</th>
 
         </tr>
         {{#routes}}
