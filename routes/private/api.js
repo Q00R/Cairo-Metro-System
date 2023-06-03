@@ -449,8 +449,8 @@ module.exports = function (app) {
       toStation = await db("se_project.stations").select("*").where("id", newRoute.toStationId).first();
       if (!toStation)
         return res.send("This destination does not exist!");
-      if (fromStation.stationPosition != null && toStation.stationPosition != null)
-        return res.send("Both of these stations already have connections!");
+      if (fromStation.stationPosition == "middle" && toStation.stationPosition == "middle")
+        return res.send("These stations are in the middle!");
 
       if (fromStation.stationPosition == null) {
         await db("se_project.stations").update("stationPosition", "start").where("id", fromStation.id);
@@ -470,7 +470,7 @@ module.exports = function (app) {
       return res.status(200).json(addedRoute);
 
     } catch (e) {
-      return res.send(e.message);
+      return res.json(e.message);
     }
   })
 
@@ -521,7 +521,8 @@ module.exports = function (app) {
       else if (fromStation.stationPosition == "middle" && toStation.stationPosition == "end") {
         await db("se_project.stations").update("stationPosition", "start").where("id", toStation.id);
       }
-      return res.json(deletedRoute);
+      
+      return res.status(200).send(deletedRoute);
 
 
     } catch (e) {
