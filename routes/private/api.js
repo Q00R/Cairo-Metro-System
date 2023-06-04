@@ -1,4 +1,3 @@
-
 const { isEmpty, countBy } = require("lodash");
 const { v4 } = require("uuid");
 const db = require("../../connectors/db");
@@ -51,8 +50,6 @@ module.exports = function (app) {
     }
   });
 
-
-  
   app.post("/api/v1/station", async function (req, res) {
     try {
       const user = await getUser(req);
@@ -61,6 +58,11 @@ module.exports = function (app) {
         if (!stationName) {
           return res.status(400).send("name is required");
         }
+        const stationsWithName = await db("se_project.stations")
+        .where("stationName", stationName)
+        .returning("*");
+        if(stationsWithName.length > 0)
+          return res.status(400).send("Station with same name already exists!")
         const station = await db("se_project.stations")
           .insert({ stationName , stationType: "normal", stationStatus: "new" })
           .returning("*");
@@ -83,24 +85,30 @@ module.exports = function (app) {
         if (!stationId) {
           return res.status(400).send("stationId is required");
         }
-        const station = await db("se_project.stations")
+        const stationsWithSameName = await db("se_project.stations")
+          .where("stationName", stationName)
+          .returning("*");
+        if(stationsWithSameName.length > 0){
+          return res.status(400).send("There is a station with same name!");
+        }
+        let station = await db("se_project.stations")
           .where("id", stationId)
           .returning("*");
-        const tickets1 = await db("se_project.tickets")
-          .where("origin", station.stationName)
+        const tickets1 = await db('se_project.tickets')
+          .where('origin', station[0].stationName)
           .update({ origin: stationName })
           .returning("*");
         const tickets2 = await db("se_project.tickets")
-          .where("destination", station.stationName)
+          .where('destination', station[0].stationName)
           .update({ destination: stationName })
           .returning("*");
         const rides1 = await db("se_project.rides")
-          .where("origin", station.stationName)
-          .andWhere("status", "upcoming")
+          .where('origin', station[0].stationName)
+          .andWhere('status', 'upcoming')
           .update({ origin: stationName })
           .returning("*");
         const rides2 = await db("se_project.rides")
-          .where("destination", station.stationName)
+          .where("destination", station[0].stationName)
           .andWhere("status", "upcoming")
           .update({ destination: stationName })
           .returning("*");
@@ -114,7 +122,6 @@ module.exports = function (app) {
         return res.status(400).send("You are Unauthorized to do this action");
       }
     } catch (e) {
-      console.log(e.message);
       return res.status(400).send("Could not update station");
     }
   });
@@ -224,20 +231,22 @@ module.exports = function (app) {
         if (!refundStaus) {
           return res.status(400).send("status is required");
         }
-        const request = await db("se_project.refund_requests")
+        let request = await db("se_project.refund_requests")
+          .where("id", requestId)
+          .returning("*");
+        if(request[0].status == "accepted"){
+          return res.status(400).send("Refund Already Accepted!");
+        }
+        if (refundStaus == "accepted"){
+          const transaction = await db("se_project.transactions")
+            .insert({ userId: request[0].userId, amount: request[0].refundAmount, purchasedId: request[0].ticketId })
+            .returning("*");
+        }
+        request = await db("se_project.refund_requests")
           .where("id", requestId)
           .update({ status: refundStaus })
           .returning("*");
-        if (refundStaus == "accepted"){
-          const transaction = await db("se_project.transactions")
-            .insert({ userId: request.userId, amount: request.refundAmount, purchasedId: request.ticketId })
-            .returning("*");
-          const ticket = await db("se_project.tickets")
-            .where("id", request.ticketId)
-            .del()
-            .returning("*");
-        }
-        return res.status(200).json(request);
+        return res.status(200).json(request[0]);
       }
       else
         return res.status(400).send("You are Unauthorized to do this action")
@@ -265,10 +274,10 @@ module.exports = function (app) {
           .update({ status: seniorStaus })
           .returning("*");
         const dbUser = await db("se_project.users")
-          .where("id", request.userId)
-          .update({ roleId: 3 })
+          .where("id", request[0].userId)
+          .update({ roleId: (seniorStaus === "accepted" ? 3 : 1) })
           .returning("*");
-        return res.status(200).json(request);
+        return res.status(200).json(request[0]);
       }
       else
         return res.status(400).send("You are Unauthorized to do this action")
@@ -333,7 +342,6 @@ module.exports = function (app) {
       return res.status(400).send("Could not create senior request");
     }
   });
-
 
   app.post("/api/v1/refund/:ticketId", async function (req, res) {
     const { ticketId } = req.params;
@@ -429,7 +437,6 @@ module.exports = function (app) {
       return res.status(400).send("Could not simulate ride");
     }
   });
-
 
   //api to create a new route
   app.post("/api/v1/route", async function (req, res) {
@@ -806,7 +813,6 @@ module.exports = function (app) {
       return res.status(400).send('Could not create ticket');
     }
   });
-
 
   app.post('/api/v1/tickets/purchase/subscription', async function (req, res) {
     try {
