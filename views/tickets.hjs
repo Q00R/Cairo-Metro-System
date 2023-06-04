@@ -172,6 +172,7 @@
         </table>
   {{/hasSubscription}}
       </div>
+    <img src="/book.jpg" style="width:100%" alt="book"><br>
     </div>
   </div>
 

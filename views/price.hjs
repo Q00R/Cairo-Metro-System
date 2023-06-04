@@ -11,7 +11,52 @@
   <script src="/js/bootstrap.min.js"></script>
 </head>
 
-<body>
+    <style>
+    body {
+        background-image: url('/howmuch.jpg');
+        background-repeat: no-repeat;
+        background-size: cover;
+    }
+    .overlay {
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 20px;
+            width: 80%;
+            max-width: 600px;
+            margin: 50px auto;
+            border-radius: 10px;
+        }
+    .overlay2 {
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 10px;
+            width: 30%;
+            max-width: 300px;
+            margin: 50px auto;
+            border-radius: 10px;
+        }
+
+        .overlay select {
+            display: block;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        .overlay input[type="button"] {
+            display: block;
+            margin: 0 auto;
+        }
+
+        .overlay-head {
+            background-color: rgba(255, 255, 255, 0.8);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            padding: 20px;
+            max-width: 400px;
+            border-radius: 10px;
+        }
+
+    </style>
 
     <script>
       $(document).ready(function(){
@@ -76,10 +121,10 @@
        </nav>
       </div>
   <div class="center">
-    <h1><u>Ticket Price</u></h1>
+    <h1 class="overlay2"><u>Ticket Price</u></h1>
   </div>
 
-  <div style="margin-left: auto; margin-right: auto; padding-left: 30%; text-align: left;">
+  <div class="overlay">
     <form id="myForm" method="post">
       <select id="originDropdown" class="btn btn-secondary btn-lg dropdown-toggle">
         <option disabled selected>Origin station</option>
