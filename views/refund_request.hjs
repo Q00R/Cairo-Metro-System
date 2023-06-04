@@ -12,9 +12,8 @@
       $(document).ready(function(){
         $("#submit").click(function() {
           const ticketId = $('#myDropdown').val();
-          if(ticketId === 'default') {
-            alert('Please select a ticket');
-            window.location.href = '/requests/refund'; 
+          if(!ticketId) {
+            return alert('Please select a ticket');
           }
           const url = `/api/v1/refund/${ticketId}`;
 
@@ -63,26 +62,27 @@
        </nav>
       </div>
 
-      <div style="margin-left: auto; margin-right: auto; padding-bottom: 5%;">
-        <h1 style="text-align: center;">Apply For Refund Requests</h1>
-      </div>
+<h1 style="text-align: center;">Apply For Refund Requests</h1><br><br>
 
-        <form id="myForm" method="post">
-        <div class="dropdown" style="margin-left: auto; margin-right: auto; padding-left: 35%;">
-            <select id="myDropdown" style="width: 30%;" class="btn btn-secondary btn-lg dropdown-toggle">
+<form id="myForm" method="post" style="display: flex; justify-content: center;">
+    <div style="display: flex;">
+        <div class="dropdown" style="flex: 1;">
+            <select id="myDropdown" class="btn btn-secondary btn-lg dropdown-toggle" style="width: 315px;">
                 <option disabled selected value="-1">Select a ticket</option>
                 {{#userTickets}}
-                    <option value={{id}}>{{id}}</option>                    
+                    <option value={{id}}>{{id}}</option>
                 {{/userTickets}}
             </select>
-        <input id="submit" style="width: 15%; height: 40%" class="btn btn-warning" name="submit" type="button" value="Place Request"><br><br>
-        </form>
         </div>
-        <div style="margin-left: auto; margin-right: auto; padding-left: 35%;">
-        <img src="/ref2.jpg" style="width:45%" alt="refund"><br>
-        </div>
-
-        
+        <input id="submit" style="flex: 1; margin-left: 15px;" class="btn btn-warning" name="submit" type="button" value="Place Request">
     </div>
+</form><br>
+
+<div style="margin-left: auto; margin-right: auto; padding-left: 35%;">
+    <img src="/ref2.jpg" style="width: 45%;" alt="refund"><br>
+</div>
+
+
+
   </body>
   </html>
