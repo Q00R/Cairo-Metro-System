@@ -47,6 +47,7 @@
               <li><a href="/requests/senior">Senior Citizens</a></li>
               <li><a href="/price">Ticket Price</a></li>
               <li><a href="/tickets">Book a ticket</a></li>
+              <li><a href="/rides/simulate">Rides</a></li>
             {{/isNormal}}
             {{#isAdmin}}
               <li><a href="/manage/routes">Routes</a></li>

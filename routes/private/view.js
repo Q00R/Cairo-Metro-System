@@ -80,6 +80,13 @@ module.exports = function(app) {
   return res.render('senior_request', {...user});
  });
 
+ app.get('/rides/simulate', async function(req, res) {
+  const user = await getUser(req);
+  const userId = user.userId;
+  const rides = await db.select('*').from('se_project.rides').where('userId', userId);
+  return res.render('rides', { ...user, rides });
+  });
+
  app.get('/price', async function(req, res) {
   const user = await getUser(req);
   const stations = await db.select('*').from('se_project.stations');
