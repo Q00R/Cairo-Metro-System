@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>Tickets</title>
+  <link rel="stylesheet" href="/styles/bootstrap.min.css">
+  <link rel="stylesheet" href="/styles/style.css">
+  <script src="/js/jquery-2.2.0.min.js"></script>
+  <script src="/js/bootstrap.min.js"></script>
+  
+  <style>
+    .navbar {
+      padding-left: 2%;
+    }
+
+    .navbar-right {
+      padding-right: 2%;
+    }
+    .form-horizontal {
+      width: 50%;
+      margin-left: 25%;
+    }
+
+    .subscription-table {
+      margin-top: 20px;
+    }
+
+    .container {
+      display: flex;
+      flex-wrap: wrap;
+    }
+
+    .left-column {
+      flex: 1;
+    }
+
+    .right-column {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .subscription-table,
+    .subscription-types {
+      flex: 1;
+    }
+  </style>
+</head>
+
+<body>
+  <div>
+        <nav class="navbar navbar-inverse" style="padding-left:2%;">
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="/dashboard">Home</a></li>
+            {{#isAdmin}}
+              <li><a href="/manage/stations">Station</a></li>
+              <li><a href="/manage/zones">Zones</a></li>
+              <li><a href="/manage/routes">Routes</a></li>
+              <div class="dropdown navbar navbar-inverse nav navbar-nav">
+                <li><a>Requests</a></li>
+                <div class="dropdown-content navbar navbar-inverse nav navbar-nav">
+                <li><a href="/manage/requests/seniors">Senior</a></li>
+                <li><a href="/manage/requests/refunds">Refund</a></li>
+                </div>
+              </div>
+            {{/isAdmin}}
+            {{#isNormal}}
+              <li><a href="/subscriptions">Subscriptions</a></li>
+              <li><a href="/requests/refund">Refund Ticket</a></li>
+              <li><a href="/requests/senior">Senior Citizens</a></li>
+              <li><a href="/price">Ticket Price</a></li>
+              <li><a href="/tickets">Book a ticket</a></li>
+            {{/isNormal}}
+          </ul>
+          <ul class="nav navbar-nav navbar-right" style="padding-right:2%">
+            <li><a style="color:goldenrod" href="/resetPassword">Reset Password</a></li>
+            <li><a  style="color:crimson" href="/">Logout</a></li>
+          </ul>
+       </nav>
+      </div>
+
+  <div class="center">
+    <h1>Booking Tickets</h1><br><br>
+  </div>
+
+  <div class="container">
+    <div class="left-column">
+      <form class="form-horizontal">
+        {{#hasNoSubscription}}
+        <div class="form-group" id="creditCardNumberParts">
+          <label for="creditCardNumber">Credit Card Number</label>
+          <input type="text" class="form-control" id="creditCardNumber" name="creditCardNumber"
+            placeholder="Enter credit card number">
+        </div>
+        <div class="form-group" id="holderNameParts">
+          <label for="holderName">Holder Name</label>
+          <input type="text" class="form-control" id="holderName" name="holderName" placeholder="Enter cardholder name">
+        </div>
+        <div class="form-group" id="payedAmountParts">
+          <label for="payedAmount">Paid Amount</label>
+          <input type="text" class="form-control" id="payedAmount" name="payedAmount" placeholder="Enter paid amount">
+        </div>
+        {{/hasNoSubscription}}
+        {{#hasSubscription}}
+        <div class="form-group" id="subscriptionPart">
+          <label for="SubscriptionID">Subscription</label>
+          <input type="text" class="form-control" id="SubscriptionID" name="SubscriptionID"
+            placeholder="Enter your SubscriptionID">
+
+        </div>
+        
+        {{/hasSubscription}}
+
+        <div class="form-group">
+          <label for="tripDate">Trip Date</label>
+          <input type="date" class="form-control" id="tripDate" name="tripDate" placeholder="Enter date" min="">
+          <br>
+          <select id="originDropdown" style="width:100%" class="btn btn-secondary btn-lg dropdown-toggle">
+            <option style="text-align: left;" disabled selected>Origin station</option>
+            {{#stations}}
+            <option value={{stationName}}>{{stationName}}</option>
+            {{/stations}}
+          </select><br><br>
+          <select id="destinationDropdown" style="width:100%" class="btn btn-secondary btn-lg dropdown-toggle">
+            <option style="text-align: left;" disabled selected>Destination station</option>
+            {{#stations}}
+            <option value={{stationName}}>{{stationName}}</option>
+            {{/stations}}
+          </select>
+
+        </div>
+        <div class="form-group">
+          <input style="width: 100%;" type="button" id="submit" class="btn btn-primary" value="Pay">
+        </div>
+      </form>
+    </div>
+    <div class="right-column">
+      <div class="stations-table">
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th>Stations Taken</th>
+            </tr>
+          </thead>
+          <tbody id="stationTable"></tbody>
+        </table>
+      </div>
+      <div class="Transfer-station">
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th>Transfer Stations</th>
+            </tr>
+          </thead>
+          <tbody id="TransferTable"></tbody>
+        </table>
+      </div>
+      <div class="price-table">
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th>Price</th>
+            </tr>
+          </thead>
+          <tbody id="PriceTable"></tbody>
+        </table>
+        {{#hasSubscription}}
+         <div class="Remaining-table">
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th>Number Of Remaining tickets</th>
+            </tr>
+          </thead>
+          <tbody id="RemainingTable"></tbody>
+        </table>
+  {{/hasSubscription}}
+      </div>
+    </div>
+  </div>
+
+
+  <script>
+    console.log("ready!");
+    var currentDate = new Date();
+    var year = currentDate.getFullYear();
+    var month = ("0" + (currentDate.getMonth() + 1)).slice(-2);
+    var day = ("0" + currentDate.getDate()).slice(-2);
+    var formattedDate = year + "-" + month + "-" + day;
+    document.getElementById("tripDate").setAttribute("min", formattedDate);
+    
+    function updateTables(priceOfTicket, stationToBeTaken, transferStations) {
+      var pTable = $("#PriceTable");
+      pTable.empty();
+      var row = $("<tr></tr>");
+      var pTable1 = $("<td></td>").text(priceOfTicket);
+      row.append(pTable1);
+      pTable.append(row);
+
+      var stations = "";
+      for (var i = 0; i < stationToBeTaken.length - 1; i++) {
+        stations += stationToBeTaken[i] + "->";
+      }
+      stations += stationToBeTaken[stationToBeTaken.length - 1];
+
+      var transfers = "";
+      if (transferStations.length == 0) {
+        transfers = "No Transfer Stations";
+      } else {
+        for (var i = 0; i < transferStations.length - 1; i++) {
+          transfers += transferStations[i] + "->";
+        }
+        transfers += transferStations[transferStations.length - 1];
+      }
+
+      var sTable = $("#stationTable");
+      sTable.empty();
+      var row = $("<tr></tr>");
+      var sTable1 = $("<td></td>").text(stations);
+      row.append(sTable1);
+      sTable.append(row);
+
+      var tTable = $("#TransferTable");
+      tTable.empty();
+      var row = $("<tr></tr>");
+      var tTable1 = $("<td></td>").text(transfers);
+      row.append(tTable1);
+      tTable.append(row);
+
+      alert("Successfully Purchased");
+    }
+    $(document).ready(function () {
+  const hasSubscription = {{hasSubscription}};
+      if (hasSubscription) {
+        $("#holderNameParts").hide();
+        $("#creditCardNumberParts").hide();
+        $("#payedAmountParts").hide();
+        $("#subscriptionPart").show(); // show the subscription textbox
+        $("#RemainingTable").show();
+      } else {
+        $("#holderNameParts").show();
+        $("#creditCardNumberParts").show();
+        $("#payedAmountParts").show();
+        $("#subscriptionPart").hide(); // hide the subscription textbox
+         $("#RemainingTable").hide();
+      }
+      console.log("ready!");
+      $("#submit").click(function () {
+        alert("Clickedddd");
+        if(!hasSubscription){
+        console.log("clicked!");
+        const creditCardNumber = parseInt($("#creditCardNumber").val());
+        const holderName = $("#holderName").val();
+        const payedAmount = parseInt($("#payedAmount").val());
+        const origin = $("#originDropdown").val();
+        const destination = $("#destinationDropdown").val();
+        const tripDate = $("#tripDate").val();
+
+        if (creditCardNumber === "" || holderName === "" || payedAmount === "" || tripDate === "" || origin == undefined || destination == undefined) {
+          alert("Please fill in all fields");
+          return;
+        }
+
+        const data = {
+          creditCardNumber,
+          holderName,
+          payedAmount,
+          origin,
+          destination,
+          tripDate,
+        };
+
+
+
+        $.ajax({
+          type: "POST",
+          url: "/api/v1/payment/ticket",
+          data,
+          success: function (serverResponse) {
+            const priceOfTicket = serverResponse.price;
+            const stationToBeTaken = serverResponse.stationToBeTaken;
+            const transferStations = serverResponse.transferStations;
+            alert(`Purchase successful!`);
+            alert(serverResponse);
+            alert(serverResponse.price);
+            alert(serverResponse.stationToBeTaken);
+            alert(serverResponse.transferStations);
+
+            updateTables(serverResponse.price, serverResponse.stationToBeTaken, serverResponse.transferStations);
+          },
+          error: function (errorResponse) {
+            if (errorResponse) {
+              alert(`Error purchasing: ${errorResponse.responseText}`);
+            }
+          },
+        });}
+        else{
+          alert("you have a subscription");
+        const subId = parseInt($("#SubscriptionID").val());
+        const origin = $("#originDropdown").val();
+        const destination = $("#destinationDropdown").val();
+        const tripDate = $("#tripDate").val();
+
+        if (subId === "" || tripDate === "" || origin == undefined || destination == undefined) {
+          alert("Please fill in all fields");
+          return;
+        }
+
+        const data = {
+          subId,
+          origin,
+          destination,
+          tripDate,
+        };
+
+
+
+        $.ajax({
+          type: "POST",
+          url: "/api/v1/tickets/purchase/subscription",
+          data,
+          success: function (serverResponse) {
+            const priceOfTicket = serverResponse.price;
+            const stationToBeTaken = serverResponse.stationToBeTaken;
+            const transferStations = serverResponse.transferStations;
+            alert(`Purchase successful!`);
+            alert(serverResponse);
+            alert(serverResponse.price);
+            alert(serverResponse.stationToBeTaken);
+            alert(serverResponse.transferStations);
+
+              var rTable = $("#RemainingTable");
+              rTable.empty();
+              var row = $("<tr></tr>");
+              var rTable1 = $("<td></td>").text( serverResponse.numnberOfRemainingTickets);
+              row.append(rTable1);
+              rTable.append(row);
+              alert(serverResponse.numnberOfRemainingTickets)
+
+            updateTables(serverResponse.price, serverResponse.stationToBeTaken, serverResponse.transferStations);
+
+          },
+          error: function (errorResponse) {
+            if (errorResponse) {
+              alert(`Error purchasing: ${errorResponse.responseText}`);
+            }
+          },
+        });
+
+        }
+      });
+    });
+  </script>
+</body>
+
+</html>

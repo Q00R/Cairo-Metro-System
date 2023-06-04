@@ -72,7 +72,8 @@ module.exports = function(app) {
   const userTickets = await db("se_project.tickets")
   .where("userId", userId)
   .returning("*");
-  return res.render('refund_request', {...user, userTickets});
+  const hasNoTickets = userTickets.length === 0;
+  return res.render('refund_request', {...user, userTickets, hasNoTickets });
  });
 
  app.get('/requests/senior', async function(req, res) {
@@ -86,11 +87,18 @@ module.exports = function(app) {
   return res.render('price', { ...user, stations });
  });
 
-  app.get('/subscriptions', async function(req, res) {
-    const user = await getUser(req);
-    const zones = await db.select('*').from('se_project.zones');
-    return res.render('subscriptions', { ...user, zones });
-  });
+app.get('/subscriptions/purchase', async function(req, res) {
+  const user = await getUser(req);
+  const zones = await db.select('*').from('se_project.zones');
+  return res.render('subscriptions/purchase', { ...user, zones });
+});
+
+app.get('/subscriptions', async function(req, res) {
+  const user = await getUser(req);
+  const subscriptions = await db.select('*').from('se_project.subsription').where('userId', user.userId);
+  const hasNoSubscription = subscriptions.length === 0;
+  return res.render('subscriptions', { ...user, subscriptions, hasNoSubscription });
+});
 
 app.get('/price', async function(req, res) {
 
@@ -99,14 +107,21 @@ app.get('/price', async function(req, res) {
   return res.render('price', { ...user, stations });
  });
 
- app.get('/tickets', async function(req, res) {
+ app.get('/tickets/purchase', async function(req, res) {
 
   const user = await getUser(req);
   const stations = await db.select('*').from('se_project.stations');
   const userSubscription = await db('se_project.subsription').where('userId', user.userId).orderBy('id', 'desc').first();
   const hasSubscription = userSubscription !== undefined; // Check if userSubscription is defined
   const hasNoSubscription = !hasSubscription; // Check if userSubscription is undefined
-  return res.render('tickets', { ...user, stations, hasSubscription ,hasNoSubscription});
+  return res.render('tickets/purchase', { ...user, stations, hasSubscription ,hasNoSubscription});
+ });
+ 
+ app.get('/tickets', async function(req, res) {
+  const user = await getUser(req);
+  const tickets = await db.select('*').from('se_project.tickets').where('userId', user.userId);
+  const hasNoTickets = tickets.length === 0;
+  return res.render('tickets', { ...user, tickets, hasNoTickets });
  });
  
  app.get('/manage/stations', async function(req, res) {

@@ -14,17 +14,6 @@
       <nav class="navbar navbar-inverse" style="padding-left:130px;">
           <ul class="nav navbar-nav">
           <li><a href="/">Home</a></li>
-            {{#isAdmin}}
-            <li><a href="/manage/stations">Station</a></li>
-            <li><a href="/manage/zones">Zones</a></li>
-            <div class="dropdown navbar navbar-inverse nav navbar-nav">
-              <li><a>Requests</a></li>
-              <div class="dropdown-content navbar navbar-inverse nav navbar-nav">
-              <li><a href="/manage/requests/seniors">Senior</a></li>
-              <li><a href="/manage/requests/refunds">Refund</a></li>
-              </div>
-            </div>
-            {{/isAdmin}}  
           </ul>
       </nav>
     </div>

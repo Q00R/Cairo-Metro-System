@@ -35,21 +35,29 @@
               </div>
             {{/isAdmin}}
             {{#isNormal}}
-              <li><a href="/subscriptions">Subscriptions</a></li>
+              <div class="dropdown navbar navbar-inverse nav navbar-nav">
+                <li><a>Subscriptions</a></li>
+                <div class="dropdown-content navbar navbar-inverse nav navbar-nav">
+                  <li><a href="/subscriptions">View</a></li>
+                  <li><a href="/subscriptions/purchase">Purchase</a></li>
+                </div>
+              </div>
               <li><a href="/requests/refund">Refund Ticket</a></li>
               <li><a href="/requests/senior">Senior Citizens</a></li>
-              <li><a href="/price">Ticket Price</a></li>
-              <li><a href="/tickets">Book a ticket</a></li>
+              <div class="dropdown navbar navbar-inverse nav navbar-nav">
+                <li><a>Tickets</a></li>
+                <div class="dropdown-content navbar navbar-inverse nav navbar-nav">
+                  <li><a href="/price">Price</a></li>
+                  <li><a href="/tickets">View</a></li>
+                  <li><a href="/tickets/purchase">Hotel? Booking.com</a></li>
+                </div>
+              </div>
             {{/isNormal}}
-            {{#isAdmin}}
-              <li><a href="/manage/routes">Routes</a></li>
-            {{/isAdmin}}
           </ul>
           <ul class="nav navbar-nav navbar-right" style="padding-right:2%">
             <li><a style="color:goldenrod" href="/resetPassword">Reset Password</a></li>
             <li><a  style="color:crimson" href="/">Logout</a></li>
           </ul>
-
        </nav>
       </div>
       <p style="text-align: center;">Welcome {{firstName}}, you are logged in!</p>

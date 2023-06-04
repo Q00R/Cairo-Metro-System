@@ -239,7 +239,7 @@ module.exports = function (app) {
         }
         if (refundStaus == "accepted"){
           const transaction = await db("se_project.transactions")
-            .insert({ userId: request[0].userId, amount: request[0].refundAmount, purchasedId: request[0].ticketId })
+            .insert({ userId: request[0].userId, amount: request[0].refundAmount, purchasedId: request[0].ticketId, type: "Ticket Refund" })
             .returning("*");
         }
         request = await db("se_project.refund_requests")
@@ -313,8 +313,6 @@ module.exports = function (app) {
     }
   });
 
-
-
   // really bteshta8al bmazagha if we remove v1, it works perfectly fine
   app.post("/api/v1/senior/request", async function (req, res) {
     let user = await getUser(req);
@@ -377,7 +375,6 @@ module.exports = function (app) {
       return res.status(400).send("There is already a refund request for this ticket");
     }
 
-    
     const tick = await db("se_project.tickets")
     .innerJoin("se_project.transactions", "se_project.tickets.id", "se_project.transactions.purchasedId")
     .where("se_project.tickets.id", ticketId)
@@ -407,8 +404,6 @@ module.exports = function (app) {
     }
 
   });
-
-
 
   // Works
   app.put("/api/v1/ride/simulate", async function (req, res) {
@@ -537,9 +532,6 @@ module.exports = function (app) {
     }
   })
 
-
-
-
   app.put('/api/v1/password/reset', async function (req, res) {
     try {
       const newPassword = req.body.newPassword;
@@ -558,8 +550,6 @@ module.exports = function (app) {
     }
   });
 
-
-
   app.get('/api/v1/zones', async function (req, res) {
     try {
       const zones = await db.select('*').from("se_project.zones")
@@ -573,9 +563,6 @@ module.exports = function (app) {
   app.post('/api/v1/payment/subscription', async function (req, res) {
     try {
       let { creditCardNumber, holderName, payedAmount, subType, zoneId } = req.body;
-
-      
-
       let noOfTickets = 0;
       let deductionAmount = 0;
 
@@ -699,7 +686,6 @@ module.exports = function (app) {
       return res.status(400).send('Could not create subscription');
     }
   });
-
  
   app.post('/api/v1/payment/ticket', async function (req, res) {
     try {
@@ -942,9 +928,6 @@ module.exports = function (app) {
 
   });
   
-
-
-
   app.post('/api/v1/tickets/price/:originId/:destinationId', async function (req, res) {
     const user = (await getUser(req));
     let numberOfSations = 0;
@@ -1001,195 +984,12 @@ module.exports = function (app) {
     }
   });
 
-  
-
-
-
-  async function getStationName(stationId) {
-    console.log("getStationName")
-    let entry = await db('se_project.stations').where('id', stationId).first();
-    if(!entry) 
-      throw new Error("station not found");
-    let stationName = entry.stationName;
-    return stationName;
-  }
-
-  async function isStationTransfer(stationId) {
-    console.log("isStationTransfer")
-    let entry = await db('se_project.stations').where('id', stationId).first();
-
-    let stationtype = entry.stationType;
-    return stationtype === "transfer";
-  }
-
-
-
-
-
-
-
-
-
-  // JavaScript code for printing shortest path between
-  // two vertices of unweighted graph
-  const max_value = 9007199254740992;
-
-  // utility function to form edge between two vertices
-  // source and dest
-  function add_edge(adj, src, dest) {
-    Number(src);
-    Number(dest);
-
-
-    adj[src].push(dest);
-
-
-  }
-
-  // a modified version of BFS that stores predecessor
-  // of each vertex in array p
-  // and its distance from source in array d
-  function BFS(adj, src, dest, v, pred, dist) {
-    console.log("IN BFS");
-    // a queue to maintain queue of vertices whose
-    // adjacency list is to be scanned as per normal
-    // DFS algorithm
-    let queue = [];
-
-    // boolean array visited[] which stores the
-    // information whether ith vertex is reached
-    // at least once in the Breadth first search
-    let visited = new Array(v);
-
-    // initially all vertices are unvisited
-    // so v[i] for all i is false
-    // and as no path is yet constructed
-    // dist[i] for all i set to infinity
-    for (let i = 0; i < v; i++) {
-      visited[i] = false;
-      dist[i] = max_value;
-      pred[i] = -1;
-    }
-
-    // now source is first to be visited and
-    // distance from source to itself should be 0
-    visited[src] = true;
-    dist[src] = 0;
-    queue.push(src);
-
-    // standard BFS algorithm
-    while (queue.length > 0) {
-      let u = queue[0];
-      queue.shift();
-      for (let i = 0; i < adj[u].length; i++) {
-        if (visited[adj[u][i]] == false) {
-          visited[adj[u][i]] = true;
-          dist[adj[u][i]] = dist[u] + 1;
-          pred[adj[u][i]] = u;
-          queue.push(adj[u][i]);
-
-          // We stop BFS when we find
-          // destination.
-          if (adj[u][i] == dest)
-            return true;
-
-
-
-        }
-      }
-
-    }
-
-    return false;
-  }
-
-  // utility function to print the shortest distance
-  // between source vertex and destination vertex
-  function shortestDistance(adj, s, dest, v) {
-    console.log("IN SHORTEST DISTANCE");
-    // predecessor[i] array stores predecessor of
-    // i and distance array stores distance of i
-    // from s
-    let pred = new Array(v).fill(0);
-    let dist = new Array(v).fill(0);
-
-    if (BFS(adj, s, dest, v, pred, dist) == false) {
-      throw new Error("unreachable destination");
-    }
-
-    // vector path stores the shortest path
-    let path = new Array();
-
-    let crawl = dest;
-    path.push(crawl);
-    while (pred[crawl] != -1) {
-      path.push(pred[crawl]);
-
-      crawl = pred[crawl];
-    }
-    // distance from source is in distance array
-    console.log("Path is::");
-    let route = "";
-    for (let i = path.length - 1; i >= 0; i--) {
-      console.log(path[i]);
-      route += path[i]
-    }
-    console.log("route", route, "route concatenated with # of stations", dist[dest] + route);
-    return dist[dest] + route;
-
-
-    // printing path from source to destination
-
-  }
-
-  async function calculatePrice(source, dest) {
-    // no. of vertices
-    console.log("IN CALCULATE PRICE");
-    let test = await db.count("*").from("se_project.stations");
-    let v = Number(test[0].count) + 1;
-
-    // array of vectors is used to store the graph
-    // in the form of an adjacency list
-    const adj = new Array(v).fill(0);
-
-    for (let i = 0; i < v; i++) {
-      adj[i] = new Array();
-    }
-
-    // Creating graph given in the above diagram.
-    // add_edge function takes adjacency list, source
-    // and destination vertex as argument and forms
-    // an edge between them.
-    fromTo = await db.select("fromStationId", "toStationId").from("se_project.routes");
-
-
-    for (let i = 0; i < fromTo.length; i++) {
-      a = fromTo[i].fromStationId;
-      b = fromTo[i].toStationId;
-
-      add_edge(adj, a, b);
-
-    }
-
-
-    return shortestDistance(adj, source, dest, v);
-
-    // The code is contributed by Gautam goel
-  }
-
-
-
   async function stationExists(stationId) {
     const station = await db("se_project.stations")
       .where("id", stationId)
       .first();
     return !isEmpty(station);
   }
-
-
-
-
-
 
 };
 // JavaScript code for printing shortest path between
@@ -1261,7 +1061,6 @@ function BFS(adj, src, dest, v, pred, dist) {
 
   return false;
 }
-
 // utility function to print the shortest distance
 // between source vertex and destination vertex
 function shortestDistance(adj, s, dest, v) {
@@ -1302,7 +1101,6 @@ function shortestDistance(adj, s, dest, v) {
   // printing path from source to destination
 
 }
-
 async function calculatePrice(source, dest) {
   // no. of vertices
   console.log("IN CALCULATE PRICE");
@@ -1345,7 +1143,6 @@ async function getStationName(stationId) {
   let stationName = entry.stationName;
   return stationName;
 }
-
 async function isStationTransfer(stationId) {
   let entry = await db('se_project.stations').where('id', stationId).first();
 
