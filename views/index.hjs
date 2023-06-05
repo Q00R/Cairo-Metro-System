@@ -10,6 +10,79 @@
     </head>
   </head>
   <body>
+    <style>
+      body {
+  background-color: #f5f5f5;
+  font-family: Arial, sans-serif;
+}
+
+.login-container {
+  width: 300px;
+  margin: 100px auto;
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+.circle {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  position: absolute;
+  top: -50px;
+  left: 50%;
+  transform: translateX(-50%);
+  overflow: hidden;
+}
+
+.circle-image {
+  width: 100%;
+  height: 100%;
+  background-image: url('/user2.jpg');
+  background-size: cover;
+  background-position: center;
+  border-radius: 50%;
+}
+
+h2 {
+  text-align: center;
+  color: #333;
+}
+
+form {
+  margin-top: 20px;
+}
+
+input[type="text"],
+input[type="password"] {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+}
+
+button {
+  width: 100%;
+  padding: 10px;
+  background-color: #4CAF50;
+  color: #fff;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #45a049;
+}
+
+button:active {
+  background-color: #3e8e41;
+}
+
+    </style>
       <script>
       $(document).ready(function(){
         $("#submit").click(function() {
@@ -47,30 +120,16 @@
       </nav>
     </div>
 
-    <div class="center">
-      <h1>Login</h1><br><br>
+   <div class="login-container">
+    <div class="circle">
+      <div class="circle-image"></div>
     </div>
-  <div style="padding-left: 25%">
-    <form class="form-horizontal" style="width: 50%;">
-      <div class="form-group">
-          <label for="email" class="col-sm-2 control-label">Email</label>
-          <div class="col-sm-10">
-              <input type="text" class="form-control" id="email" name="email" placeholder="Email" value="">
-          </div>
-      </div>
-      <div class="form-group">
-          <label for="password" class="col-sm-2 control-label">Password</label>
-          <div class="col-sm-10">
-              <input type="password" class="form-control" id="password" name="password" placeholder="Password" value="">
-          </div>
-      </div>
-      <div class="form-group">
-          <div class="col-sm-10 col-sm-offset-2">
-              <input id="submit" name="submit" type="button" value="Login" class="btn btn-primary">
-              Need to register? click <a href="/register">here.</a>
-          </div>
-      </div>
-  </form>
-    </div>
+    <h2 style="padding-top: 5%;">Login</h2>
+    <form>
+      <input id="email" type="text" placeholder="Username">
+      <input id="password" type="password" placeholder="Password">
+      <button id="submit" type="submit">Login</button>
+    </form>
+  </div>
   </body>
 </html>

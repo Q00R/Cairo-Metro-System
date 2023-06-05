@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Routes</title>
+    <link rel='stylesheet' href='/styles/bootstrap.min.css' />
+    <link rel='stylesheet' href='/styles/style.css' />
+    <script src="/js/jquery-2.2.0.min.js" type="text/javascript"></script>
+    <script src="/js/bootstrap.min.js" type="text/javascript"></script>
+
+    <style>
+    body {
+        background-image: url('/simulate.jpg');
+        background-repeat: no-repeat;
+        background-size: cover;
+    }
+    </style>
+
+    <script>
+        $(document).ready(function () {
+            $("#ridesTable").on("click", ".update-button", function () {
+                var id = $(this).data("id");
+                var origin = $(this).closest("tr").find("td:nth-child(3)").text();
+                var destination = $(this).closest("tr").find("td:nth-child(4)").text();
+                var status = $(this).closest("tr").find("td:nth-child(2)").text();
+                if (status === "completed") {
+                    return alert("Ride already completed!");
+                }
+                var date = $(this).closest("tr").find("td:nth-child(7)").text();
+                var tripDate = formatDate(date);
+                alert(tripDate);
+                data = { 
+                    origin,
+                    destination,
+                    tripDate
+                 };
+                $.ajax({
+                    type: "PUT",
+                    url: "/api/v1/ride/simulate",
+                    data,
+                    success: function (serverResponse) {
+                        location.reload();
+                        alert("Ride Simulated Successfully!\n" + JSON.stringify(serverResponse));
+                    },
+                    error: function (errorResponse) {
+                        if (errorResponse) {
+                            alert(`Error Simulating Ride: ${errorResponse.responseText}`);
+                        }
+                    }
+                });
+            });
+        });
+        function formatDate(dateString) {
+            var date = new Date(dateString);
+            var month = ("0" + (date.getMonth() + 1)).slice(-2);
+            var day = ("0" + date.getDate()).slice(-2);
+            var year = date.getFullYear();
+            return month + "-" + day + "-" + year;
+        }
+    </script>
+</head>
+
+<body>
+    <div>
+        <div>
+        <nav class="navbar navbar-inverse" style="padding-left:1%;">
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="/dashboard">Home</a></li>
+            <li><a href="/stations">Stations</a></li>
+            <li><a href="/users">Users</a></li>
+            {{#isNormal}}
+              <li><a href="/subscriptions">Subscriptions</a></li>
+              <li><a href="/requests/refund">Refund Ticket</a></li>
+              <li><a href="/requests/senior">Senior Citizens</a></li>
+              <li><a href="/price">Ticket Price</a></li>
+              <li><a href="/tickets">Book a ticket</a></li>
+              <li><a href="/rides/simulate">Rides</a></li>
+            {{/isNormal}}
+            {{#isAdmin}}
+              <li><a href="/manage/routes">Routes</a></li>
+               <li><a href="/manage/stations">Station</a></li>
+              <li><a href="/manage/zones">Zones</a></li>
+              <li><a href="/manage/routes">Routes</a></li>
+              <div class="dropdown navbar navbar-inverse nav navbar-nav">
+                <li><a>Requests</a></li>
+                <div class="dropdown-content navbar navbar-inverse nav navbar-nav">
+                  <li><a href="/manage/requests/seniors">Senior</a></li>
+                  <li><a href="/manage/requests/refunds">Refund</a></li>
+                </div>
+              </div>
+            {{/isAdmin}}
+          </ul>
+          <ul class="nav navbar-nav navbar-right" style="padding-right:2%">
+            <li><a style="color:goldenrod" href="/resetPassword">Reset Password</a></li>
+            <li><a  style="color:crimson" href="/">Logout</a></li>
+          </ul>
+       </nav>
+      </div>
+        <br />
+
+        <div class="center">
+            <h1 class="overlay2">Simulate A Ride</h1>
+        </div>
+  <div class="overlay">
+        <table id="ridesTable" class="table" style="margin-left: auto; margin-right: auto;">
+            <thead>
+                <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Origin</th>
+                    <th scope="col">Destination</th>
+                    <th style="width:15%" scope="col">User ID</th>
+                    <th style="width:15%" scope="col">Ticket ID</th>
+                    <th style="width:30%" scope="col">Trip Date</th>
+
+                </tr>
+                {{#rides}}
+                <tr>
+                    <td>{{id}}</td>
+                    <td>{{status}}</td>
+                    <td>{{origin}}</td>
+                    <td>{{destination}}</td>
+                    <td>{{userId}}</td>
+                    <td>{{ticketId}}</td>
+                    <td>{{tripDate}}</td>
+                    <td>
+                        <input data-id={{id}} type="button" class="update-button btn btn-info" value="Simulate">
+                    </td>
+                </tr>
+                {{/rides}}
+            </thead>
+        </table>
+  </div>
+</body>
+
+</html>

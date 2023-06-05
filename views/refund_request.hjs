@@ -12,7 +12,7 @@
       $(document).ready(function(){
         $("#submit").click(function() {
           const ticketId = $('#myDropdown').val();
-          if(ticketId == null || ticketId == -1 || ticketId == undefined || isNaN(ticketId)) {
+          if(ticketId === 'default') {
             alert('Please select a ticket');
             window.location.href = '/requests/refund'; 
           }
@@ -39,28 +39,43 @@
       </script>    
     <div>
       <div>
-        <nav class="navbar navbar-inverse" style="padding-left:2%;">
+        <nav class="navbar navbar-inverse" style="padding-left:1%;">
           <ul class="nav navbar-nav">
             <li class="active"><a href="/dashboard">Home</a></li>
+            <li><a href="/stations">Stations</a></li>
+            <li><a href="/users">Users</a></li>
+            {{#isNormal}}
+              <div class="dropdown navbar navbar-inverse nav navbar-nav">
+                <li><a>Subscriptions</a></li>
+                <div class="dropdown-content navbar navbar-inverse nav navbar-nav">
+                  <li><a href="/subscriptions">View</a></li>
+                  <li><a href="/subscriptions/purchase">Purchase</a></li>
+                </div>
+              </div>
+              <li><a href="/requests/refund">Refund Ticket</a></li>
+              <li><a href="/requests/senior">Senior Citizens</a></li>
+              <li><a href="/rides/simulate">Rides</a></li>
+              <div class="dropdown navbar navbar-inverse nav navbar-nav">
+                <li><a>Tickets</a></li>
+                <div class="dropdown-content navbar navbar-inverse nav navbar-nav">
+                  <li><a href="/price">Price</a></li>
+                  <li><a href="/tickets">View</a></li>
+                  <li><a href="/tickets/purchase">Hotel? Booking.com</a></li>
+                </div>
+              </div>
+            {{/isNormal}}
             {{#isAdmin}}
+              <li><a href="/manage/routes">Routes</a></li>
               <li><a href="/manage/stations">Station</a></li>
               <li><a href="/manage/zones">Zones</a></li>
-              <li><a href="/manage/routes">Routes</a></li>
               <div class="dropdown navbar navbar-inverse nav navbar-nav">
                 <li><a>Requests</a></li>
                 <div class="dropdown-content navbar navbar-inverse nav navbar-nav">
-                <li><a href="/manage/requests/seniors">Senior</a></li>
-                <li><a href="/manage/requests/refunds">Refund</a></li>
+                  <li><a href="/manage/requests/seniors">Senior</a></li>
+                  <li><a href="/manage/requests/refunds">Refund</a></li>
                 </div>
               </div>
             {{/isAdmin}}
-            {{#isNormal}}
-              <li><a href="/subscriptions">Subscriptions</a></li>
-              <li><a href="/requests/refund">Refund Ticket</a></li>
-              <li><a href="/requests/senior">Senior Citizens</a></li>
-              <li><a href="/price">Ticket Price</a></li>
-              <li><a href="/tickets">Book a ticket</a></li>
-            {{/isNormal}}
           </ul>
           <ul class="nav navbar-nav navbar-right" style="padding-right:2%">
             <li><a style="color:goldenrod" href="/resetPassword">Reset Password</a></li>
@@ -72,56 +87,22 @@
       <div style="margin-left: auto; margin-right: auto; padding-bottom: 5%;">
         <h1 style="text-align: center;">Apply For Refund Requests</h1>
       </div>
-        
+
         <form id="myForm" method="post">
-          
         <div class="dropdown" style="margin-left: auto; margin-right: auto; padding-left: 35%;">
-            <select id="myDropdown" style="width: 50%;" class="btn btn-secondary btn-lg dropdown-toggle">
+            <select id="myDropdown" style="width: 30%;" class="btn btn-secondary btn-lg dropdown-toggle">
                 <option disabled selected value="-1">Select a ticket</option>
                 {{#userTickets}}
-                    <option value={{id}}>{{id}}</option>                    
+                    <option value={{id}}>{{id}}</option>
                 {{/userTickets}}
             </select>
-        <input id="submit" style="width: 45%; height: 40%" class="btn btn-warning" name="submit" type="button" value="Place Request"><br><br>
+        <input id="submit" style="width: 15%; height: 40%" class="btn btn-warning" name="submit" type="button" value="Place Request"><br><br>
         </form>
         </div>
         <div style="margin-left: auto; margin-right: auto; padding-left: 35%;">
         <img src="/ref2.jpg" style="width:45%" alt="refund"><br>
         </div>
-    <div class="form-group form-horizontal">
-        {{#hasNoTickets}}
-          <tr>
-            <div class="alert alert-danger">
-              <strong>Warning!</strong> You have no Tickets.
-            </div>
-          </tr>
-        {{/hasNoTickets}}
-        {{^hasNoTickets}}
-        <table class="table table-bordered">
-          <thead>
-            <tr>
-              <th>Id</th>
-              <th>Origin</th>
-              <th>Destination</th>
-              <th>User Id</th>
-              <th>Subscription Id</th>
-              <th>Trip Date</th>
-            </tr>
-          </thead>
-          {{#userTickets}}
-          <tbody>
-            <tr>
-              <td>{{id}}</td>
-              <td>{{origin}}</td>
-              <td>{{destination}}</td>
-              <td>{{userId}}</td>
-              <td>{{subId}}</td>
-              <td>{{tripDate}}</td>
-            </tr>
-          {{/userTickets}}
-        </table>
-        {{/hasNoTickets}}
-    </div>
+
         
     </div>
   </body>
