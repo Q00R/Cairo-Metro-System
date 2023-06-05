@@ -9,29 +9,36 @@
   </head>
   <body>
     <script>
-    $(document).ready(function(){    
+    console.log({{stationId}});
+    const stationId = {{stationId}};
+    $(document).ready(function(){   
       // Handle Registration Button Click
       $("#update").click(function() {
         const stationName = $('#stationName').val();
-        const stationId = $('#stationId').val();
-        const data = {
-          stationName
-        };
-        $.ajax({
-          type: "put",
-          url: '/api/v1/station/' + stationId,
-          data,
-          success: function(serverResponse) {
-            if(serverResponse) {
-              alert('Successfully Edited Station');
+        if(!stationName) {
+          alert('Please enter a station name');
+          window.location.href = '/manage/stations/edit/' + stationId; 
+        }
+        else{
+          const data = {
+            stationName
+          };
+          $.ajax({
+            type: "put",
+            url: '/api/v1/station/' + stationId,
+            data,
+            success: function(serverResponse) {
+              if(serverResponse) {
+                alert('Successfully Edited Station');
+              }
+            },
+            error: function(errorResponse) {
+              if(errorResponse) {
+                alert(`Error Editing Station: ${errorResponse.responseText}`);
+              }            
             }
-          },
-          error: function(errorResponse) {
-            if(errorResponse) {
-              alert(`Error Editing Station: ${errorResponse.responseText}`);
-            }            
-          }
-        });
+          });
+        }
       });      
     });
     </script>
@@ -81,6 +88,7 @@
           </ul>
        </nav>
       </div>
+      </div>
     <br/>
     
       <div class="center">
@@ -88,12 +96,6 @@
     </div>
     <div style="padding-left: 500px">
     <form class="form-horizontal" style="width: 50%;">
-      <div class="form-group">
-          <label for="stationId" class="col-sm-2 control-label">Station Id</label>
-          <div class="col-sm-10">
-              <input type="text" class="form-control" id="stationId" name="stationId" placeholder="Station Id" value="{{stationId}}">
-          </div>
-      </div>
       <div class="form-group">
           <label for="stationName" class="col-sm-2 control-label">Station Name</label>
           <div class="col-sm-10">

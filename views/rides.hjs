@@ -14,11 +14,49 @@
         background-repeat: no-repeat;
         background-size: cover;
     }
+    #object {
+    position: absolute;
+    top: 0%;
+    left: -100px;
+    width: 80%;
+    height: 80%;
+    background-image: url('/train.png'); 
+    background-size: cover;
+    display: none;
+    }
+
+
     </style>
 
     <script>
         $(document).ready(function () {
             $("#ridesTable").on("click", ".update-button", function () {
+                var train = document.getElementById("object");
+                var currentPositionX = -100;
+                var currentPositionY = 0;
+                var targetPositionX = window.innerWidth; // Adjust this value to change the horizontal target position
+                var targetPositionY = 100; // Adjust this value to change the vertical target position
+                var audio = new Audio("/trainwhistle.mp3");
+                audio.play();
+
+                // Show the train
+                train.style.display = "block";
+
+                function animate() {
+                currentPositionX += 5; // Adjust this value to change the horizontal animation speed
+                currentPositionY = Math.sin(currentPositionX / 50) * 50 + targetPositionY; // Adjust this value to change the vertical animation range
+                train.style.transform = "translate(" + currentPositionX + "px, " + currentPositionY + "px)";
+
+                if (currentPositionX < targetPositionX) {
+                    requestAnimationFrame(animate);
+                } else {
+                    // Animation is completed, hide the train
+                    train.style.display = "none";
+                }
+                }
+
+                animate();
+
                 var id = $(this).data("id");
                 var origin = $(this).closest("tr").find("td:nth-child(3)").text();
                 var destination = $(this).closest("tr").find("td:nth-child(4)").text();
@@ -124,6 +162,8 @@
                     <td>{{ticketId}}</td>
                     <td>{{tripDate}}</td>
                     <td>
+                        <div id="object">
+                        </div>
                         <input data-id={{id}} type="button" class="update-button btn btn-info" value="Simulate">
                     </td>
                 </tr>

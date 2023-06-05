@@ -15,24 +15,6 @@ body {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Add a box shadow */
   }
   
-  .navbar {
-    color: #fff;
-    padding-left: 2%;
-  }
-  
-  .navbar a {
-    color: #fff;
-    text-decoration: none;
-  }
-  
-  .navbar-right a {
-    color: goldenrod;
-  }
-  
-  .navbar-right a:last-child {
-    color: crimson;
-  }
-  
   .center {
     text-align: center;
     margin-top: 40px;
@@ -93,12 +75,6 @@ body {
   /* Additional suggestions for your project */
   .container {
     padding: 40px 20px; /* Increase padding for more breathing space */
-  }
-  
-
-  
-  .navbar {
-    margin-bottom: 20px; /* Add margin at the bottom of the navbar */
   }
   
   .form-horizontal {

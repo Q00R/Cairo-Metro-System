@@ -105,7 +105,6 @@
         <table class="table table-bordered">
           <thead>
             <tr>
-              <th>Id</th>
               <th>Subscription Type</th>
               <th>Zone Id</th>
               <th>User Id</th>
@@ -115,7 +114,6 @@
           {{#subscriptions}}
           <tbody>
             <tr>
-              <td>{{id}}</td>
               <td>{{subType}}</td>
               <td>{{zoneId}}</td>
               <td>{{userId}}</td>

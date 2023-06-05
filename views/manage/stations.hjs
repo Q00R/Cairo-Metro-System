@@ -15,7 +15,7 @@
           url: '/api/v1/station/' + stationId,
           success: function(serverResponse) {
             if(serverResponse) {
-              alert('Deleted Station with is ' + stationId);
+              alert('Deleted Station with id ' + stationId);
               location.href = '/manage/stations';
             }
           },
@@ -95,7 +95,6 @@
       <table class="table" style="max-width: 75%; margin-left: auto; margin-right: auto;">
         <thead>
           <tr>
-            <th scope="col">id</th>
             <th scope="col">Name</th>
             <th scope="col">Type</th>
             <th scope="col">Position</th>
@@ -103,7 +102,6 @@
           </tr>
           {{#stations}}
             <tr>
-              <td>{{id}}</td>
               <td>{{stationName}}</td>
               <td>{{stationType}}</td>
               <td>{{stationPosition}}</td>

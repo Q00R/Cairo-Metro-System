@@ -12,10 +12,14 @@
       $(document).ready(function(){
         $("#submit").click(function() {
             const nationalId = $('#nationalId').val();
+            if(!nationalId) {
+              alert('Please enter your National ID');
+              window.location.href = '/requests/senior'; 
+            }
+            else{
             const data = {
                 nationalId,
             };
-
           $.ajax({
             type: "POST",
             url: '/api/v1/senior/request',
@@ -32,6 +36,7 @@
               }            
             }
           });
+            }
         });
       });
       </script>
@@ -87,7 +92,7 @@
     <form class="form-horizontal" style="width: 50%;">
       <div class="form-group">
               <label for="nationalIdLabel" class="form-check-label">National ID</label>
-              <input type="text" class="form-control" id="nationalId" name="nationalId" placeholder="102030104433" value="">
+              <input type="number" class="form-control" id="nationalId" name="nationalId" placeholder="102030104433" value="">
                 <small id="passHelp" class="form-text text-muted">If your National ID starts with a 3, do not bother appling.</small>
 
       </div>

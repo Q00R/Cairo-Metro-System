@@ -1,7 +1,7 @@
 const db = require('../../connectors/db');
 const roles = require('../../constants/roles');
 const { getSessionToken } = require('../../utils/session');
-
+//https://knexjs.org/guide/#node-js
 const getUser = async function(req) {
   const sessionToken = getSessionToken(req);
   if (!sessionToken) {
@@ -58,7 +58,8 @@ module.exports = function(app) {
 
   app.get('/manage/routes/create', async function(req, res) {
     const user = await getUser(req);
-    return res.render('routesCreate', { ...user});
+    const stations = await db.select('*').from('se_project.stations').orderBy("id");
+    return res.render('routesCreate', { ...user, stations });
   });
 
   app.get('/resetPassword', async function(req, res) {
@@ -70,7 +71,9 @@ module.exports = function(app) {
   const user = await getUser(req);
   const userId = user.userId;
   const userTickets = await db("se_project.tickets")
-  .where("userId", userId)
+  .select('se_project.tickets.*', 'se_project.refund_requests.status', 'se_project.refund_requests.refundAmount')
+  .innerJoin("se_project.refund_requests", "se_project.tickets.id", "se_project.refund_requests.ticketId")
+  .where("se_project.tickets.userId", userId)
   .returning("*");
   const hasNoTickets = userTickets.length === 0;
   return res.render('refund_request', {...user, userTickets, hasNoTickets });
@@ -121,12 +124,13 @@ app.get('/price', async function(req, res) {
   const userSubscription = await db('se_project.subsription').where('userId', user.userId).orderBy('id', 'desc').first();
   const hasSubscription = userSubscription !== undefined; // Check if userSubscription is defined
   const hasNoSubscription = !hasSubscription; // Check if userSubscription is undefined
-  return res.render('tickets/purchase', { ...user, stations, hasSubscription ,hasNoSubscription});
+  const subId = userSubscription.id;
+  return res.render('tickets/purchase', { ...user, stations, hasSubscription ,hasNoSubscription, subId });
  });
  
  app.get('/tickets', async function(req, res) {
   const user = await getUser(req);
-  const tickets = await db.select('*').from('se_project.tickets').where('userId', user.userId);
+  const tickets = await db.select('*').from('se_project.tickets').where('userId', user.userId).where('tripDate', '>=', 'Now()');
   const hasNoTickets = tickets.length === 0;
   return res.render('tickets', { ...user, tickets, hasNoTickets });
  });
@@ -177,7 +181,7 @@ app.get('/manage/requests/seniors', async function(req, res) {
 
 app.get('/manage/zones', async function(req, res) {
   const user = await getUser(req);
-  const zones = await db.select('*').from('se_project.zones');
+  const zones = await db.select('*').from('se_project.zones').orderBy("id", "asc");
   if (!user.isAdmin) {
     return res.status(403).render('403');
   }

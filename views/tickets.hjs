@@ -10,13 +10,6 @@
   <script src="/js/bootstrap.min.js"></script>
   
   <style>
-    .navbar {
-      padding-left: 2%;
-    }
-
-    .navbar-right {
-      padding-right: 2%;
-    }
     .form-horizontal {
       width: 50%;
       margin-left: 25%;
@@ -133,8 +126,7 @@
             </tr>                  
           {{/tickets}}
         </table>
-  {{/hasSubscription}}
-      </div>
+        {{/hasNoTickets}}
     </div>
   </form>
 </body>

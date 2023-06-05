@@ -241,6 +241,7 @@ module.exports = function (app) {
         }
         if (refundStaus === "accepted"){
           const transaction = await db("se_project.transactions")
+            .insert({ userId: request[0].userId, amount: request[0].refundAmount, purchasedId: request[0].ticketId, type: "Ticket Refund" })
             .insert({ userId: request[0].userId, amount: request[0].refundAmount, purchasedId: request[0].ticketId, type:"ticket" })
             .returning("*");
         }
@@ -320,7 +321,7 @@ module.exports = function (app) {
     let user = await getUser(req);
     let userId = user.userId;
     const { nationalId } = req.body;
-    const requestExists = await db("se_project.senior_requests").select("*").where("userId", userId).first();
+    const requestExists = await db("se_project.senior_requests").select("*").where("userId", userId).andWhere("status", "pending").first();
     if (!isEmpty(requestExists)) 
     {
       return res.status(400).send("This user already submitted a request to be a senior");
@@ -414,7 +415,7 @@ module.exports = function (app) {
     const userId = user.userId;
     const rideQuery = await db("se_project.rides").select("*").where("origin", origin).andWhere("destination", destination).andWhere("tripDate", tripDate).andWhere("userId", userId).first();
     const ticketId = rideQuery.ticketId; 
-    const checkAppliedRefReq = await db("se_project.refund_requests").select("*").where(ticketId, ticketId).first();
+    const checkAppliedRefReq = await db("se_project.refund_requests").select("*").where("ticketId", ticketId).andWhereNot("status", "rejected").first();
     if (!isEmpty(checkAppliedRefReq))
     {
       return res.status(400).send("There is a refund request for this ticket. You can't simulate the ride");

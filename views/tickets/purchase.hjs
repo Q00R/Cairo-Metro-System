@@ -10,13 +10,6 @@
   <script src="/js/bootstrap.min.js"></script>
   
   <style>
-    .navbar {
-      padding-left: 2%;
-    }
-
-    .navbar-right {
-      padding-right: 2%;
-    }
     .form-horizontal {
       width: 50%;
       margin-left: 25%;
@@ -51,28 +44,43 @@
 
 <body>
   <div>
-        <nav class="navbar navbar-inverse" style="padding-left:2%;">
+        <nav class="navbar navbar-inverse" style="padding-left:1%;">
           <ul class="nav navbar-nav">
             <li class="active"><a href="/dashboard">Home</a></li>
+            <li><a href="/stations">Stations</a></li>
+            <li><a href="/users">Users</a></li>
+            {{#isNormal}}
+              <div class="dropdown navbar navbar-inverse nav navbar-nav">
+                <li><a>Subscriptions</a></li>
+                <div class="dropdown-content navbar navbar-inverse nav navbar-nav">
+                  <li><a href="/subscriptions">View</a></li>
+                  <li><a href="/subscriptions/purchase">Purchase</a></li>
+                </div>
+              </div>
+              <li><a href="/requests/refund">Refund Ticket</a></li>
+              <li><a href="/requests/senior">Senior Citizens</a></li>
+              <li><a href="/rides/simulate">Rides</a></li>
+              <div class="dropdown navbar navbar-inverse nav navbar-nav">
+                <li><a>Tickets</a></li>
+                <div class="dropdown-content navbar navbar-inverse nav navbar-nav">
+                  <li><a href="/price">Price</a></li>
+                  <li><a href="/tickets">View</a></li>
+                  <li><a href="/tickets/purchase">Hotel? Booking.com</a></li>
+                </div>
+              </div>
+            {{/isNormal}}
             {{#isAdmin}}
+              <li><a href="/manage/routes">Routes</a></li>
               <li><a href="/manage/stations">Station</a></li>
               <li><a href="/manage/zones">Zones</a></li>
-              <li><a href="/manage/routes">Routes</a></li>
               <div class="dropdown navbar navbar-inverse nav navbar-nav">
                 <li><a>Requests</a></li>
                 <div class="dropdown-content navbar navbar-inverse nav navbar-nav">
-                <li><a href="/manage/requests/seniors">Senior</a></li>
-                <li><a href="/manage/requests/refunds">Refund</a></li>
+                  <li><a href="/manage/requests/seniors">Senior</a></li>
+                  <li><a href="/manage/requests/refunds">Refund</a></li>
                 </div>
               </div>
             {{/isAdmin}}
-            {{#isNormal}}
-              <li><a href="/subscriptions">Subscriptions</a></li>
-              <li><a href="/requests/refund">Refund Ticket</a></li>
-              <li><a href="/requests/senior">Senior Citizens</a></li>
-              <li><a href="/price">Ticket Price</a></li>
-              <li><a href="/tickets">Book a ticket</a></li>
-            {{/isNormal}}
           </ul>
           <ul class="nav navbar-nav navbar-right" style="padding-right:2%">
             <li><a style="color:goldenrod" href="/resetPassword">Reset Password</a></li>
@@ -103,15 +111,6 @@
           <input type="text" class="form-control" id="payedAmount" name="payedAmount" placeholder="Enter paid amount">
         </div>
         {{/hasNoSubscription}}
-        {{#hasSubscription}}
-        <div class="form-group" id="subscriptionPart">
-          <label for="SubscriptionID">Subscription</label>
-          <input type="text" class="form-control" id="SubscriptionID" name="SubscriptionID"
-            placeholder="Enter your SubscriptionID">
-
-        </div>
-        
-        {{/hasSubscription}}
 
         <div class="form-group">
           <label for="tripDate">Trip Date</label>
@@ -190,7 +189,7 @@
     var day = ("0" + currentDate.getDate()).slice(-2);
     var formattedDate = year + "-" + month + "-" + day;
     document.getElementById("tripDate").setAttribute("min", formattedDate);
-    
+
     function updateTables(priceOfTicket, stationToBeTaken, transferStations) {
       var pTable = $("#PriceTable");
       pTable.empty();
@@ -258,7 +257,7 @@
         const destination = $("#destinationDropdown").val();
         const tripDate = $("#tripDate").val();
 
-        if (creditCardNumber === "" || holderName === "" || payedAmount === "" || tripDate === "" || origin == undefined || destination == undefined) {
+        if (!creditCardNumber || !holderName || !payedAmount || !tripDate || !origin || !destination) {
           alert("Please fill in all fields");
           return;
         }
@@ -298,12 +297,12 @@
         });}
         else{
           alert("you have a subscription");
-        const subId = parseInt($("#SubscriptionID").val());
+        const subId = {{subId}};
         const origin = $("#originDropdown").val();
         const destination = $("#destinationDropdown").val();
         const tripDate = $("#tripDate").val();
 
-        if (subId === "" || tripDate === "" || origin == undefined || destination == undefined) {
+        if (!subId || !tripDate || !origin || !destination) {
           alert("Please fill in all fields");
           return;
         }
