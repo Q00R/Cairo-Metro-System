@@ -1,4 +1,4 @@
-const { isEmpty, countBy } = require("lodash");
+const { isEmpty, countBy, toLower } = require("lodash");
 const { v4 } = require("uuid");
 const db = require("../../connectors/db");
 const roles = require("../../constants/roles");
@@ -224,7 +224,9 @@ module.exports = function (app) {
       const user = await getUser(req);
       if (user.isAdmin){
         const { requestId } = req.params;
-        const { refundStaus } = req.body;
+        let { refundStaus } = req.body;
+        refundStaus = toLower(refundStaus);
+        
         if (!requestId) {
           return res.status(400).send("requestId is required");
         }
@@ -234,12 +236,12 @@ module.exports = function (app) {
         let request = await db("se_project.refund_requests")
           .where("id", requestId)
           .returning("*");
-        if(request[0].status == "accepted"){
+        if(request[0].status === "accepted"){
           return res.status(400).send("Refund Already Accepted!");
         }
-        if (refundStaus == "accepted"){
+        if (refundStaus === "accepted"){
           const transaction = await db("se_project.transactions")
-            .insert({ userId: request[0].userId, amount: request[0].refundAmount, purchasedId: request[0].ticketId })
+            .insert({ userId: request[0].userId, amount: request[0].refundAmount, purchasedId: request[0].ticketId, type:"ticket" })
             .returning("*");
         }
         request = await db("se_project.refund_requests")
