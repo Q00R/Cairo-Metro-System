@@ -9,12 +9,14 @@
   <script src="/js/bootstrap.min.js" type="text/javascript"></script>
   <script>
     $(document).ready(function () {
-      $("#del" + {{ id }}).click(function () {
+       $("#routesTable").on("click", ".delete-button", function () {
         $(this).parent().parent().remove();
+          var id = $(this).data("id");
+
 
         $.ajax({
           type: "DELETE",
-          url: "/api/v1/route/" + {{ id }},
+          url: "/api/v1/route/" + id,
         success: function (serverResponse) {
           alert("Deleted station\n" + JSON.stringify(serverResponse));
         }
@@ -92,7 +94,7 @@
           <td>{{fromStationId}}</td>
           <td>{{toStationId}}</td>
           <td>
-            <input id=del{{id}} type="button" value="Remove" class="btn btn-danger">
+            <input data-id=del{{id}} type="button" value="Remove" class="delete-button btn btn-danger">
           </td>
         </tr>
         {{/routes}}
