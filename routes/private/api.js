@@ -643,7 +643,12 @@ module.exports = function (app) {
             return res.status(400).send('Cannot downgrade subscription or subscription already exists');
           }
 
-          // Delete the existing subscription
+          // Delete the existing subscription but first change the subId in tickets to null
+
+          await db('se_project.tickets')
+            .where('subId', existingSubscription.id)
+            .update({ subId: null });
+
           await db('se_project.subsription')
             .where('userId', userId)
             .del();
@@ -667,7 +672,7 @@ module.exports = function (app) {
       const sub = await db('se_project.subsription')
         .where('userId', userId)
         .select('id').first();
-
+        
       const newTrans = {
         amount: deductionAmount,
         userId,
