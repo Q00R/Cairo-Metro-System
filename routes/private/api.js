@@ -463,8 +463,10 @@ module.exports = function (app) {
       addedRoute = addedRoute[0];
       const s1 = { "stationId": newStationId, "routeId": addedRoute.id };
       await db("se_project.stationRoutes").insert(s1);
+      await db("se_project.stations").update("stationStatus", "old").where("id", fromStation.id)
       const s2 = { "stationId": connectedStationId, "routeId": addedRoute.id };
       await db("se_project.stationRoutes").insert(s2);
+      await db("se_project.stations").update("stationStatus", "old").where("id", toStation.id)
       return res.status(200).json(addedRoute);
 
     } catch (e) {
@@ -639,8 +641,12 @@ module.exports = function (app) {
             return res.status(400).send('Cannot downgrade subscription or subscription already exists');
           }
 
-          // Delete the existing subscription
-          await db('se_project.tickets').where('subId', existingSubscription.id).update({ 'subId': null });
+          // Delete the existing subscription but first change the subId in tickets to null
+
+          await db('se_project.tickets')
+            .where('subId', existingSubscription.id)
+            .update({ subId: null });
+
           await db('se_project.subsription')
             .where('userId', userId)
             .del();
