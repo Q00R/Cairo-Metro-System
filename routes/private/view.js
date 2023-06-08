@@ -119,13 +119,17 @@ app.get('/price', async function(req, res) {
 
  app.get('/tickets/purchase', async function(req, res) {
 
-  const user = await getUser(req);
-  const stations = await db.select('*').from('se_project.stations');
-  const userSubscription = await db('se_project.subsription').where('userId', user.userId).orderBy('id', 'desc').first();
-  const hasSubscription = userSubscription !== undefined; // Check if userSubscription is defined
-  const hasNoSubscription = !hasSubscription; // Check if userSubscription is undefined
-  const subId = userSubscription.id;
+  let user = await getUser(req);
+  let stations = await db.select('*').from('se_project.stations');
+  let userSubscription = await db('se_project.subsription').where('userId', user.userId).orderBy('id', 'desc').first();
+  let hasSubscription = userSubscription !== undefined; // Check if userSubscription is defined
+  let hasNoSubscription = !hasSubscription; // Check if userSubscription is undefined
+  let subId = 0;
+  if (hasSubscription) 
+   subId = userSubscription.id;
   return res.render('tickets/purchase', { ...user, stations, hasSubscription ,hasNoSubscription, subId });
+
+  
  });
  
  app.get('/tickets', async function(req, res) {
@@ -187,5 +191,11 @@ app.get('/manage/zones', async function(req, res) {
   }
   return res.render('manage/zones', { ...user, zones });
 });
-
+  app.get('/advert' , async function(req, res) {
+   
+    const user = await getUser(req);
+    const userId = user.userId;
+    const rides = await db.select('*').from('se_project.rides').where('userId', userId);
+   return res.render('/advert',{...user,rides});
+  });
 };

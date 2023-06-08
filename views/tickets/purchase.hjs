@@ -183,6 +183,7 @@
 
   <script>
     console.log("ready!");
+    
     var currentDate = new Date();
     var year = currentDate.getFullYear();
     var month = ("0" + (currentDate.getMonth() + 1)).slice(-2);
@@ -247,7 +248,7 @@
       }
       console.log("ready!");
       $("#submit").click(function () {
-        alert("Clickedddd");
+       
         if(!hasSubscription){
         console.log("clicked!");
         const creditCardNumber = parseInt($("#creditCardNumber").val());
@@ -282,11 +283,7 @@
             const stationToBeTaken = serverResponse.stationToBeTaken;
             const transferStations = serverResponse.transferStations;
             alert(`Purchase successful!`);
-            alert(serverResponse);
-            alert(serverResponse.price);
-            alert(serverResponse.stationToBeTaken);
-            alert(serverResponse.transferStations);
-
+            
             updateTables(serverResponse.price, serverResponse.stationToBeTaken, serverResponse.transferStations);
           },
           error: function (errorResponse) {
@@ -325,11 +322,7 @@
             const stationToBeTaken = serverResponse.stationToBeTaken;
             const transferStations = serverResponse.transferStations;
             alert(`Purchase successful!`);
-            alert(serverResponse);
-            alert(serverResponse.price);
-            alert(serverResponse.stationToBeTaken);
-            alert(serverResponse.transferStations);
-
+            
               var rTable = $("#RemainingTable");
               rTable.empty();
               var row = $("<tr></tr>");
@@ -344,6 +337,16 @@
           error: function (errorResponse) {
             if (errorResponse) {
               alert(`Error purchasing: ${errorResponse.responseText}`);
+          
+              if (errorResponse.responseText == "No tickets remaining you have to pay using your credit card kindly refresh the page to pay using your credit card"||errorResponse.responseText == "No tickets remaining you have to pay using your credit card") {
+                const apiEndpoint= "/tickets/purchase";
+             // /tickets/purchase
+              window.location.href = apiEndpoint ;
+              //reload the page
+              }
+
+//refressh the page
+
             }
           },
         });
