@@ -10,15 +10,14 @@
   <script>
     $(document).ready(function () {
        $("#routesTable").on("click", ".delete-button", function () {
-        $(this).parent().parent().remove();
-          var id = $(this).data("id");
-
+        var id = $(this).data("id");
 
         $.ajax({
           type: "DELETE",
           url: "/api/v1/route/" + id,
         success: function (serverResponse) {
-          alert("Deleted station\n" + JSON.stringify(serverResponse));
+          alert("Deleted Route\n" + JSON.stringify(serverResponse));
+          location.reload();
         }
         });
       });
@@ -93,8 +92,8 @@
         <tr>
           <th scope="col">Id</th>
           <th scope="col">Name</th>
-          <th scope="col">From Station Id</th>
-          <th scope="col">To Station Id</th>
+          <th scope="col">From Station</th>
+          <th scope="col">To Station</th>
           <th scope="col">Delete</th>
 
         </tr>
@@ -105,7 +104,7 @@
           <td>{{fromStationId}}</td>
           <td>{{toStationId}}</td>
           <td>
-            <input data-id=del{{id}} type="button" value="Remove" class="delete-button btn btn-danger">
+            <input data-id={{id}} type="button" value="Remove" class="delete-button btn btn-danger">
           </td>
         </tr>
         {{/routes}}

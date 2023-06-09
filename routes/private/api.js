@@ -1,4 +1,4 @@
-const { isEmpty, countBy, toLower } = require("lodash");
+const { isEmpty, countBy, toLower, forEach } = require("lodash");
 const { v4 } = require("uuid");
 const db = require("../../connectors/db");
 const roles = require("../../constants/roles");
@@ -129,89 +129,120 @@ module.exports = function (app) {
   app.delete("/api/v1/station/:stationId", async function (req, res) {
     try {
       const user = await getUser(req);
-      if (user.isAdmin) {
-        const { stationId } = req.params;
-        if (!stationId) {
-          return res.status(400).send("stationId is required");
-        }
-        const station = await db("se_project.stations")
-          .where("id", stationId)
-          .returning("*");
-        const stationRoutes = await db("se_project.stationRoutes")
-          .innerJoin(
-            "se_project.routes",
-            "se_project.routes.id",
-            "se_project.stationRoutes.routeId"
-          )
-          .where("stationId", stationId)
-          .returning("se_project.routes.id", "se_project.routes.routeName", "se_project.routes.fromStationId", "se_project.routes.toStationId");
-        const routesIds = stationRoutes.map(route => route.routeId);
-        console.log("routesIds =>", routesIds);
-        let connectedStationsIds = (stationRoutes.map(route => (route.toStationId == stationId ? route.fromStationId : route.toStationId))).filter(id => id != stationId);
-        connectedStationsIds = connectedStationsIds.filter((id, index) => connectedStationsIds.indexOf(id) === index);
-        console.log("connectedStationsIds =>", connectedStationsIds);
-        let addedRoute;
-        for (let i = 0; i < connectedStationsIds.length - 1; i++) {
-          for (let j = i + 1; j < connectedStationsIds.length; j++) {
-            const newRoute1 = {
-              "fromStationId": connectedStationsIds[i],
-              "toStationId": connectedStationsIds[j],
-              "routeName": "New Route"
-            }
-            addedRoute = (await db("se_project.routes").insert(newRoute1).returning("*"));
-            console.log("addedRoute =>", addedRoute);
-            let id = addedRoute[0].id;
-            const newStationRoute1 = {
-              "stationId": newRoute1.fromStationId,
-              "routeId": id
-            }
-            console.log("newStationRoute1 =>", newStationRoute1);
-            const newStationRoute2 = {
-              "stationId": newRoute1.toStationId,
-              "routeId": id
-            }
-            console.log("newStationRoute2 =>", newStationRoute2);
-            await db("se_project.stationRoutes").insert(newStationRoute1).returning("*");
-            await db("se_project.stationRoutes").insert(newStationRoute2).returning("*");
-            const newRoute2 = {
-              "fromStationId": connectedStationsIds[j],
-              "toStationId": connectedStationsIds[i],
-              "routeName": "New Route"
-            }
-            addedRoute = (await db("se_project.routes").insert(newRoute2).returning("*"));
-            id = addedRoute[0].id;
-            console.log("addedRoute =>", addedRoute);
-            const newStationRoute3 = {
-              "stationId": newRoute2.fromStationId,
-              "routeId": id
-            }
-            const newStationRoute4 = {
-              "stationId": newRoute2.toStationId,
-              "routeId": id
-            }
-            await db("se_project.stationRoutes").insert(newStationRoute3).returning("*");
-            await db("se_project.stationRoutes").insert(newStationRoute4).returning("*");
+        if (user.isAdmin){
+          const { stationId } = req.params;
+          if (!stationId) {
+            return res.status(400).send("stationId is required");
           }
+          const station = await db("se_project.stations")
+            .where("id", stationId)
+            .returning("*");
+          const stationRoutes = await db("se_project.stationRoutes")
+            .innerJoin(
+              "se_project.routes",
+              "se_project.routes.id",
+              "se_project.stationRoutes.routeId"
+            )
+            .where("stationId", stationId)
+            .returning("se_project.routes.id", "se_project.routes.routeName", "se_project.routes.fromStationId", "se_project.routes.toStationId");
+          const routesIds = stationRoutes.map(route => route.routeId);
+          console.log("routesIds =>", routesIds);
+          let toStationsIds = stationRoutes.map(route => route.toStationId).filter(id => id != stationId);
+          let fromStationIds = stationRoutes.map(route => route.fromStationId).filter(id => id != stationId);
+          // let connectedStationsIds = (stationRoutes.map(route => (route.toStationId == stationId ? route.fromStationId : route.toStationId))).filter(id => id != stationId);
+          // connectedStationsIds = connectedStationsIds.filter((id, index) => connectedStationsIds.indexOf(id) === index);
+          // console.log("connectedStationsIds =>", connectedStationsIds);
+          console.log("toStationsIds =>", toStationsIds);
+          console.log("fromStationIds =>", fromStationIds);
+          let addedRoutes = [];
+          forEach(fromStationIds, async (fromStationId) => {
+            forEach(toStationsIds, async (toStationId) => {
+              if (fromStationId != toStationId){
+                const newRoute = {
+                  "fromStationId": fromStationId,
+                  "toStationId": toStationId,
+                  "routeName": "New Route"
+                }
+                let addedRoute = (await db("se_project.routes").insert(newRoute).returning("*"));
+                addedRoute = addedRoute[0];
+                console.log("addedRoute =>", addedRoute);
+                const newStationRoute1 = {
+                  "stationId": newRoute.fromStationId,
+                  "routeId": addedRoute.id
+                }
+                const newStationRoute2 = {
+                  "stationId": newRoute.toStationId,
+                  "routeId": addedRoute.id
+                }
+                await db("se_project.stationRoutes").insert(newStationRoute1).returning("*");
+                await db("se_project.stationRoutes").insert(newStationRoute2).returning("*");
+                addedRoutes.push(addedRoute);
+              }
+            })
+          })
+          console.log("addedRoutes =>", addedRoutes);
+
+          // for (let i = 0; i < connectedStationsIds.length-1; i++) {
+          //   for (let j = i+1; j < connectedStationsIds.length; j++) {
+          //     const newRoute1 = {
+          //       "fromStationId": connectedStationsIds[i],
+          //       "toStationId": connectedStationsIds[j],
+          //       "routeName": "New Route"
+          //     }
+          //     addedRoute = (await db("se_project.routes").insert(newRoute1).returning("*"));
+          //     console.log("addedRoute =>", addedRoute);
+          //     let id = addedRoute[0].id;
+          //     const newStationRoute1 = {
+          //       "stationId": newRoute1.fromStationId,
+          //       "routeId": id
+          //     }
+          //     console.log("newStationRoute1 =>", newStationRoute1);
+          //     const newStationRoute2 = {
+          //       "stationId": newRoute1.toStationId,
+          //       "routeId": id
+          //     }
+          //     console.log("newStationRoute2 =>", newStationRoute2);
+          //     await db("se_project.stationRoutes").insert(newStationRoute1).returning("*");
+          //     await db("se_project.stationRoutes").insert(newStationRoute2).returning("*");
+          //     const newRoute2 = {
+          //       "fromStationId": connectedStationsIds[j],
+          //       "toStationId": connectedStationsIds[i],
+          //       "routeName": "New Route"
+          //     }
+          //     addedRoute = (await db("se_project.routes").insert(newRoute2).returning("*"));
+          //     id = addedRoute[0].id;
+          //     console.log("addedRoute =>", addedRoute);
+          //     const newStationRoute3 = {
+          //       "stationId": newRoute2.fromStationId,
+          //       "routeId":  id
+          //     }
+          //     const newStationRoute4 = {
+          //       "stationId": newRoute2.toStationId,
+          //       "routeId":  id
+          //     }
+          //     await db("se_project.stationRoutes").insert(newStationRoute3).returning("*");
+          //     await db("se_project.stationRoutes").insert(newStationRoute4).returning("*");
+          //   }
+          // }
+          const deletedStationRoutes1 = await db("se_project.stationRoutes")
+            .whereIn("routeId", routesIds)
+            .del()
+            .returning("*");
+          console.log("deletedStationRoutes1 =>", deletedStationRoutes1);
+          const deletedRoutes = await db("se_project.routes")
+            .whereIn("id", routesIds)
+            .del()
+            .returning("*");
+            console.log("deletedRoutes =>", deletedRoutes);
+          const deletedStation = await db("se_project.stations")
+            .where("id", stationId)
+            .del()
+            .returning("*");
+            console.log("deletedStation =>", deletedStation);
+          return res.status(200).json(deletedStation);
         }
-        const deletedStationRoutes1 = await db("se_project.stationRoutes")
-          .whereIn("routeId", routesIds)
-          .del()
-          .returning("*");
-        console.log("deletedStationRoutes1 =>", deletedStationRoutes1);
-        const deletedRoutes = await db("se_project.routes")
-          .whereIn("id", routesIds)
-          .del()
-          .returning("*");
-        console.log("deletedRoutes =>", deletedRoutes);
-        const deletedStation = await db("se_project.stations")
-          .where("id", stationId)
-          .del()
-          .returning("*");
-        console.log("deletedStation =>", deletedStation);
-        return res.status(200).json(deletedStation);
-      }
-      else
-        return res.status(400).send("You are Unauthorized to do this action")
+        else
+          return res.status(400).send("You are Unauthorized to do this action")
     }
     catch (e) {
       console.log(e.message);
@@ -717,7 +748,10 @@ module.exports = function (app) {
             let priceThatShouldBePayed = 0;
             let route = "";
             try {
-              retrievingRoute = await calculatePrice(originID, destinationID);
+              retrievingRoute = await calculatePrice(originID, destinationID, res);
+              if (res.statusCode == 400) {
+                return;
+              }
               numberOfSations = Number(retrievingRoute.charAt(0));
               route = retrievingRoute.substring(1);
             }
@@ -842,7 +876,10 @@ module.exports = function (app) {
             let priceThatShouldBePayed = 0;
             let route = "";
             try {
-              retrievingRoute = await calculatePrice(originID, destinationID);
+              retrievingRoute = await calculatePrice(originID, destinationID, res);
+              if (res.statusCode == 400) {
+                return;
+              }
               numberOfSations = Number(retrievingRoute.charAt(0));
               route = retrievingRoute.substring(1);
             }
@@ -957,13 +994,16 @@ module.exports = function (app) {
         return res.json({ "price": 0, "message": `You are already at your destination ${station}` });
       } else {
         try {
-          retrievingRoute = await calculatePrice(originID, destinationID);
+          retrievingRoute = await calculatePrice(originID, destinationID, res);
+          if (res.statusCode == 400) {
+            return;
+          }
           numberOfSations = Number(retrievingRoute.charAt(0));
           route = retrievingRoute.substring(1);
         }
         catch (e) {
 
-          return (res.send(e.message));
+          return (res.status(400).send(e.message));
         }
         const stationToBeTaken = [];
         const transferStations = [];
@@ -1077,7 +1117,7 @@ function BFS(adj, src, dest, v, pred, dist) {
 }
 // utility function to print the shortest distance
 // between source vertex and destination vertex
-function shortestDistance(adj, s, dest, v) {
+function shortestDistance(adj, s, dest, v, res) {
   console.log("IN SHORTEST DISTANCE");
   // predecessor[i] array stores predecessor of
   // i and distance array stores distance of i
@@ -1085,10 +1125,12 @@ function shortestDistance(adj, s, dest, v) {
   let pred = new Array(v).fill(0);
   let dist = new Array(v).fill(0);
 
+  console.log("sd1");
   if (BFS(adj, s, dest, v, pred, dist) == false) {
-    throw new Error("unreachable destination");
+    console.log("sd2");
+    return res.status(400).send("Given source and destination are not connected");
   }
-
+  console.log("sd3");
   // vector path stores the shortest path
   let path = new Array();
 
@@ -1115,7 +1157,7 @@ function shortestDistance(adj, s, dest, v) {
   // printing path from source to destination
 
 }
-async function calculatePrice(source, dest) {
+async function calculatePrice(source, dest, res) {
   // no. of vertices
   console.log("IN CALCULATE PRICE");
   let test = await db.count("*").from("se_project.stations");
@@ -1148,7 +1190,7 @@ async function calculatePrice(source, dest) {
   console.log("HENAAAAAAAAAAAAAAA");
   console.log(adj)
 
-  return shortestDistance(adj, source, dest, v);
+  return shortestDistance(adj, source, dest, v, res);
 
   // The code is contributed by Gautam goel
 }

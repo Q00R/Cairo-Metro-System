@@ -47,6 +47,12 @@ module.exports = function(app) {
   app.get('/manage/routes', async function(req, res) {
     const user = await getUser(req);
     const routes = await db.select('*').from('se_project.routes').orderBy("id");
+    for (let index = 0; index < routes.length; index++) {
+      const toStationName = await db.select('stationName').from('se_project.stations').where('id', routes[index].toStationId).first();
+      routes[index].toStationId = toStationName.stationName;
+      const fromStationName = await db.select('stationName').from('se_project.stations').where('id', routes[index].fromStationId).first();
+      routes[index].fromStationId = fromStationName.stationName;
+    }
     return res.render('routes', { ...user, routes });
   });
 
@@ -71,12 +77,15 @@ module.exports = function(app) {
   const user = await getUser(req);
   const userId = user.userId;
   const userTickets = await db("se_project.tickets")
+  .where("se_project.tickets.userId", userId)
+  .returning("*");
+  const refundedTickets = await db("se_project.tickets")
   .select('se_project.tickets.*', 'se_project.refund_requests.status', 'se_project.refund_requests.refundAmount')
   .innerJoin("se_project.refund_requests", "se_project.tickets.id", "se_project.refund_requests.ticketId")
   .where("se_project.tickets.userId", userId)
   .returning("*");
   const hasNoTickets = userTickets.length === 0;
-  return res.render('refund_request', {...user, userTickets, hasNoTickets });
+  return res.render('refund_request', {...user, userTickets, hasNoTickets, refundedTickets });
  });
 
  app.get('/requests/senior', async function(req, res) {
@@ -141,7 +150,7 @@ app.get('/price', async function(req, res) {
  
  app.get('/manage/stations', async function(req, res) {
   const user = await getUser(req);
-  const stations = await db.select('*').from('se_project.stations');
+  const stations = await db.select('*').from('se_project.stations').orderBy("id", "desc");
   if (!user.isAdmin) {
     return res.status(403).render('403');
   }

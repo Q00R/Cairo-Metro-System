@@ -229,7 +229,6 @@
       row.append(tTable1);
       tTable.append(row);
 
-      alert("Successfully Purchased");
     }
     $(document).ready(function () {
   const hasSubscription = {{hasSubscription}};
@@ -287,13 +286,10 @@
             updateTables(serverResponse.price, serverResponse.stationToBeTaken, serverResponse.transferStations);
           },
           error: function (errorResponse) {
-            if (errorResponse) {
-              alert(`Error purchasing: ${errorResponse.responseText}`);
-            }
+            alert(`Error purchasing: ${errorResponse.responseText}`);
           },
         });}
         else{
-          alert("you have a subscription");
         const subId = {{subId}};
         const origin = $("#originDropdown").val();
         const destination = $("#destinationDropdown").val();
@@ -321,7 +317,7 @@
             const priceOfTicket = serverResponse.price;
             const stationToBeTaken = serverResponse.stationToBeTaken;
             const transferStations = serverResponse.transferStations;
-            alert(`Purchase successful!`);
+            alert(`Purchase successful 123!`);
             
               var rTable = $("#RemainingTable");
               rTable.empty();
@@ -329,13 +325,11 @@
               var rTable1 = $("<td></td>").text( serverResponse.numnberOfRemainingTickets);
               row.append(rTable1);
               rTable.append(row);
-              alert(serverResponse.numnberOfRemainingTickets)
 
             updateTables(serverResponse.price, serverResponse.stationToBeTaken, serverResponse.transferStations);
 
           },
           error: function (errorResponse) {
-            if (errorResponse) {
               alert(`Error purchasing: ${errorResponse.responseText}`);
           
               if (errorResponse.responseText == "No tickets remaining you have to pay using your credit card kindly refresh the page to pay using your credit card"||errorResponse.responseText == "No tickets remaining you have to pay using your credit card") {
@@ -347,7 +341,6 @@
 
 //refressh the page
 
-            }
           },
         });
 

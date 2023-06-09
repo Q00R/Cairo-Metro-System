@@ -18,6 +18,7 @@
           }
           else{
             const url = `/api/v1/refund/${ticketId}`;
+            location.reload();
             $.ajax({
               type: "POST",
               url,
@@ -128,7 +129,7 @@
               <th>Refund Amount</th>
             </tr>
           </thead>
-          {{#userTickets}}
+          {{#refundedTickets}}
           <tbody>
             <tr>
               <td>{{id}}</td>
@@ -140,7 +141,7 @@
               <td>{{status}}</td>
               <td>{{refundAmount}}</td>
             </tr>
-          {{/userTickets}}
+          {{/refundedTickets}}
         </table>
         {{/hasNoTickets}}
     </div>
