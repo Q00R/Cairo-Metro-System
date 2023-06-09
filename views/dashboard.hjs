@@ -30,7 +30,9 @@
           <ul class="nav navbar-nav">
             <li class="active"><a href="/dashboard">Home</a></li>
             {{^isAdmin}}
-              <li><a href="/requests/senior">Senior Citizens</a></li>
+              {{#isNormal}}
+                <li><a href="/requests/senior">Senior Citizens</a></li>
+              {{/isNormal}}
               <li><a href="/rides/simulate">Rides</a></li>
               <li><a href="/requests/refund">Refund Ticket</a></li>
               <div class="dropdown navbar navbar-inverse nav navbar-nav">

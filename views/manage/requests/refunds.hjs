@@ -36,19 +36,12 @@
         <nav class="navbar navbar-inverse" style="padding-left:1%;">
           <ul class="nav navbar-nav">
             <li class="active"><a href="/dashboard">Home</a></li>
-            <li><a href="/stations">Stations</a></li>
-            <li><a href="/users">Users</a></li>
-            {{#isNormal}}
-              <div class="dropdown navbar navbar-inverse nav navbar-nav">
-                <li><a>Subscriptions</a></li>
-                <div class="dropdown-content navbar navbar-inverse nav navbar-nav">
-                  <li><a href="/subscriptions">View</a></li>
-                  <li><a href="/subscriptions/purchase">Purchase</a></li>
-                </div>
-              </div>
-              <li><a href="/requests/refund">Refund Ticket</a></li>
-              <li><a href="/requests/senior">Senior Citizens</a></li>
+            {{^isAdmin}}
+              {{#isNormal}}
+                <li><a href="/requests/senior">Senior Citizens</a></li>
+              {{/isNormal}}
               <li><a href="/rides/simulate">Rides</a></li>
+              <li><a href="/requests/refund">Refund Ticket</a></li>
               <div class="dropdown navbar navbar-inverse nav navbar-nav">
                 <li><a>Tickets</a></li>
                 <div class="dropdown-content navbar navbar-inverse nav navbar-nav">
@@ -57,7 +50,14 @@
                   <li><a href="/tickets/purchase">Hotel? Booking.com</a></li>
                 </div>
               </div>
-            {{/isNormal}}
+              <div class="dropdown navbar navbar-inverse nav navbar-nav">
+                <li><a>Subscriptions</a></li>
+                <div class="dropdown-content navbar navbar-inverse nav navbar-nav">
+                  <li><a href="/subscriptions">View</a></li>
+                  <li><a href="/subscriptions/purchase">Purchase</a></li>
+                </div>
+              </div>
+            {{/isAdmin}}
             {{#isAdmin}}
               <li><a href="/manage/routes">Routes</a></li>
               <li><a href="/manage/stations">Station</a></li>
