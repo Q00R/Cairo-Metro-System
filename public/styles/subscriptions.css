@@ -11,8 +11,8 @@ body {
     max-width: 960px;
     margin: 0 auto;
     padding: 20px;
-    background-color: #fff;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Add a box shadow */
+    background-color: rgba(255, 255, 255, 0.5);
   }
   
   .center {
@@ -118,5 +118,9 @@ body {
   .subscription-table,
   .subscription-types {
     flex: 1;
+  }
+
+  .darwin{
+      position: relative;
   }
   

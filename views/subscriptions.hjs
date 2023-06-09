@@ -9,6 +9,30 @@
   <script src="/js/jquery-2.2.0.min.js"></script>
   <script src="/js/bootstrap.min.js"></script>
   <style>
+    body {
+        background-image: url('/DarwizzySub.jpeg');
+        background-repeat: no-repeat;
+        background-size: cover;
+    }
+
+    .header-overlay {
+  background-color: rgba(255, 255, 255, 0.8);
+  padding: 5px; /* Reduced padding to make it fit better */
+  width: 300px; /* Reduced width to fit the header */
+  max-width: 100%; /* Allow the element to expand up to the full width of the parent container */
+  margin: 50px auto;
+  border-radius: 10px;
+}
+
+
+  .table-overlay {
+     background-color: rgba(255, 255, 255, 0.8);
+  padding: 20px;
+  max-width: 60%;
+  margin: 50px auto;
+  border-radius: 10px;
+  }
+
     .center {
       text-align: center;
     }
@@ -44,83 +68,87 @@
   </style>
 </head>
 <body>
-  <div>
-        <nav class="navbar navbar-inverse" style="padding-left:1%;">
-          <ul class="nav navbar-nav">
-            <li class="active"><a href="/dashboard">Home</a></li>
-            <li><a href="/stations">Stations</a></li>
-            <li><a href="/users">Users</a></li>
-            {{#isNormal}}
-              <div class="dropdown navbar navbar-inverse nav navbar-nav">
-                <li><a>Subscriptions</a></li>
-                <div class="dropdown-content navbar navbar-inverse nav navbar-nav">
-                  <li><a href="/subscriptions">View</a></li>
-                  <li><a href="/subscriptions/purchase">Purchase</a></li>
-                </div>
-              </div>
-              <li><a href="/requests/refund">Refund Ticket</a></li>
-              <li><a href="/requests/senior">Senior Citizens</a></li>
-              <li><a href="/rides/simulate">Rides</a></li>
-              <div class="dropdown navbar navbar-inverse nav navbar-nav">
-                <li><a>Tickets</a></li>
-                <div class="dropdown-content navbar navbar-inverse nav navbar-nav">
-                  <li><a href="/price">Price</a></li>
-                  <li><a href="/tickets">View</a></li>
-                  <li><a href="/tickets/purchase">Hotel? Booking.com</a></li>
-                </div>
-              </div>
-            {{/isNormal}}
-            {{#isAdmin}}
-              <li><a href="/manage/routes">Routes</a></li>
-              <li><a href="/manage/stations">Station</a></li>
-              <li><a href="/manage/zones">Zones</a></li>
-              <div class="dropdown navbar navbar-inverse nav navbar-nav">
-                <li><a>Requests</a></li>
-                <div class="dropdown-content navbar navbar-inverse nav navbar-nav">
-                  <li><a href="/manage/requests/seniors">Senior</a></li>
-                  <li><a href="/manage/requests/refunds">Refund</a></li>
-                </div>
-              </div>
-            {{/isAdmin}}
-          </ul>
-          <ul class="nav navbar-nav navbar-right" style="padding-right:2%">
-            <li><a style="color:goldenrod" href="/resetPassword">Reset Password</a></li>
-            <li><a  style="color:crimson" href="/">Logout</a></li>
-          </ul>
-       </nav>
-      </div>
+    <nav class="navbar navbar-inverse" style="padding-left:1%;">
+      <ul class="nav navbar-nav">
+        <li class="active"><a href="/dashboard">Home</a></li>
+        <li><a href="/stations">Stations</a></li>
+        <li><a href="/users">Users</a></li>
+        {{#isNormal}}
+          <div class="dropdown navbar navbar-inverse nav navbar-nav">
+            <li><a>Subscriptions</a></li>
+            <div class="dropdown-content navbar navbar-inverse nav navbar-nav">
+              <li><a href="/subscriptions">View</a></li>
+              <li><a href="/subscriptions/purchase">Purchase</a></li>
+            </div>
+          </div>
+          <li><a href="/requests/refund">Refund Ticket</a></li>
+          <li><a href="/requests/senior">Senior Citizens</a></li>
+          <li><a href="/rides/simulate">Rides</a></li>
+          <div class="dropdown navbar navbar-inverse nav navbar-nav">
+            <li><a>Tickets</a></li>
+            <div class="dropdown-content navbar navbar-inverse nav navbar-nav">
+              <li><a href="/price">Price</a></li>
+              <li><a href="/tickets">View</a></li>
+              <li><a href="/tickets/purchase">Hotel? Booking.com</a></li>
+            </div>
+          </div>
+        {{/isNormal}}
+        {{#isAdmin}}
+          <li><a href="/manage/routes">Routes</a></li>
+          <li><a href="/manage/stations">Station</a></li>
+          <li><a href="/manage/zones">Zones</a></li>
+          <div class="dropdown navbar navbar-inverse nav navbar-nav">
+            <li><a>Requests</a></li>
+            <div class="dropdown-content navbar navbar-inverse nav navbar-nav">
+              <li><a href="/manage/requests/seniors">Senior</a></li>
+              <li><a href="/manage/requests/refunds">Refund</a></li>
+            </div>
+          </div>
+        {{/isAdmin}}
+      </ul>
+      <ul class="nav navbar-nav navbar-right" style="padding-right:2%">
+        <li><a style="color:goldenrod" href="/resetPassword">Reset Password</a></li>
+        <li><a style="color:crimson" href="/">Logout</a></li>
+      </ul>
+    </nav>
+    <div class="header-overlay">
     <h1>Subscriptions</h1>
-  </div>
+    </div>
 
+    
+  
   <form class="form-horizontal">
     <div class="form-group">
         {{#hasNoSubscription}}
-          <tr>
+          <div class="table-overlay">
             <div class="alert alert-danger">
               <strong>Warning!</strong> You have no subscriptions.
             </div>
-          </tr>
+          </div>
         {{/hasNoSubscription}}
         {{^hasNoSubscription}}
-        <table class="table table-bordered">
-          <thead>
-            <tr>
-              <th>Subscription Type</th>
-              <th>Zone Id</th>
-              <th>User Id</th>
-              <th>Number of Tickets</th>
-            </tr>
-          </thead>
-          {{#subscriptions}}
-          <tbody>
-            <tr>
-              <td>{{subType}}</td>
-              <td>{{zoneId}}</td>
-              <td>{{userId}}</td>
-              <td>{{noOfTickets}}</td>
-            </tr>                  
-          {{/subscriptions}}
-        </table>
+        <div class="table-overlay">
+          <table class="table table-bordered">
+            <thead>
+              <tr>
+                <th>Subscription Type</th>
+                <th>Zone Id</th>
+                <th>User Id</th>
+                <th>Number of Tickets</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#subscriptions}}
+                <tr>
+                  <td>{{subType}}</td>
+                  <td>{{zoneId}}</td>
+                  <td>{{userId}}</td>
+                  <td>{{noOfTickets}}</td>
+                </tr>
+              {{/subscriptions}}
+            </tbody>
+          </table>
+        </div>
         {{/hasNoSubscription}}
     </div>
   </form>
