@@ -253,6 +253,78 @@ module.exports = function (app) {
             .del()
             .returning("*");
             console.log("deletedStation =>", deletedStation);
+            let ttickets = await db("se_project.tickets").select("*");
+      for (let i = 0; i < ttickets.length; i++) {
+        let cur = ttickets[i];
+        const tticketId = cur.id;
+        let transaction = await db("se_project.transactions").select("*").where("purchasedId", tticketId).andWhere("type", "ticket").first();
+        try {
+          let retrievingRoute = await calculatePrice(Number(cur.origin), Number(cur.destination));
+          let numberOfSations = Number(retrievingRoute.split('.')[0]);
+
+          if (numberOfSations <= 9) {
+            const zone = await db('se_project.zones').where('id', 1).first();
+          } else if (numberOfSations <= 16) {
+            const zone = await db('se_project.zones').where('id', 2).first();
+          } else {
+            const zone = await db('se_project.zones').where('id', 3).first();
+          }
+
+          priceThatShouldBePayed = zone.price;
+
+          if (user.isSenior)
+            priceThatShouldBePayed = priceThatShouldBePayed * 0.5;
+
+          await db("se_project.transactions").update("amount", priceThatShouldBePayed);
+        }
+        catch (e) {
+          const ticketQuery = await db
+            .select("*")
+            .from("se_project.tickets")
+            .where("id", tticketId)
+            .first();
+
+          const userId = ticketQuery.userId;
+          const rideCompletedCheck = await db("se_project.rides").select("*").where("ticketId", tticketId).andWhere("status", "completed").first();
+          if (!isEmpty(rideCompletedCheck)) {
+            continue;
+          }
+
+          const refundsSearch = await db("se_project.refund_requests")
+            .select("*")
+            .where("ticketId", tticketId);
+          if (!isEmpty(refundsSearch)) {
+            continue;
+          }
+
+          const tick = await db("se_project.tickets")
+            .innerJoin("se_project.transactions", "se_project.tickets.id", "se_project.transactions.purchasedId")
+            .where("se_project.tickets.id", tticketId)
+            .andWhere("se_project.transactions.type", "ticket")
+            .first();
+          console.log("ticket   ", tick);
+          const ticketPrice = tick.amount;
+
+          console.log("ticketPrice   ", ticketPrice);
+
+          try {
+            const newRefund =
+            {
+              status: "pending",
+              userId,
+              refundAmount: ticketPrice,
+              ticketId: tticketId
+            }
+            const refund = await db("se_project.refund_requests").insert(newRefund).returning("*");
+            continue;
+
+          }
+          catch (e) {
+            console.log(e.message);
+            return res.status(400).send("Could not refund ticket");
+          }
+        }
+      }
           return res.status(200).json(deletedStation);
         }
         else
