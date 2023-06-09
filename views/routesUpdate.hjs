@@ -11,7 +11,7 @@
         $(document).ready(function () {
             $("#routesTable").on("click", ".update-button", function () {
                 var id = $(this).data("id");
-                var routeName = $("#field" + id).val().split(" ").join("");
+                var routeName = $("#field" + id).val();
                 if (!routeName){
                   alert("Plz ng7ena");
                   return;

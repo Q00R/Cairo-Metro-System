@@ -12,7 +12,7 @@
     $(document).ready(function(){    
       // Handle Registration Button Click
       $("#create").click(function() {
-        const stationName = $('#stationName').val().split(" ").join("");
+        const stationName = $('#stationName').val();
 
         const data = {
           stationName

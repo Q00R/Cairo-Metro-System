@@ -24,7 +24,7 @@
           success: function (serverResponse) {
             $("#newStationId").val("");
             $("#toStationId").val("");
-            $("#routeName").val("").split(" ").join("");
+            $("#routeName").val("");
             alert(JSON.stringify(serverResponse));
           },
           error: function (serverResponse) {

@@ -1,5 +1,6 @@
 const { isEmpty, countBy, toLower, forEach } = require("lodash");
 const { v4 } = require("uuid");
+const axios = require("axios");
 const db = require("../../connectors/db");
 const roles = require("../../constants/roles");
 const { getSessionToken } = require('../../utils/session')
@@ -587,7 +588,78 @@ module.exports = function (app) {
 
       let deletedRoute = await db("se_project.routes").delete().where("id", routeId).returning("*");
       deletedRoute = deletedRoute[0];
+      let ttickets = await db("se_project.tickets").select("*");
+      for (let i = 0; i < ttickets.length; i++) {
+        let cur = ttickets[i];
+        const tticketId = cur.id;
+        let transaction = await db("se_project.transactions").select("*").where("purchasedId", tticketId).andWhere("type", "ticket").first();
+        try {
+          let retrievingRoute = await calculatePrice(Number(cur.origin), Number(cur.destination));
+          let numberOfSations = Number(retrievingRoute.split('.')[0]);
 
+          if (numberOfSations <= 9) {
+            const zone = await db('se_project.zones').where('id', 1).first();
+          } else if (numberOfSations <= 16) {
+            const zone = await db('se_project.zones').where('id', 2).first();
+          } else {
+            const zone = await db('se_project.zones').where('id', 3).first();
+          }
+
+          priceThatShouldBePayed = zone.price;
+
+          if (user.isSenior)
+            priceThatShouldBePayed = priceThatShouldBePayed * 0.5;
+
+          await db("se_project.transactions").update("amount", priceThatShouldBePayed);
+        }
+        catch (e) {
+          const ticketQuery = await db
+            .select("*")
+            .from("se_project.tickets")
+            .where("id", tticketId)
+            .first();
+
+          const userId = ticketQuery.userId;
+          const rideCompletedCheck = await db("se_project.rides").select("*").where("ticketId", tticketId).andWhere("status", "completed").first();
+          if (!isEmpty(rideCompletedCheck)) {
+            continue;
+          }
+
+          const refundsSearch = await db("se_project.refund_requests")
+            .select("*")
+            .where("ticketId", tticketId);
+          if (!isEmpty(refundsSearch)) {
+            continue;
+          }
+
+          const tick = await db("se_project.tickets")
+            .innerJoin("se_project.transactions", "se_project.tickets.id", "se_project.transactions.purchasedId")
+            .where("se_project.tickets.id", tticketId)
+            .andWhere("se_project.transactions.type", "ticket")
+            .first();
+          console.log("ticket   ", tick);
+          const ticketPrice = tick.amount;
+
+          console.log("ticketPrice   ", ticketPrice);
+
+          try {
+            const newRefund =
+            {
+              status: "pending",
+              userId,
+              refundAmount: ticketPrice,
+              ticketId: tticketId
+            }
+            const refund = await db("se_project.refund_requests").insert(newRefund).returning("*");
+            continue;
+
+          }
+          catch (e) {
+            console.log(e.message);
+            return res.status(400).send("Could not refund ticket");
+          }
+        }
+      }
       if (!(await db("se_project.stationRoutes").select("*").where("stationId", fromStation.id).first())) {
         console.log(fromStation.stationPosition);
         await db("se_project.stations").update("stationPosition", fromStation.stationPosition).where("id", toStation.id);
@@ -608,9 +680,6 @@ module.exports = function (app) {
       else if (fromStation.stationPosition == "middle" && toStation.stationPosition == "end") {
         await db("se_project.stations").update("stationPosition", "start").where("id", toStation.id);
       }
-
-      let tickets = await db("se_project.tickets").select("*").first();
-      console.log(tickets);
 
       return res.status(200).send(deletedRoute);
 
@@ -802,17 +871,17 @@ module.exports = function (app) {
 
             const originID = originResult.id;
             const destinationID = destinationResult.id;
-            let retrievingRoute = "";
+            let retrievingRoute = '';
             let numberOfSations = 0;
             let priceThatShouldBePayed = 0;
-            let route = "";
+            let route = '';
             try {
               retrievingRoute = await calculatePrice(originID, destinationID, res);
               if (res.statusCode == 400) {
                 return;
               }
-              numberOfSations = Number(retrievingRoute.charAt(0));
-              route = retrievingRoute.substring(1);
+              numberOfSations = Number(retrievingRoute.split('.')[0]);
+              route = retrievingRoute.split('.');
             }
             catch (e) {
 
@@ -820,8 +889,9 @@ module.exports = function (app) {
             }
             const stationToBeTaken = [];
             const transferStations = [];
-            for (let i = 0; i < route.length; i++) {
-              let id = Number(route.charAt(i));
+            for (let i = 0; i < route.length-1; i++) {
+              let id = Number(route[i+1]);
+              console.log(id)
               stationToBeTaken.push(await getStationName(id));
               if (await isStationTransfer(id)) {
                 transferStations.push(await getStationName(id));
@@ -867,7 +937,6 @@ module.exports = function (app) {
                 type: "ticket"
               });
 
-              console.log("ticketId", ticketId);
               const ride = await db('se_project.rides').insert({
                 status: "upcoming",
                 origin: origin,
@@ -939,8 +1008,8 @@ module.exports = function (app) {
               if (res.statusCode == 400) {
                 return;
               }
-              numberOfSations = Number(retrievingRoute.charAt(0));
-              route = retrievingRoute.substring(1);
+              numberOfSations = Number(retrievingRoute.split('.')[0]);
+              route = retrievingRoute.split('.');
             }
             catch (e) {
 
@@ -948,8 +1017,8 @@ module.exports = function (app) {
             }
             const stationToBeTaken = [];
             const transferStations = [];
-            for (let i = 0; i < route.length; i++) {
-              let id = Number(route.charAt(i));
+            for (let i = 0; i < route.length-1; i++) {
+              let id = Number(route[i+1]);
               stationToBeTaken.push(await getStationName(id));
               if (await isStationTransfer(id)) {
                 transferStations.push(await getStationName(id));
@@ -1057,8 +1126,8 @@ module.exports = function (app) {
           if (res.statusCode == 400) {
             return;
           }
-          numberOfSations = Number(retrievingRoute.charAt(0));
-          route = retrievingRoute.substring(1);
+          numberOfSations = Number(retrievingRoute.split('.')[0]);
+          route = retrievingRoute.split('.');
         }
         catch (e) {
 
@@ -1066,8 +1135,8 @@ module.exports = function (app) {
         }
         const stationToBeTaken = [];
         const transferStations = [];
-        for (let i = 0; i < route.length; i++) {
-          let id = Number(route.charAt(i));
+        for (let i = 0; i < route.length-1; i++) {
+          let id = Number(route[i+1]);
           stationToBeTaken.push(await getStationName(id));
           if (await isStationTransfer(id)) {
             transferStations.push(await getStationName(id));
@@ -1205,10 +1274,10 @@ function shortestDistance(adj, s, dest, v, res) {
   console.log("heloo");
   console.log(dist[dest]);
   console.log("Path is::");
-  let route = "";
+  let route = '';
   for (let i = path.length - 1; i >= 0; i--) {
     console.log(path[i]);
-    route += path[i]
+    route += '.' + path[i];
   }
   console.log("route", route, "concatenated", dist[dest] + route);
   return dist[dest] + route;
@@ -1260,7 +1329,9 @@ async function calculatePrice(source, dest, res) {
 }
 async function getStationName(stationId) {
   let entry = await db('se_project.stations').where('id', stationId).first();
+  console.log('stationId: ' + stationId)
   let stationName = entry.stationName;
+  console.log('here2')
   return stationName;
 }
 async function isStationTransfer(stationId) {

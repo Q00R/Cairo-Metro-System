@@ -1,8 +1,8 @@
 const db = require('./connectors/db');
 
-
 const path = require('path');
 const express = require('express');
+const axios = require("axios");
 const app = express();
 const authMiddleware = require('./middleware/auth');
 const privateApiRoutes = require('./routes/private/api');
