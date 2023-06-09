@@ -130,205 +130,215 @@ module.exports = function (app) {
   app.delete("/api/v1/station/:stationId", async function (req, res) {
     try {
       const user = await getUser(req);
-        if (user.isAdmin){
-          const { stationId } = req.params;
-          if (!stationId) {
-            return res.status(400).send("stationId is required");
-          }
-          const station = await db("se_project.stations")
-            .where("id", stationId)
-            .returning("*");
-          const stationRoutes = await db("se_project.stationRoutes")
-            .innerJoin(
-              "se_project.routes",
-              "se_project.routes.id",
-              "se_project.stationRoutes.routeId"
-            )
-            .where("stationId", stationId)
-            .returning("se_project.routes.id", "se_project.routes.routeName", "se_project.routes.fromStationId", "se_project.routes.toStationId");
-          const routesIds = stationRoutes.map(route => route.routeId);
-          console.log("routesIds =>", routesIds);
-          let toStationsIds = stationRoutes.map(route => route.toStationId).filter(id => id != stationId);
-          let fromStationIds = stationRoutes.map(route => route.fromStationId).filter(id => id != stationId);
-          // let connectedStationsIds = (stationRoutes.map(route => (route.toStationId == stationId ? route.fromStationId : route.toStationId))).filter(id => id != stationId);
-          // connectedStationsIds = connectedStationsIds.filter((id, index) => connectedStationsIds.indexOf(id) === index);
-          // console.log("connectedStationsIds =>", connectedStationsIds);
-          console.log("toStationsIds =>", toStationsIds);
-          console.log("fromStationIds =>", fromStationIds);
-          let addedRoutes = [];
-          forEach(fromStationIds, async (fromStationId) => {
-            forEach(toStationsIds, async (toStationId) => {
-              if (fromStationId != toStationId){
-                const newRoute = {
-                  "fromStationId": fromStationId,
-                  "toStationId": toStationId,
-                  "routeName": "New Route"
-                }
-                let addedRoute = (await db("se_project.routes").insert(newRoute).returning("*"));
-                addedRoute = addedRoute[0];
-                console.log("addedRoute =>", addedRoute);
-                const newStationRoute1 = {
-                  "stationId": newRoute.fromStationId,
-                  "routeId": addedRoute.id
-                }
-                const newStationRoute2 = {
-                  "stationId": newRoute.toStationId,
-                  "routeId": addedRoute.id
-                }
-                await db("se_project.stationRoutes").insert(newStationRoute1).returning("*");
-                await db("se_project.stationRoutes").insert(newStationRoute2).returning("*");
-                addedRoutes.push(addedRoute);
-              }
-            })
-          })
-          forEach(toStationsIds, async (toStationId) => {
-            const station2 = db('se_project.stations')
-            .where('stationId', toStationId)
-            .update({'stationPosition': getStationPosition(toStationId)})
-            .returning('*').first;
-          });
-          forEach(fromStationIds, async (fromStationId) => {
-            const station2 = db('se_project.stations')
-            .where('stationId', fromStationId)
-            .update({'stationPosition': getStationPosition(fromStationId)})
-            .returning('*').first;
-          });
-
-          console.log("addedRoutes =>", addedRoutes);
-
-          // for (let i = 0; i < connectedStationsIds.length-1; i++) {
-          //   for (let j = i+1; j < connectedStationsIds.length; j++) {
-          //     const newRoute1 = {
-          //       "fromStationId": connectedStationsIds[i],
-          //       "toStationId": connectedStationsIds[j],
-          //       "routeName": "New Route"
-          //     }
-          //     addedRoute = (await db("se_project.routes").insert(newRoute1).returning("*"));
-          //     console.log("addedRoute =>", addedRoute);
-          //     let id = addedRoute[0].id;
-          //     const newStationRoute1 = {
-          //       "stationId": newRoute1.fromStationId,
-          //       "routeId": id
-          //     }
-          //     console.log("newStationRoute1 =>", newStationRoute1);
-          //     const newStationRoute2 = {
-          //       "stationId": newRoute1.toStationId,
-          //       "routeId": id
-          //     }
-          //     console.log("newStationRoute2 =>", newStationRoute2);
-          //     await db("se_project.stationRoutes").insert(newStationRoute1).returning("*");
-          //     await db("se_project.stationRoutes").insert(newStationRoute2).returning("*");
-          //     const newRoute2 = {
-          //       "fromStationId": connectedStationsIds[j],
-          //       "toStationId": connectedStationsIds[i],
-          //       "routeName": "New Route"
-          //     }
-          //     addedRoute = (await db("se_project.routes").insert(newRoute2).returning("*"));
-          //     id = addedRoute[0].id;
-          //     console.log("addedRoute =>", addedRoute);
-          //     const newStationRoute3 = {
-          //       "stationId": newRoute2.fromStationId,
-          //       "routeId":  id
-          //     }
-          //     const newStationRoute4 = {
-          //       "stationId": newRoute2.toStationId,
-          //       "routeId":  id
-          //     }
-          //     await db("se_project.stationRoutes").insert(newStationRoute3).returning("*");
-          //     await db("se_project.stationRoutes").insert(newStationRoute4).returning("*");
-          //   }
-          // }
-          const deletedStationRoutes1 = await db("se_project.stationRoutes")
-            .whereIn("routeId", routesIds)
-            .del()
-            .returning("*");
-          console.log("deletedStationRoutes1 =>", deletedStationRoutes1);
-          const deletedRoutes = await db("se_project.routes")
-            .whereIn("id", routesIds)
-            .del()
-            .returning("*");
-            console.log("deletedRoutes =>", deletedRoutes);
-          const deletedStation = await db("se_project.stations")
-            .where("id", stationId)
-            .del()
-            .returning("*");
-            console.log("deletedStation =>", deletedStation);
-            let ttickets = await db("se_project.tickets").select("*");
-      for (let i = 0; i < ttickets.length; i++) {
-        let cur = ttickets[i];
-        const tticketId = cur.id;
-        let transaction = await db("se_project.transactions").select("*").where("purchasedId", tticketId).andWhere("type", "ticket").first();
-        try {
-          let retrievingRoute = await calculatePrice(Number(cur.origin), Number(cur.destination));
-          let numberOfSations = Number(retrievingRoute.split('.')[0]);
-
-          if (numberOfSations <= 9) {
-            const zone = await db('se_project.zones').where('id', 1).first();
-          } else if (numberOfSations <= 16) {
-            const zone = await db('se_project.zones').where('id', 2).first();
-          } else {
-            const zone = await db('se_project.zones').where('id', 3).first();
-          }
-
-          priceThatShouldBePayed = zone.price;
-
-          if (user.isSenior)
-            priceThatShouldBePayed = priceThatShouldBePayed * 0.5;
-
-          await db("se_project.transactions").update("amount", priceThatShouldBePayed);
+      if (user.isAdmin) {
+        const { stationId } = req.params;
+        if (!stationId) {
+          return res.status(400).send("stationId is required");
         }
-        catch (e) {
-          const ticketQuery = await db
-            .select("*")
-            .from("se_project.tickets")
-            .where("id", tticketId)
-            .first();
-
-          const userId = ticketQuery.userId;
-          const rideCompletedCheck = await db("se_project.rides").select("*").where("ticketId", tticketId).andWhere("status", "completed").first();
-          if (!isEmpty(rideCompletedCheck)) {
-            continue;
-          }
-
-          const refundsSearch = await db("se_project.refund_requests")
-            .select("*")
-            .where("ticketId", tticketId);
-          if (!isEmpty(refundsSearch)) {
-            continue;
-          }
-
-          const tick = await db("se_project.tickets")
-            .innerJoin("se_project.transactions", "se_project.tickets.id", "se_project.transactions.purchasedId")
-            .where("se_project.tickets.id", tticketId)
-            .andWhere("se_project.transactions.type", "ticket")
-            .first();
-          console.log("ticket   ", tick);
-          const ticketPrice = tick.amount;
-
-          console.log("ticketPrice   ", ticketPrice);
-
-          try {
-            const newRefund =
-            {
-              status: "pending",
-              userId,
-              refundAmount: ticketPrice,
-              ticketId: tticketId
+        const station = await db("se_project.stations")
+          .where("id", stationId)
+          .returning("*");
+        const stationRoutes = await db("se_project.stationRoutes")
+          .innerJoin(
+            "se_project.routes",
+            "se_project.routes.id",
+            "se_project.stationRoutes.routeId"
+          )
+          .where("stationId", stationId)
+          .returning("se_project.routes.id", "se_project.routes.routeName", "se_project.routes.fromStationId", "se_project.routes.toStationId");
+        const routesIds = stationRoutes.map(route => route.routeId);
+        console.log("routesIds =>", routesIds);
+        let toStationsIds = stationRoutes.map(route => route.toStationId).filter(id => id != stationId);
+        let fromStationIds = stationRoutes.map(route => route.fromStationId).filter(id => id != stationId);
+        // let connectedStationsIds = (stationRoutes.map(route => (route.toStationId == stationId ? route.fromStationId : route.toStationId))).filter(id => id != stationId);
+        // connectedStationsIds = connectedStationsIds.filter((id, index) => connectedStationsIds.indexOf(id) === index);
+        // console.log("connectedStationsIds =>", connectedStationsIds);
+        console.log("toStationsIds =>", toStationsIds);
+        console.log("fromStationIds =>", fromStationIds);
+        let addedRoutes = [];
+        forEach(fromStationIds, async (fromStationId) => {
+          forEach(toStationsIds, async (toStationId) => {
+            if (fromStationId != toStationId) {
+              const newRoute = {
+                "fromStationId": fromStationId,
+                "toStationId": toStationId,
+                "routeName": "New Route"
+              }
+              let addedRoute = (await db("se_project.routes").insert(newRoute).returning("*"));
+              addedRoute = addedRoute[0];
+              console.log("addedRoute =>", addedRoute);
+              const newStationRoute1 = {
+                "stationId": newRoute.fromStationId,
+                "routeId": addedRoute.id
+              }
+              const newStationRoute2 = {
+                "stationId": newRoute.toStationId,
+                "routeId": addedRoute.id
+              }
+              await db("se_project.stationRoutes").insert(newStationRoute1).returning("*");
+              await db("se_project.stationRoutes").insert(newStationRoute2).returning("*");
+              addedRoutes.push(addedRoute);
             }
-            const refund = await db("se_project.refund_requests").insert(newRefund).returning("*");
-            continue;
+          })
+        })
+        forEach(toStationsIds, async (toStationId) => {
+          const station2 = db('se_project.stations')
+            .where('stationId', toStationId)
+            .update({ 'stationPosition': getStationPosition(toStationId) })
+            .returning('*').first;
+        });
+        forEach(fromStationIds, async (fromStationId) => {
+          const station2 = db('se_project.stations')
+            .where('stationId', fromStationId)
+            .update({ 'stationPosition': getStationPosition(fromStationId) })
+            .returning('*').first;
+        });
 
+        console.log("addedRoutes =>", addedRoutes);
+
+        // for (let i = 0; i < connectedStationsIds.length-1; i++) {
+        //   for (let j = i+1; j < connectedStationsIds.length; j++) {
+        //     const newRoute1 = {
+        //       "fromStationId": connectedStationsIds[i],
+        //       "toStationId": connectedStationsIds[j],
+        //       "routeName": "New Route"
+        //     }
+        //     addedRoute = (await db("se_project.routes").insert(newRoute1).returning("*"));
+        //     console.log("addedRoute =>", addedRoute);
+        //     let id = addedRoute[0].id;
+        //     const newStationRoute1 = {
+        //       "stationId": newRoute1.fromStationId,
+        //       "routeId": id
+        //     }
+        //     console.log("newStationRoute1 =>", newStationRoute1);
+        //     const newStationRoute2 = {
+        //       "stationId": newRoute1.toStationId,
+        //       "routeId": id
+        //     }
+        //     console.log("newStationRoute2 =>", newStationRoute2);
+        //     await db("se_project.stationRoutes").insert(newStationRoute1).returning("*");
+        //     await db("se_project.stationRoutes").insert(newStationRoute2).returning("*");
+        //     const newRoute2 = {
+        //       "fromStationId": connectedStationsIds[j],
+        //       "toStationId": connectedStationsIds[i],
+        //       "routeName": "New Route"
+        //     }
+        //     addedRoute = (await db("se_project.routes").insert(newRoute2).returning("*"));
+        //     id = addedRoute[0].id;
+        //     console.log("addedRoute =>", addedRoute);
+        //     const newStationRoute3 = {
+        //       "stationId": newRoute2.fromStationId,
+        //       "routeId":  id
+        //     }
+        //     const newStationRoute4 = {
+        //       "stationId": newRoute2.toStationId,
+        //       "routeId":  id
+        //     }
+        //     await db("se_project.stationRoutes").insert(newStationRoute3).returning("*");
+        //     await db("se_project.stationRoutes").insert(newStationRoute4).returning("*");
+        //   }
+        // }
+        const deletedStationRoutes1 = await db("se_project.stationRoutes")
+          .whereIn("routeId", routesIds)
+          .del()
+          .returning("*");
+        console.log("deletedStationRoutes1 =>", deletedStationRoutes1);
+        const deletedRoutes = await db("se_project.routes")
+          .whereIn("id", routesIds)
+          .del()
+          .returning("*");
+        console.log("deletedRoutes =>", deletedRoutes);
+        const deletedStation = await db("se_project.stations")
+          .where("id", stationId)
+          .del()
+          .returning("*");
+        console.log("deletedStation =>", deletedStation);
+
+
+        let ttickets = await db("se_project.tickets").select("*");
+        console.log(ttickets);
+        for (let i = 0; i < ttickets.length; i++) {
+          let cur = ttickets[i];
+          const tticketId = cur.id;
+          try {
+            console.log(cur);
+            let org = await db("se_project.stations").select("id").where("stationName", cur.origin).first();
+            let dest = await db("se_project.stations").select("id").where("stationName", cur.destination).first();
+            
+            let retrievingRoute = await calculatePrice(org.id, dest.id);
+            let numberOfSations = Number(retrievingRoute.split('.')[0]);
+
+            if (numberOfSations <= 9) {
+              const zone = await db('se_project.zones').where('id', 1).first();
+              priceThatShouldBePayed = zone.price;
+            } else if (numberOfSations <= 16) {
+              const zone = await db('se_project.zones').where('id', 2).first();
+              priceThatShouldBePayed = zone.price;
+            } else {
+              const zone = await db('se_project.zones').where('id', 3).first();
+              priceThatShouldBePayed = zone.price;
+            }
+
+            
+
+            if (user.isSenior)
+              priceThatShouldBePayed = priceThatShouldBePayed * 0.5;
+
+            await db("se_project.transactions").update("amount", priceThatShouldBePayed).where("purchasedId", tticketId).andWhere("type", "ticket");
           }
           catch (e) {
             console.log(e.message);
-            return res.status(400).send("Could not refund ticket");
+            const ticketQuery = await db
+              .select("*")
+              .from("se_project.tickets")
+              .where("id", tticketId)
+              .first();
+            console.log(ticketQuery);
+            const userId = ticketQuery.userId;
+            const rideCompletedCheck = await db("se_project.rides").select("*").where("ticketId", tticketId).andWhere("status", "completed").first();
+            if (!isEmpty(rideCompletedCheck)) {
+              continue;
+            }
+
+            const refundsSearch = await db("se_project.refund_requests")
+              .select("*")
+              .where("ticketId", tticketId);
+            if (!isEmpty(refundsSearch)) {
+              continue;
+            }
+
+            const tick = await db("se_project.tickets")
+              .innerJoin("se_project.transactions", "se_project.tickets.id", "se_project.transactions.purchasedId")
+              .where("se_project.tickets.id", tticketId)
+              .andWhere("se_project.transactions.type", "ticket")
+              .first();
+            console.log("ticket   ", tick);
+            const ticketPrice = tick.amount;
+
+            console.log("ticketPrice   ", ticketPrice);
+
+            try {
+              const newRefund =
+              {
+                status: "pending",
+                userId,
+                refundAmount: ticketPrice,
+                ticketId: tticketId
+              }
+              const refund = await db("se_project.refund_requests").insert(newRefund).returning("*");
+              continue;
+
+            }
+            catch (e) {
+              console.log(e.message);
+              return res.status(400).send("Could not refund ticket");
+            }
           }
         }
+        return res.status(200).json(deletedStation);
       }
-          return res.status(200).json(deletedStation);
-        }
-        else
-          return res.status(400).send("You are Unauthorized to do this action")
+      else
+        return res.status(400).send("You are Unauthorized to do this action")
     }
     catch (e) {
       console.log(e.message);
@@ -520,18 +530,18 @@ module.exports = function (app) {
   });
 
   // Works
-  
+
   function formatDate(dateString) {
     var date = dateString;
     var year = date.getFullYear();
     var month = ("0" + (date.getMonth() + 1)).slice(-2);
     var day = ("0" + date.getDate()).slice(-2);
-    var hours = ("0" + (date.getHours()-2)).slice(-2);
+    var hours = ("0" + (date.getHours() - 2)).slice(-2);
     var minutes = ("0" + date.getMinutes()).slice(-2);
     var seconds = ("0" + date.getSeconds()).slice(-2);
-    
+
     return year + "-" + month + "-" + day + "T" + hours + ":" + minutes + ":" + seconds + ".000Z";
-}
+  }
   app.put("/api/v1/ride/simulate", async function (req, res) {
     const { origin, destination, tripDate } = req.body;
     const user = await getUser(req);
@@ -542,7 +552,7 @@ module.exports = function (app) {
     console.log(tripDate);
     rideQuery.forEach(ride => {
       console.log(formatDate(ride.tripDate));
-      if(tripDate == formatDate(ride.tripDate)){
+      if (tripDate == formatDate(ride.tripDate)) {
         wantedRide = ride;
       }
     });
@@ -605,14 +615,14 @@ module.exports = function (app) {
       const newRoute2 = {
         "fromStationId": connectedStationId,
         "toStationId": newStationId,
-        routeName: routeName+"p"
+        routeName: routeName + "p"
       }
 
       let addedRoute1 = await db("se_project.routes").insert(newRoute).returning("*");
       addedRoute1 = addedRoute1[0];
       let addedRoute2 = await db("se_project.routes").insert(newRoute2).returning("*");
       addedRoute2 = addedRoute2[0];
-      
+
       const sr11 = { "stationId": newStationId, "routeId": addedRoute1.id };
       const sr12 = { "stationId": newStationId, "routeId": addedRoute2.id };
       await db("se_project.stationRoutes").insert(sr11);
@@ -647,6 +657,7 @@ module.exports = function (app) {
   //api to delete a route
   app.delete("/api/v1/route/:routeId", async function (req, res) {
     const routeId = req.params.routeId;
+    const user = await getUser(req);
     try {
       const stationsId = await db("se_project.routes").select("fromStationId", "toStationId").where("id", routeId).first();
       if (!stationsId)
@@ -660,89 +671,99 @@ module.exports = function (app) {
 
       let deletedRoute = await db("se_project.routes").delete().where("id", routeId).returning("*");
       deletedRoute = deletedRoute[0];
+
+
       let ttickets = await db("se_project.tickets").select("*");
-      for (let i = 0; i < ttickets.length; i++) {
-        let cur = ttickets[i];
-        const tticketId = cur.id;
-        let transaction = await db("se_project.transactions").select("*").where("purchasedId", tticketId).andWhere("type", "ticket").first();
-        try {
-          let retrievingRoute = await calculatePrice(Number(cur.origin), Number(cur.destination));
-          let numberOfSations = Number(retrievingRoute.split('.')[0]);
-
-          if (numberOfSations <= 9) {
-            const zone = await db('se_project.zones').where('id', 1).first();
-          } else if (numberOfSations <= 16) {
-            const zone = await db('se_project.zones').where('id', 2).first();
-          } else {
-            const zone = await db('se_project.zones').where('id', 3).first();
-          }
-
-          priceThatShouldBePayed = zone.price;
-
-          if (user.isSenior)
-            priceThatShouldBePayed = priceThatShouldBePayed * 0.5;
-
-          await db("se_project.transactions").update("amount", priceThatShouldBePayed);
-        }
-        catch (e) {
-          const ticketQuery = await db
-            .select("*")
-            .from("se_project.tickets")
-            .where("id", tticketId)
-            .first();
-
-          const userId = ticketQuery.userId;
-          const rideCompletedCheck = await db("se_project.rides").select("*").where("ticketId", tticketId).andWhere("status", "completed").first();
-          if (!isEmpty(rideCompletedCheck)) {
-            continue;
-          }
-
-          const refundsSearch = await db("se_project.refund_requests")
-            .select("*")
-            .where("ticketId", tticketId);
-          if (!isEmpty(refundsSearch)) {
-            continue;
-          }
-
-          const tick = await db("se_project.tickets")
-            .innerJoin("se_project.transactions", "se_project.tickets.id", "se_project.transactions.purchasedId")
-            .where("se_project.tickets.id", tticketId)
-            .andWhere("se_project.transactions.type", "ticket")
-            .first();
-          console.log("ticket   ", tick);
-          const ticketPrice = tick.amount;
-
-          console.log("ticketPrice   ", ticketPrice);
-
+        console.log(ttickets);
+        for (let i = 0; i < ttickets.length; i++) {
+          let cur = ttickets[i];
+          const tticketId = cur.id;
           try {
-            const newRefund =
-            {
-              status: "pending",
-              userId,
-              refundAmount: ticketPrice,
-              ticketId: tticketId
-            }
-            const refund = await db("se_project.refund_requests").insert(newRefund).returning("*");
-            continue;
+            console.log(cur);
+            let org = await db("se_project.stations").select("id").where("stationName", cur.origin).first();
+            let dest = await db("se_project.stations").select("id").where("stationName", cur.destination).first();
+            
+            let retrievingRoute = await calculatePrice(org.id, dest.id);
+            let numberOfSations = Number(retrievingRoute.split('.')[0]);
 
+            if (numberOfSations <= 9) {
+              const zone = await db('se_project.zones').where('id', 1).first();
+              priceThatShouldBePayed = zone.price;
+            } else if (numberOfSations <= 16) {
+              const zone = await db('se_project.zones').where('id', 2).first();
+              priceThatShouldBePayed = zone.price;
+            } else {
+              const zone = await db('se_project.zones').where('id', 3).first();
+              priceThatShouldBePayed = zone.price;
+            }
+
+            
+
+            if (user.isSenior)
+              priceThatShouldBePayed = priceThatShouldBePayed * 0.5;
+
+            await db("se_project.transactions").update("amount", priceThatShouldBePayed).where("purchasedId", tticketId).andWhere("type", "ticket");
           }
           catch (e) {
             console.log(e.message);
-            return res.status(400).send("Could not refund ticket");
+            const ticketQuery = await db
+              .select("*")
+              .from("se_project.tickets")
+              .where("id", tticketId)
+              .first();
+            console.log(ticketQuery);
+            const userId = ticketQuery.userId;
+            const rideCompletedCheck = await db("se_project.rides").select("*").where("ticketId", tticketId).andWhere("status", "completed").first();
+            if (!isEmpty(rideCompletedCheck)) {
+              continue;
+            }
+
+            const refundsSearch = await db("se_project.refund_requests")
+              .select("*")
+              .where("ticketId", tticketId);
+            if (!isEmpty(refundsSearch)) {
+              continue;
+            }
+
+            const tick = await db("se_project.tickets")
+              .innerJoin("se_project.transactions", "se_project.tickets.id", "se_project.transactions.purchasedId")
+              .where("se_project.tickets.id", tticketId)
+              .andWhere("se_project.transactions.type", "ticket")
+              .first();
+            console.log("ticket   ", tick);
+            const ticketPrice = tick.amount;
+
+            console.log("ticketPrice   ", ticketPrice);
+
+            try {
+              const newRefund =
+              {
+                status: "pending",
+                userId,
+                refundAmount: ticketPrice,
+                ticketId: tticketId
+              }
+              const refund = await db("se_project.refund_requests").insert(newRefund).returning("*");
+              continue;
+
+            }
+            catch (e) {
+              console.log(e.message);
+              return res.status(400).send("Could not refund ticket");
+            }
           }
         }
-      }
       if (!(await db("se_project.stationRoutes").select("*").where("stationId", fromStation.id).first())) {
         console.log(fromStation.stationPosition);
         await db("se_project.stations").update("stationPosition", fromStation.stationPosition).where("id", toStation.id);
         await db("se_project.stations").update("stationPosition", null).where("id", fromStation.id);
-        await db("se_project.stations").update("stationStatus","new").where("id", fromStation.id)
+        await db("se_project.stations").update("stationStatus", "new").where("id", fromStation.id)
         return res.json(deletedRoute);
       }
       else if (!(await db("se_project.stationRoutes").select("*").where("stationId", toStation.id).first())) {
         await db("se_project.stations").update("stationPosition", toStation.stationPosition).where("id", fromStation.id);
         await db("se_project.stations").update("stationPosition", null).where("id", toStation.id);
-        await db("se_project.stations").update("stationStatus","new").where("id", toStation.id)
+        await db("se_project.stations").update("stationStatus", "new").where("id", toStation.id)
         return res.json(deletedRoute);
       }
 
@@ -961,8 +982,8 @@ module.exports = function (app) {
             }
             const stationToBeTaken = [];
             const transferStations = [];
-            for (let i = 0; i < route.length-1; i++) {
-              let id = Number(route[i+1]);
+            for (let i = 0; i < route.length - 1; i++) {
+              let id = Number(route[i + 1]);
               console.log(id)
               stationToBeTaken.push(await getStationName(id));
               if (await isStationTransfer(id)) {
@@ -1089,8 +1110,8 @@ module.exports = function (app) {
             }
             const stationToBeTaken = [];
             const transferStations = [];
-            for (let i = 0; i < route.length-1; i++) {
-              let id = Number(route[i+1]);
+            for (let i = 0; i < route.length - 1; i++) {
+              let id = Number(route[i + 1]);
               stationToBeTaken.push(await getStationName(id));
               if (await isStationTransfer(id)) {
                 transferStations.push(await getStationName(id));
@@ -1207,8 +1228,8 @@ module.exports = function (app) {
         }
         const stationToBeTaken = [];
         const transferStations = [];
-        for (let i = 0; i < route.length-1; i++) {
-          let id = Number(route[i+1]);
+        for (let i = 0; i < route.length - 1; i++) {
+          let id = Number(route[i + 1]);
           stationToBeTaken.push(await getStationName(id));
           if (await isStationTransfer(id)) {
             transferStations.push(await getStationName(id));
@@ -1253,10 +1274,8 @@ const max_value = 9007199254740992;
 // utility function to form edge between two vertices
 // source and dest
 function add_edge(adj, src, dest) {
-  console.log(src + " " + dest)
   Number(src);
   Number(dest);
-  console.log(adj[src]);
   adj[src].push(dest);
 }
 
@@ -1305,7 +1324,6 @@ function BFS(adj, src, dest, v, pred, dist) {
         // We stop BFS when we find
         // destination.
         if (adj[u][i] == dest) {
-          console.log("vsited", visited);
           return true;
         }
 
@@ -1326,12 +1344,9 @@ function shortestDistance(adj, s, dest, v, res) {
   let pred = new Array(v).fill(0);
   let dist = new Array(v).fill(0);
 
-  console.log("sd1");
   if (BFS(adj, s, dest, v, pred, dist) == false) {
-    console.log("sd2");
     return res.status(400).send("Given source and destination are not connected");
   }
-  console.log("sd3");
   // vector path stores the shortest path
   let path = new Array();
 
@@ -1372,7 +1387,6 @@ async function calculatePrice(source, dest, res) {
 
   for (let i = 0; i < v; i++) {
     adj[i] = new Array();
-    console.log('entrin gshortest siisdf')
   }
 
   // Creating graph given in the above diagram.
@@ -1389,12 +1403,8 @@ async function calculatePrice(source, dest, res) {
     console.log(i)
     add_edge(adj, a, b);
 
-    console.log('entrin gshortest siisdf123')
   }
-  console.log("HENAAAAAAAAAAAAAAA");
-  console.log(adj)
 
-  console.log('entrin gshortest siisdf12345')
   return shortestDistance(adj, source, dest, v, res);
 
   // The code is contributed by Gautam goel
@@ -1403,7 +1413,6 @@ async function getStationName(stationId) {
   let entry = await db('se_project.stations').where('id', stationId).first();
   console.log('stationId: ' + stationId)
   let stationName = entry.stationName;
-  console.log('here2')
   return stationName;
 }
 async function isStationTransfer(stationId) {
@@ -1413,14 +1422,14 @@ async function isStationTransfer(stationId) {
   return stationtype === "transfer";
 }
 
-async function getStationPosition(stationId){
+async function getStationPosition(stationId) {
   const station = db('se_project.stations').where('id', stationId).first();
   const comingFromStations = db('se_project.routes').where('toStationId', stationId).select('fromStationId');
   const goingToStations = db('se_project.routes').where('fromStationId', stationId).select('toStationId');
-  if(comingFromStations.length > 0 && goingToStations.length > 0)
+  if (comingFromStations.length > 0 && goingToStations.length > 0)
     return "middle";
-  else if(comingFromStations.length == 0 && goingToStations.length > 0)
+  else if (comingFromStations.length == 0 && goingToStations.length > 0)
     return "start";
-  else if(comingFromStations.length > 0 && goingToStations.length == 0)
+  else if (comingFromStations.length > 0 && goingToStations.length == 0)
     return "end";
 }
