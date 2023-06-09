@@ -8,6 +8,13 @@
     <script src="/js/bootstrap.min.js" type="text/javascript"></script>
   </head>
   <body>
+    <style>
+    body {
+        background-image: url('/download.jpg'); 
+        background-repeat: no-repeat;
+        background-size: cover;
+    }
+    </style>
   <script>
       $(document).ready(function(){
         $("#submit").click(function() {
@@ -85,12 +92,12 @@
        </nav>
       </div>
 
+<div class="overlay">
       <h1 style="text-align: center;">Apply For Refund Requests</h1><br><br>
-
 <form id="myForm" method="post" style="display: flex; justify-content: center;">
     <div style="display: flex;">
         <div class="dropdown" style="flex: 1;">
-            <select id="myDropdown" class="btn btn-secondary btn-lg dropdown-toggle" style="width: 315px;">
+            <select id="myDropdown" class="btn btn-secondary btn-lg dropdown-toggle" style="width: 315px; background-color: rgb(190, 190, 190);">
                 <option disabled selected value="-1">Select a ticket</option>
                 {{#userTickets}}
                     <option value={{id}}>{{id}}</option>
@@ -101,13 +108,7 @@
     </div>
     
 </form><br>
-
-<div style="margin-left: auto; margin-right: auto; padding-left: 35%;">
-    <img src="/ref2.jpg" style="width: 45%;" alt="refund"><br>
-</div>
-<br>
-
-<div class="form-group form-horizontal" style = "width: 55%; margin-left: auto; margin-right: auto;">
+<div class="form-group form-horizontal" style = "max-width: 100%; margin-left: auto; margin-right: auto;">
         {{#hasNoTickets}}
           <tr>
             <div class="alert alert-danger">
@@ -144,7 +145,8 @@
           {{/refundedTickets}}
         </table>
         {{/hasNoTickets}}
-    </div>
-
+</div>
+  
+</div>
   </body>
   </html>

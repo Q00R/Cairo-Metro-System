@@ -180,6 +180,19 @@ module.exports = function (app) {
               }
             })
           })
+          forEach(toStationsIds, async (toStationId) => {
+            const station2 = db('se_project.stations')
+            .where('stationId', toStationId)
+            .update({'stationPosition': getStationPosition(toStationId)})
+            .returning('*').first;
+          });
+          forEach(fromStationIds, async (fromStationId) => {
+            const station2 = db('se_project.stations')
+            .where('stationId', fromStationId)
+            .update({'stationPosition': getStationPosition(fromStationId)})
+            .returning('*').first;
+          });
+
           console.log("addedRoutes =>", addedRoutes);
 
           // for (let i = 0; i < connectedStationsIds.length-1; i++) {
@@ -349,20 +362,20 @@ module.exports = function (app) {
 
   // really bteshta8al bmazagha if we remove v1, it works perfectly fine
   app.post("/api/v1/senior/request", async function (req, res) {
-    let user = await getUser(req);
-    let userId = user.userId;
-    const { nationalId } = req.body;
-    const requestExists = await db("se_project.senior_requests").select("*").where("userId", userId).andWhere("status", "pending").first();
-    if (!isEmpty(requestExists)) {
-      return res.status(400).send("This user already submitted a request to be a senior");
-    }
-    const newRequest =
-    {
-      status: "pending",
-      userId,
-      nationalId
-    }
     try {
+      let user = await getUser(req);
+      let userId = user.userId;
+      const { nationalId } = req.body;
+      const requestExists = await db("se_project.senior_requests").select("*").where("userId", userId).andWhere("status", "pending").first();
+      if (!isEmpty(requestExists)) {
+        return res.status(400).send("This user already submitted a request to be a senior");
+      }
+      const newRequest =
+      {
+        status: "pending",
+        userId,
+        nationalId
+      }
       const result = await db.insert(newRequest).into("se_project.senior_requests").returning("*");
       return res.status(200).json(result);
     }
@@ -434,12 +447,36 @@ module.exports = function (app) {
   });
 
   // Works
+  
+  function formatDate(dateString) {
+    var date = dateString;
+    var year = date.getFullYear();
+    var month = ("0" + (date.getMonth() + 1)).slice(-2);
+    var day = ("0" + date.getDate()).slice(-2);
+    var hours = ("0" + (date.getHours()-2)).slice(-2);
+    var minutes = ("0" + date.getMinutes()).slice(-2);
+    var seconds = ("0" + date.getSeconds()).slice(-2);
+    
+    return year + "-" + month + "-" + day + "T" + hours + ":" + minutes + ":" + seconds + ".000Z";
+}
   app.put("/api/v1/ride/simulate", async function (req, res) {
     const { origin, destination, tripDate } = req.body;
     const user = await getUser(req);
     const userId = user.userId;
-    const rideQuery = await db("se_project.rides").select("*").where("origin", origin).andWhere("destination", destination).andWhere("tripDate", tripDate).andWhere("userId", userId).first();
-    const ticketId = rideQuery.ticketId;
+    const rideQuery = await db("se_project.rides").select("*").where("origin", origin).andWhere("destination", destination).andWhere("userId", userId);
+    console.log(rideQuery);
+    let wantedRide = null;
+    console.log(tripDate);
+    rideQuery.forEach(ride => {
+      console.log(formatDate(ride.tripDate));
+      if(tripDate == formatDate(ride.tripDate)){
+        wantedRide = ride;
+      }
+    });
+    if (!wantedRide) {
+      return res.status(400).send("This ride doesn't exist in the first place to be simulated");
+    }
+    const ticketId = wantedRide.ticketId;
     const checkAppliedRefReq = await db("se_project.refund_requests").select("*").where("ticketId", ticketId).andWhereNot("status", "rejected").first();
     if (!isEmpty(checkAppliedRefReq)) {
       return res.status(400).send("There is a refund request for this ticket. You can't simulate the ride");
@@ -448,7 +485,7 @@ module.exports = function (app) {
       const newRide = await db("se_project.rides")
         .where("origin", origin)
         .andWhere("destination", destination)
-        .andWhere("tripDate", tripDate)
+        .andWhere("tripDate", wantedRide.tripDate)
         .andWhere("userId", userId)
         .update("status", "completed")
         .returning("*");
@@ -478,8 +515,10 @@ module.exports = function (app) {
       toStation = await db("se_project.stations").select("*").where("id", newRoute.toStationId).first();
       if (!toStation)
         return res.send("This destination does not exist!");
+      if (fromStation.stationStatus == "old" && toStation.stationStatus == "old")
+        return res.send("Both of these stations are old!")
       if (fromStation.stationPosition == "middle" && toStation.stationPosition == "middle")
-        return res.send("These stations are in the middle!");
+        return res.send("Both of these stations are in the middle!");
 
       if (fromStation.stationPosition == null) {
         await db("se_project.stations").update("stationPosition", "start").where("id", fromStation.id);
@@ -490,15 +529,30 @@ module.exports = function (app) {
         await db("se_project.stations").update("stationPosition", "middle").where("id", fromStation.id);
       }
 
-      let addedRoute = await db("se_project.routes").insert(newRoute).returning("*");
-      addedRoute = addedRoute[0];
-      const s1 = { "stationId": newStationId, "routeId": addedRoute.id };
-      await db("se_project.stationRoutes").insert(s1);
+      const newRoute2 = {
+        "fromStationId": connectedStationId,
+        "toStationId": newStationId,
+        routeName: routeName+"p"
+      }
+
+      let addedRoute1 = await db("se_project.routes").insert(newRoute).returning("*");
+      addedRoute1 = addedRoute1[0];
+      let addedRoute2 = await db("se_project.routes").insert(newRoute2).returning("*");
+      addedRoute2 = addedRoute2[0];
+      
+      const sr11 = { "stationId": newStationId, "routeId": addedRoute1.id };
+      const sr12 = { "stationId": newStationId, "routeId": addedRoute2.id };
+      await db("se_project.stationRoutes").insert(sr11);
+      await db("se_project.stationRoutes").insert(sr12);
+
+      const sr21 = { "stationId": connectedStationId, "routeId": addedRoute1.id };
+      const sr22 = { "stationId": connectedStationId, "routeId": addedRoute2.id };
+      await db("se_project.stationRoutes").insert(sr21);
+      await db("se_project.stationRoutes").insert(sr22);
+
       await db("se_project.stations").update("stationStatus", "old").where("id", fromStation.id)
-      const s2 = { "stationId": connectedStationId, "routeId": addedRoute.id };
-      await db("se_project.stationRoutes").insert(s2);
       await db("se_project.stations").update("stationStatus", "old").where("id", toStation.id)
-      return res.status(200).json(addedRoute);
+      return res.status(200).json(addedRoute1);
 
     } catch (e) {
       return res.json(e.message);
@@ -538,11 +592,13 @@ module.exports = function (app) {
         console.log(fromStation.stationPosition);
         await db("se_project.stations").update("stationPosition", fromStation.stationPosition).where("id", toStation.id);
         await db("se_project.stations").update("stationPosition", null).where("id", fromStation.id);
+        await db("se_project.stations").update("stationStatus","new").where("id", fromStation.id)
         return res.json(deletedRoute);
       }
       else if (!(await db("se_project.stationRoutes").select("*").where("stationId", toStation.id).first())) {
         await db("se_project.stations").update("stationPosition", toStation.stationPosition).where("id", fromStation.id);
         await db("se_project.stations").update("stationPosition", null).where("id", toStation.id);
+        await db("se_project.stations").update("stationStatus","new").where("id", toStation.id)
         return res.json(deletedRoute);
       }
 
@@ -552,6 +608,9 @@ module.exports = function (app) {
       else if (fromStation.stationPosition == "middle" && toStation.stationPosition == "end") {
         await db("se_project.stations").update("stationPosition", "start").where("id", toStation.id);
       }
+
+      let tickets = await db("se_project.tickets").select("*").first();
+      console.log(tickets);
 
       return res.status(200).send(deletedRoute);
 
@@ -864,7 +923,7 @@ module.exports = function (app) {
 
 
 
-          console.log(!(originResult && destinationResult));
+          console.log(originResult + " " + destinationResult);
           if (!(originResult && destinationResult)) {
             return res.status(400).send('Invalid origin or destination');
           } else {
@@ -1053,9 +1112,10 @@ const max_value = 9007199254740992;
 // utility function to form edge between two vertices
 // source and dest
 function add_edge(adj, src, dest) {
+  console.log(src + " " + dest)
   Number(src);
   Number(dest);
-
+  console.log(adj[src]);
   adj[src].push(dest);
 }
 
@@ -1160,9 +1220,9 @@ function shortestDistance(adj, s, dest, v, res) {
 async function calculatePrice(source, dest, res) {
   // no. of vertices
   console.log("IN CALCULATE PRICE");
-  let test = await db.count("*").from("se_project.stations");
-  console.log("test:", test[0].count);
-  let v = Number(test[0].count) + 1;
+  let test = await db.max('id').from("se_project.stations");
+  console.log("test:", test[0]);
+  let v = Number(test[0].max) + 1;
   console.log("printing V: ", v);
 
   // array of vectors is used to store the graph
@@ -1171,6 +1231,7 @@ async function calculatePrice(source, dest, res) {
 
   for (let i = 0; i < v; i++) {
     adj[i] = new Array();
+    console.log('entrin gshortest siisdf')
   }
 
   // Creating graph given in the above diagram.
@@ -1179,17 +1240,20 @@ async function calculatePrice(source, dest, res) {
   // an edge between them.
   fromTo = await db.select("fromStationId", "toStationId").from("se_project.routes");
 
-  console.log(fromTo);
+  console.log(fromTo.length);
   for (let i = 0; i < fromTo.length; i++) {
     a = fromTo[i].fromStationId;
     b = fromTo[i].toStationId;
 
+    console.log(i)
     add_edge(adj, a, b);
 
+    console.log('entrin gshortest siisdf123')
   }
   console.log("HENAAAAAAAAAAAAAAA");
   console.log(adj)
 
+  console.log('entrin gshortest siisdf12345')
   return shortestDistance(adj, source, dest, v, res);
 
   // The code is contributed by Gautam goel
@@ -1204,4 +1268,16 @@ async function isStationTransfer(stationId) {
 
   let stationtype = entry.stationType;
   return stationtype === "transfer";
+}
+
+async function getStationPosition(stationId){
+  const station = db('se_project.stations').where('id', stationId).first();
+  const comingFromStations = db('se_project.routes').where('toStationId', stationId).select('fromStationId');
+  const goingToStations = db('se_project.routes').where('fromStationId', stationId).select('toStationId');
+  if(comingFromStations.length > 0 && goingToStations.length > 0)
+    return "middle";
+  else if(comingFromStations.length == 0 && goingToStations.length > 0)
+    return "start";
+  else if(comingFromStations.length > 0 && goingToStations.length == 0)
+    return "end";
 }

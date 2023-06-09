@@ -27,25 +27,17 @@ module.exports = function(app) {
   // Register HTTP endpoint to render /users page
   app.get('/dashboard', async function(req, res) {
     const user = await getUser(req);
+    if(!user.isSenior && !user.isAdmin && !user.isNormal){
+      return res.status(403).render('403');
+    }
     return res.render('dashboard', user);
-  });
-
-  // Register HTTP endpoint to render /users page
-  app.get('/users', async function(req, res) {
-    const user = await getUser(req);
-    const users = await db.select('*').from('se_project.users');
-    return res.render('users', { ...user,users });
-  });
-
-  // Register HTTP endpoint to render /courses page
-  app.get('/stations', async function(req, res) {
-    const user = await getUser(req);
-    const stations = await db.select('*').from('se_project.stations').orderBy("id");
-    return res.render('stations_example', { ...user, stations });
   });
 
   app.get('/manage/routes', async function(req, res) {
     const user = await getUser(req);
+    if (!user.isAdmin) {
+      return res.status(403).render('403');
+    }
     const routes = await db.select('*').from('se_project.routes').orderBy("id");
     for (let index = 0; index < routes.length; index++) {
       const toStationName = await db.select('stationName').from('se_project.stations').where('id', routes[index].toStationId).first();
@@ -58,23 +50,41 @@ module.exports = function(app) {
 
   app.get('/manage/routes/edit/:routeId', async function(req, res) {
     const user = await getUser(req);
+    if (!user.isAdmin) {
+      return res.status(403).render('403');
+    }
     const routes = await db.select('*').from('se_project.routes').orderBy("id");
+    for (let index = 0; index < routes.length; index++) {
+      const toStationName = await db.select('stationName').from('se_project.stations').where('id', routes[index].toStationId).first();
+      routes[index].toStationId = toStationName.stationName;
+      const fromStationName = await db.select('stationName').from('se_project.stations').where('id', routes[index].fromStationId).first();
+      routes[index].fromStationId = fromStationName.stationName;
+    }
     return res.render('routesUpdate', { ...user, routes });
   });
 
   app.get('/manage/routes/create', async function(req, res) {
     const user = await getUser(req);
+    if (!user.isAdmin) {
+      return res.status(403).render('403');
+    }
     const stations = await db.select('*').from('se_project.stations').orderBy("id");
     return res.render('routesCreate', { ...user, stations });
   });
 
   app.get('/resetPassword', async function(req, res) {
     const user = await getUser(req);
+    if(!user.isSenior && !user.isAdmin && !user.isNormal){
+      return res.status(403).render('403');
+    }
     return res.render('resetPassword', {...user});
   });
   
  app.get('/requests/refund', async function(req, res) {
   const user = await getUser(req);
+  if(user.isAdmin){
+    return res.status(403).render('403');
+  }
   const userId = user.userId;
   const userTickets = await db("se_project.tickets")
   .where("se_project.tickets.userId", userId)
@@ -90,11 +100,17 @@ module.exports = function(app) {
 
  app.get('/requests/senior', async function(req, res) {
   const user = await getUser(req);
+  if(user.isAdmin){
+    return res.status(403).render('403');
+  }
   return res.render('senior_request', {...user});
  });
 
  app.get('/rides/simulate', async function(req, res) {
   const user = await getUser(req);
+  if(user.isAdmin){
+    return res.status(403).render('403');
+  }
   const userId = user.userId;
   const rides = await db.select('*').from('se_project.rides').where('userId', userId);
   return res.render('rides', { ...user, rides });
@@ -102,33 +118,46 @@ module.exports = function(app) {
 
  app.get('/price', async function(req, res) {
   const user = await getUser(req);
+  if(user.isAdmin){
+    return res.status(403).render('403');
+  }
   const stations = await db.select('*').from('se_project.stations');
   return res.render('price', { ...user, stations });
  });
 
 app.get('/subscriptions/purchase', async function(req, res) {
   const user = await getUser(req);
+  if(user.isAdmin){
+    return res.status(403).render('403');
+  }
   const zones = await db.select('*').from('se_project.zones');
   return res.render('subscriptions/purchase', { ...user, zones });
 });
 
 app.get('/subscriptions', async function(req, res) {
   const user = await getUser(req);
+  if(user.isAdmin){
+    return res.status(403).render('403');
+  }
   const subscriptions = await db.select('*').from('se_project.subsription').where('userId', user.userId);
   const hasNoSubscription = subscriptions.length === 0;
   return res.render('subscriptions', { ...user, subscriptions, hasNoSubscription });
 });
 
 app.get('/price', async function(req, res) {
-
   const user = await getUser(req);
+  if(user.isAdmin){
+    return res.status(403).render('403');
+  }
   const stations = await db.select('*').from('se_project.stations');
   return res.render('price', { ...user, stations });
  });
 
  app.get('/tickets/purchase', async function(req, res) {
-
   let user = await getUser(req);
+  if(user.isAdmin){
+    return res.status(403).render('403');
+  }
   let stations = await db.select('*').from('se_project.stations');
   let userSubscription = await db('se_project.subsription').where('userId', user.userId).orderBy('id', 'desc').first();
   let hasSubscription = userSubscription !== undefined; // Check if userSubscription is defined
@@ -143,6 +172,9 @@ app.get('/price', async function(req, res) {
  
  app.get('/tickets', async function(req, res) {
   const user = await getUser(req);
+  if(user.isAdmin){
+    return res.status(403).render('403');
+  }
   const tickets = await db.select('*').from('se_project.tickets').where('userId', user.userId).where('tripDate', '>=', 'Now()');
   const hasNoTickets = tickets.length === 0;
   return res.render('tickets', { ...user, tickets, hasNoTickets });
@@ -150,7 +182,10 @@ app.get('/price', async function(req, res) {
  
  app.get('/manage/stations', async function(req, res) {
   const user = await getUser(req);
-  const stations = await db.select('*').from('se_project.stations').orderBy("id", "desc");
+  if(!user.isAdmin){
+    return res.status(403).render('403');
+  }
+  const stations = await db.select('*').from('se_project.stations').orderBy("id", "asc");
   if (!user.isAdmin) {
     return res.status(403).render('403');
   }
@@ -176,7 +211,7 @@ app.get('/manage/stations/edit/:stationId', async function(req, res) {
 
 app.get('/manage/requests/refunds', async function(req, res) {
   const user = await getUser(req);
-  const refunds = await db.select('*').from('se_project.refund_requests');
+  const refunds = await db.select('*').from('se_project.refund_requests').where('status', 'pending').orderBy("id", "asc");
   if (!user.isAdmin) {
     return res.status(403).render('403');
   }
@@ -185,26 +220,19 @@ app.get('/manage/requests/refunds', async function(req, res) {
 
 app.get('/manage/requests/seniors', async function(req, res) {
   const user = await getUser(req);
-  const seniors = await db.select('*').from('se_project.senior_requests');
   if (!user.isAdmin) {
     return res.status(403).render('403');
   }
+  const seniors = await db.select('*').from('se_project.senior_requests').where('status', 'pending').orderBy("id", "asc");
   return res.render('manage/requests/seniors', { ...user, seniors });
 });
 
 app.get('/manage/zones', async function(req, res) {
   const user = await getUser(req);
-  const zones = await db.select('*').from('se_project.zones').orderBy("id", "asc");
   if (!user.isAdmin) {
     return res.status(403).render('403');
   }
+  const zones = await db.select('*').from('se_project.zones').orderBy("id", "asc");
   return res.render('manage/zones', { ...user, zones });
 });
-  app.get('/advert' , async function(req, res) {
-   
-    const user = await getUser(req);
-    const userId = user.userId;
-    const rides = await db.select('*').from('se_project.rides').where('userId', userId);
-   return res.render('/advert',{...user,rides});
-  });
 };

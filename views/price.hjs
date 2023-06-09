@@ -43,7 +43,7 @@
                         }
                         else
                         {
-                            alert('Ticket Price retreived successfully: ' + serverResponse.price );
+                            alert(`Price: ${serverResponse.price}`);
                         }
                     }
                 },

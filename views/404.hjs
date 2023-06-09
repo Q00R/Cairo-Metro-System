@@ -14,40 +14,6 @@
         <nav class="navbar navbar-inverse" style="padding-left:1%;">
           <ul class="nav navbar-nav">
             <li class="active"><a href="/dashboard">Home</a></li>
-            {{^isAdmin}}
-              {{#isNormal}}
-                <li><a href="/requests/senior">Senior Citizens</a></li>
-              {{/isNormal}}
-              <li><a href="/rides/simulate">Rides</a></li>
-              <li><a href="/requests/refund">Refund Ticket</a></li>
-              <div class="dropdown navbar navbar-inverse nav navbar-nav">
-                <li><a>Tickets</a></li>
-                <div class="dropdown-content navbar navbar-inverse nav navbar-nav">
-                  <li><a href="/price">Price</a></li>
-                  <li><a href="/tickets">View</a></li>
-                  <li><a href="/tickets/purchase">Hotel? Booking.com</a></li>
-                </div>
-              </div>
-              <div class="dropdown navbar navbar-inverse nav navbar-nav">
-                <li><a>Subscriptions</a></li>
-                <div class="dropdown-content navbar navbar-inverse nav navbar-nav">
-                  <li><a href="/subscriptions">View</a></li>
-                  <li><a href="/subscriptions/purchase">Purchase</a></li>
-                </div>
-              </div>
-            {{/isAdmin}}
-            {{#isAdmin}}
-              <li><a href="/manage/routes">Routes</a></li>
-              <li><a href="/manage/stations">Station</a></li>
-              <li><a href="/manage/zones">Zones</a></li>
-              <div class="dropdown navbar navbar-inverse nav navbar-nav">
-                <li><a>Requests</a></li>
-                <div class="dropdown-content navbar navbar-inverse nav navbar-nav">
-                  <li><a href="/manage/requests/seniors">Senior</a></li>
-                  <li><a href="/manage/requests/refunds">Refund</a></li>
-                </div>
-              </div>
-            {{/isAdmin}}
           </ul>
           <ul class="nav navbar-nav navbar-right" style="padding-right:2%">
             <li><a style="color:goldenrod" href="/resetPassword">Reset Password</a></li>
@@ -57,7 +23,7 @@
       </div>
 
     <div class="center">
-      <img src="images/404.jpg">
+      <img src="/404.jpg">
     </div>
   </body>
 </html>

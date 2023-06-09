@@ -67,6 +67,8 @@
                 var date = $(this).closest("tr").find("td:nth-child(7)").text();
                 var tripDate = formatDate(date);
                 alert(tripDate);
+                alert(origin);
+                alert(destination);
                 data = { 
                     origin,
                     destination,
@@ -90,10 +92,14 @@
         });
         function formatDate(dateString) {
             var date = new Date(dateString);
+            var year = date.getFullYear();
             var month = ("0" + (date.getMonth() + 1)).slice(-2);
             var day = ("0" + date.getDate()).slice(-2);
-            var year = date.getFullYear();
-            return month + "-" + day + "-" + year;
+            var hours = ("0" + (date.getHours()-3)).slice(-2);
+            var minutes = ("0" + date.getMinutes()).slice(-2);
+            var seconds = ("0" + date.getSeconds()).slice(-2);
+            
+            return year + "-" + month + "-" + day + "T" + hours + ":" + minutes + ":" + seconds + ".000Z";
         }
     </script>
 </head>
